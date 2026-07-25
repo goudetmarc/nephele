@@ -8,3 +8,10 @@ nephele-dpo.jsonl
 nephele-corpus.json
 grammaire-nephele.json
 carnet-nephele.md
+
+# artefacts de test Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/.playwright/
+package-lock.json

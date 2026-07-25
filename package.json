@@ -1,0 +1,11 @@
+{
+  "name": "nephele-tests",
+  "private": true,
+  "description": "Harnais de test Playwright pour Nephélé — l'application elle-même reste zéro dépendance ; ceci n'outille que les tests.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1"
+  }
+}
