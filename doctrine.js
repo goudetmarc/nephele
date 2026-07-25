@@ -583,7 +583,7 @@ Où ce champ se situe entre matière et figuration, et ce qui se passerait si on
 
 /* Mots creux — le jargon qui a l'air de dire et ne désigne rien.
    Leur densité mesure le premier mode d'échec : parler sans avoir regardé. */
-const LEX_CREUX = `dynamique harmonieux harmonie équilibré équilibre vibrant vibrante poétique
+const LEX_CREUX = `dynamique harmonieux harmonie équilibré équilibre vibrant poétique
 évocateur évocatrice mystérieux mystérieuse saisissant captivant fascinant envoûtant
 atmosphère ambiance onirique éthéré sublime magnifique superbe magistral
 palette maîtrise virtuosité chef-d'œuvre intemporel universel indicible ineffable
@@ -591,27 +591,46 @@ palette maîtrise virtuosité chef-d'œuvre intemporel universel indicible ineff
 contemplation méditatif serein sérénité mélancolie nostalgie rêverie
 invite suggère évoque transporte dégage émane baigne nimbe berce
 richesse profondeur intensité puissance force beauté grâce élégance
-subtil subtilité délicat délicatesse nuance nuancé raffiné`;
+subtil subtilité délicat délicatesse nuance raffiné
+chatoyant chatoiement vaporeux diaphane évanescent aérien cristallin hypnotique
+magique féerique lyrique lyrisme somptueux opulent flamboyant éclatant éclat
+rayonnant resplendissant majestueux grandiose spectaculaire impressionnant admirable
+splendide charme charmant séduisant troublant onirisme poésie sensoriel immersif
+spirituel spiritualité transcende transcendance cosmique tellurique organique
+énergie énergique frémissement palpitant intense expression évocation suggestion
+exprime incarne célèbre traduit reflète capture dévoile explore interroge convoque questionne`;
 
 /* Noms concrets — le figuratif. Leur densité mesure le second mode d'échec :
    nommer des objets là où il n'y a plus rien à nommer. */
 const LEX_CONCRET = `chien chat cheval oiseau aigle poisson serpent lion loup ours cerf lapin
 papillon dragon licorne baleine dauphin tortue araignée insecte vache mouton chèvre
+chameau grenouille crocodile éléphant girafe singe renard hibou chouette corbeau cygne
+coq crabe méduse hippocampe escargot scorpion abeille libellule fourmi
 visage tête crâne œil yeux nez bouche oreille main doigt bras jambe pied corps
 torse épaule dos ventre cheveux barbe silhouette homme femme enfant personnage
+genou coude cou front joue menton lèvre dent mâchoire os vertèbre hanche
 foule danseur cavalier ange démon fantôme squelette
+sirène diable sorcière géant monstre créature bête gargouille guerrier roi reine moine clown
 arbre forêt fleur feuille branche racine herbe champ montagne colline falaise
+pétale tige fruit épi mousse épine
 rocher pierre rivière fleuve lac mer océan vague plage île côte
+péninsule cap golfe baie détroit delta archipel iceberg volcan cascade grotte canyon dune glacier
 maison village ville église tour pont mur porte fenêtre toit escalier colonne
+cathédrale temple pyramide dôme voûte pilier statue buste phare obélisque
 ruine château cabane bateau voile navire barque train voiture roue
 table chaise vase bouteille verre couteau clef marteau outil machine
+sablier violon guitare champignon panache volute glyphe idéogramme hiéroglyphe rune
+épée lance bouclier casque couronne hache faucille ancre aiguille ciseaux peigne cuillère lampe bougie
 engrenage horloge livre lettre chiffre croix étoile lune soleil nuage
+éclair flamme feu fumée brume
 route chemin sentier échelle corde drapeau tissu robe chapeau masque`;
 
 /* Marqueurs de position — l'ancrage. Leur présence mesure si le discours
    désigne quelque chose de localisable ou flotte au-dessus de l'image. */
 const LEX_POSITION = `gauche droite haut bas centre milieu coin bord angle
+haut-gauche haut-droite bas-gauche bas-droite haut-droit bas-droit
 supérieur inférieur latéral central périphérique
+sommet base pointe extrémité axe horizontale verticale oblique flanc pourtour intérieur extérieur rangée
 tiers quart moitié bande zone région quadrant secteur diagonale
 avant-plan arrière-plan premier-plan fond lisière`;
 
@@ -620,7 +639,8 @@ avant-plan arrière-plan premier-plan fond lisière`;
 const LEX_ESQUIVE = `semble paraît pourrait peut-être possiblement probablement
 apparemment vraisemblablement incertain ambigu indéterminé indéterminée flou vague
 divers différents plusieurs certains quelques variés
-généralement souvent parfois habituellement typiquement éventuellement`;
+généralement souvent parfois habituellement typiquement
+éventuellement potentiellement vaguement hypothétiquement`;
 
 /* Les mêmes esquives, mais en LOCUTIONS. Comptées par occurrence de la locution
    entière, jamais mot à mot : « il est difficile » et « je ne peux pas » se

@@ -52,3 +52,18 @@ test('mesure : l’esquive ne compte pas « est »/« pas », mais compte les lo
   // La vraie esquive est bien détectée (locution « il est difficile » + semble/ambigu/pourrait).
   expect(r.esquive).toBeGreaterThanOrEqual(4);
 });
+
+test('mesure : les lexiques couvrent les angles morts (chameau, coins composés, jargon)', async ({ page }) => {
+  await page.goto('/banc.html');
+  const r = await page.evaluate(() => ({
+    // « chameau » — l'exemple canonique de la doctrine — doit compter en figuration.
+    chameau: mesure("On dirait un chameau et une péninsule.").brut.concret,
+    // Les coins composés que la doctrine écrit doivent compter en ancrage.
+    coin: mesure("La masse occupe le bas-gauche, le haut-droite reste vide.").brut.pos,
+    // Les mots creux ajoutés doivent compter en jargon.
+    jargon: mesure("Un rendu chatoyant, spectaculaire, flamboyant.").brut.creux,
+  }));
+  expect(r.chameau).toBeGreaterThanOrEqual(2);   // chameau + péninsule
+  expect(r.coin).toBeGreaterThanOrEqual(2);      // bas-gauche + haut-droite
+  expect(r.jargon).toBeGreaterThanOrEqual(3);    // chatoyant + spectaculaire + flamboyant
+});

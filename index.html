@@ -788,7 +788,7 @@ function liste(v){
 function tableauFigures(j){
   if(Array.isArray(j)) return j;
   if(!j || typeof j!=="object") return [];
-  const d=champ(j,["figures","lectures","formes","propositions","readings","resultats","trouvailles","items","liste"]);
+  const d=champ(j,["figures","constatations","lectures","formes","propositions","readings","resultats","trouvailles","items","liste"]);
   if(Array.isArray(d)) return d;
   for(const v of Object.values(j)) if(Array.isArray(v)&&v.length&&typeof v[0]==="object") return v;
   for(const v of Object.values(j)) if(Array.isArray(v)&&v.length) return v;
