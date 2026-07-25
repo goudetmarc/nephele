@@ -1375,7 +1375,7 @@ async function majGrammaire(stage, signal){
     .filter(L=>(L.r||"fig")==="sens")
     .map(L=>{const S=L.second||{};
       return {configuration:S.configuration||L.configuration, effet:S.effet||L.effet,
-              dementi_possible:L.dementi, zone:L.zone, registre:L.registre};})
+              dementi_possible:S.dementi||L.dementi, zone:L.zone, registre:L.registre};})
     .filter(r=>r.configuration && r.effet && r.dementi_possible);
 
   const c=card("gram","Grammaire",`${rapports.length} rapport${rapports.length>1?"s":""} exploitable${rapports.length>1?"s":""}`);

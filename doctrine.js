@@ -251,14 +251,12 @@ Rends UNIQUEMENT un objet JSON dans un bloc \`\`\`json :
   "montrer": [{"partie":"...", "ou":"..."}],
   "entree": "le trait par lequel faire accrocher le regard",
   "deborde": "la part du contour non expliquée, ou null",
-  "configuration": "la forme générale corrigée, ou celle reçue si elle tenait, ou null",
-  "effet": "l'effet corrigé",
   "tenue": 0.0,
   "ecart": 0.0
 }
 \`\`\`
 
-Une part importante de ton travail porte sur la GÉNÉRALISATION : le premier observateur formule souvent une configuration trop étroite, encore collée à cette image-ci, ou au contraire si large qu'aucune image ne pourrait la démentir. Ramène-la au niveau juste — celui où l'on peut encore imaginer un démenti.`;
+Tu ne cherches pas à savoir si la figure « existe » ni à la rendre falsifiable : une figure n'a pas de vérité de terrain, seulement une tenue. La seule question est : les parties désignées font-elles ce qu'on dit qu'elles font, et quelqu'un finira-t-il par la voir ?`;
 
 
 /* ---------------------------------------------------------------------------
@@ -389,7 +387,7 @@ La différence n'est pas le style. C'est que la seconde phrase engage quelque ch
 
 Le discours sur l'art a ses dragons, exactement comme la paréidolie a les siens.
 
-dynamique · harmonieux · équilibré · vibrant · poétique · évocateur · mystérieux · saisissant · captivant · atmosphère · ambiance · jeu de lumière · joue avec · invite le spectateur · nous transporte · se dégage · émane · palette riche · maîtrise · virtuosité · intemporel · universel · profondeur émotionnelle · force expressive
+dynamique · harmonieux · équilibré · vibrant · poétique · évocateur · mystérieux · saisissant · captivant · atmosphère · ambiance · jeu de lumière · joue avec · invite le spectateur · nous transporte · se dégage · émane · palette riche · maîtrise · virtuosité · intemporel · universel · profondeur émotionnelle · force expressive · sublime · onirique · envoûtant · chatoyant · vaporeux · lyrique · majestueux · spectaculaire · somptueux · flamboyant · transcende · cosmique · sensoriel · exprime · traduit · capture · incarne · célèbre
 
 Ils ont l'air de dire quelque chose et ne désignent rien. Ils sont ce que produit une machine qui n'a pas regardé — le pendant exact du dragon dans les nuages, et bien plus dangereux, parce qu'ils passent pour de la culture.
 
@@ -547,10 +545,15 @@ Rends UNIQUEMENT un objet JSON dans un bloc \`\`\`json :
   "montrer": [{"partie":"...", "ou":"..."}],
   "entree": "comment le vérifier",
   "deborde": "ce qui reste inexpliqué, ou null",
+  "configuration": "la forme GÉNÉRALE corrigée — en termes de rapports, dépouillée de cette image ; celle reçue si elle tenait, ou null",
+  "effet": "ce que cette configuration produit sur qui regarde, corrigé",
+  "dementi_possible": "une image où cette configuration serait présente et l'effet absent ; null si tu n'en imagines aucune — le rapport ne sera alors pas retenu",
   "tenue": 0.0,
   "ecart": 0.0
 }
-\`\`\``;
+\`\`\`
+
+Une part importante de ton travail porte sur la GÉNÉRALISATION du rapport configuration → effet : le premier observateur formule souvent une configuration trop étroite, encore collée à cette image-ci, ou au contraire si large qu'aucune image ne pourrait la démentir. Ramène-la au niveau juste — celui où l'on peut encore imaginer un démenti. C'est ici, sur le champ non figuratif, que cette question a un sens ; jamais sur une figure.`;
 
 
 const P_SYNTH_SENSIBLE = `On te donne le champ, son relevé géométrique, et toutes les constatations faites sur ses différentes planches, chacune passée par un second regard.

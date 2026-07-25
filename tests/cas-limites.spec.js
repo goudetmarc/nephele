@@ -130,6 +130,50 @@ test('épreuve de l’horoscope : une constatation sans démenti n’est pas exp
   expect(exploitables).toBeLessThan(stats.sens); // au moins un rapport écarté
 });
 
+test('A1 : le démenti du second regard sensible atteint la grammaire', async ({ page }) => {
+  // L'observation ne fournit AUCUN démenti ; c'est le second regard sensible
+  // qui le produit (configuration/effet/dementi_possible). Avant A1, ce démenti
+  // était ignoré (le code ne lisait que L.dementi) et aucun rapport n'était
+  // exploitable ; après A1 (S.dementi||L.dementi), tous le deviennent.
+  const responder = ({ content }) => {
+    const blob = JSON.stringify(content || '');
+    if (blob.includes('grammaire des formes'))
+      return JSON.stringify({ entrees: [{
+        configuration: 'masse dense excentrée + quadrant opposé vide', effet: 'chute',
+        dementi_possible: 'une image équilibrée sans chute', matieres: ['nuage'], vues: 1 }] });
+    if (blob.includes('Tu es le second regard'))
+      return JSON.stringify({ geste: 'affine', pourquoi: 'rapport resserré',
+        configuration: 'masse dense excentrée + quadrant opposé vide', effet: 'chute',
+        dementi_possible: 'une image équilibrée où la masse ne fait pas basculer' });
+    if (blob.includes('champ visuel'))
+      // constatations SANS démenti — config + effet seulement.
+      return JSON.stringify({ constatations: Array.from({ length: 4 }, (_, i) => ({
+        nom: 'constatation ' + i, zone: ['A1', 'B2', 'C3', 'D4'][i],
+        configuration: 'masse dense en ' + ['A1', 'B2', 'C3', 'D4'][i], effet: 'bascule' })) });
+    return 'prose sensible.';
+  };
+  await mockAnthropic(page, { responder });
+  await page.goto('/index.html');
+  await page.fill('#key', 'test-mock-key');
+  await page.click('#regimes button[data-reg="sens"]');
+  await page.fill('#nRefut', '30'); // tout second-regarder, pour couvrir chaque constatation
+  await chargeImage(page);
+  await expect(page.locator('#run')).toBeEnabled({ timeout: 10000 });
+  await page.click('#run');
+
+  await expect(page.locator('.card.gram')).toBeVisible({ timeout: 30000 });
+  const stats = await page.evaluate(() => ({
+    sens: state.lectures.filter(L => (L.r || 'fig') === 'sens').length,
+    avecDementiSecond: state.lectures.filter(L => L.second && L.second.dementi).length,
+  }));
+  const sText = (await page.locator('.card.gram .s').textContent()) || '';
+  const exploitables = parseInt((sText.match(/\d+/) || ['0'])[0], 10);
+  // Chaque constatation second-regardée devient exploitable grâce au démenti du second regard.
+  expect(stats.avecDementiSecond).toBe(stats.sens);
+  expect(exploitables).toBe(stats.sens);
+  expect(exploitables).toBeGreaterThan(0);
+});
+
 test('corpus : la séance s’enregistre et le verdict se persiste', async ({ page }) => {
   await mockAnthropic(page, { responder: passResponder() });
   await page.goto('/index.html');
