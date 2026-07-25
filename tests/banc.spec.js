@@ -37,3 +37,18 @@ test('le banc parcourt son échelle et rend une courbe', async ({ page }) => {
   // Au moins un appel par barreau de l'échelle.
   expect(calls.length).toBeGreaterThanOrEqual(3);
 });
+
+test('mesure : l’esquive ne compte pas « est »/« pas », mais compte les locutions', async ({ page }) => {
+  await page.goto('/banc.html');
+  const r = await page.evaluate(() => {
+    // Prose sans esquive, mais riche en « est » et « pas ».
+    const neutre = "L'image est sombre, la masse est dense et rien ne bascule pas vers le bas.";
+    // Vraie esquive : locutions + mots simples.
+    const esquive = "Il est difficile de déterminer ; cela semble ambigu et pourrait varier.";
+    return { neutre: mesure(neutre).brut.esq, esquive: mesure(esquive).brut.esq };
+  });
+  // Aucune esquive comptée sur la prose neutre (le bug « est »/« pas » est fermé).
+  expect(r.neutre).toBe(0);
+  // La vraie esquive est bien détectée (locution « il est difficile » + semble/ambigu/pourrait).
+  expect(r.esquive).toBeGreaterThanOrEqual(4);
+});

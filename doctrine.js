@@ -618,10 +618,28 @@ avant-plan arrière-plan premier-plan fond lisière`;
 /* Marqueurs de recul — l'esquive. Leur densité mesure le troisième mode
    d'échec : le modèle parle pour ne rien dire d'engageant. */
 const LEX_ESQUIVE = `semble paraît pourrait peut-être possiblement probablement
-apparemment vraisemblablement sans doute on dirait il est difficile
-je ne peux pas impossible de déterminer incertain ambigu indéterminé
+apparemment vraisemblablement incertain ambigu indéterminé indéterminée flou vague
 divers différents plusieurs certains quelques variés
-généralement souvent parfois habituellement typiquement`;
+généralement souvent parfois habituellement typiquement éventuellement`;
+
+/* Les mêmes esquives, mais en LOCUTIONS. Comptées par occurrence de la locution
+   entière, jamais mot à mot : « il est difficile » et « je ne peux pas » se
+   brisent sinon en « est » et « pas » — les mots les plus fréquents du français —
+   et chaque phrase ordinaire deviendrait une esquive. C'est ce trou qui faussait
+   la courbe d'esquive du banc. */
+const LEX_ESQUIVE_PHRASES = `il est difficile
+difficile de dire
+difficile de déterminer
+difficile de trancher
+difficile à cerner
+je ne peux pas
+on ne peut pas
+on ne saurait
+on dirait
+sans doute
+impossible de déterminer
+impossible de dire
+reste à déterminer`;
 
 /* Noms propres et termes d'école — la récitation. Utilisés pour le test
    apparié : si l'œuvre reconnue déclenche ces mots et pas le recadrage,

@@ -193,6 +193,17 @@ const state={ img:null, name:"", sonde:"nue", running:false, abort:null,
 const sansAcc=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 const lex=id=>sansAcc($(id).value).split(/[\s,;]+/).filter(w=>w.length>2);
 const motsDe=t=>sansAcc(t).replace(/[^a-z0-9'\- ]/g," ").split(/\s+/).filter(Boolean);
+/* Locutions comptées d'un bloc — les esquives multi-mots (« il est difficile »)
+   ne doivent jamais être découpées, sinon « est » et « pas » polluent la mesure. */
+const comptePhrases=(src,texte)=>{
+  const t=" "+sansAcc(texte).replace(/[^a-z0-9'\- ]/g," ").replace(/\s+/g," ")+" ";
+  let c=0;
+  for(const p of sansAcc(src).split(/[\n;,]+/).map(s=>s.trim()).filter(s=>s.includes(" "))){
+    let i=0; const q=" "+p+" ";
+    while((i=t.indexOf(q,i))>=0){ c++; i+=q.length-1; }
+  }
+  return c;
+};
 
 function mesure(texte){
   const mots=motsDe(texte), n=Math.max(1,mots.length);
@@ -207,7 +218,7 @@ function mesure(texte){
     return c;
   };
   const creux=compte(lex("#lexCreux")), concret=compte(lex("#lexConcret"));
-  const esq=compte(lex("#lexEsq"));
+  const esq=compte(lex("#lexEsq")) + comptePhrases(LEX_ESQUIVE_PHRASES, texte);
   const pos=compte(lex("#lexPos"));
   const grille=(texte.match(/\b[A-E][1-5]\b/g)||[]).length;
   const phrases=(texte.match(/[.!?…]+/g)||[]).length||1;
