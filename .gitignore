@@ -1,0 +1,10 @@
+.DS_Store
+*.log
+node_modules/
+# données personnelles — ne jamais versionner
+*-nephele.md
+nephele-sft.jsonl
+nephele-dpo.jsonl
+nephele-corpus.json
+grammaire-nephele.json
+carnet-nephele.md

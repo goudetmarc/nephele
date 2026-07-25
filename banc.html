@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nephélé — banc d'abstraction</title>
+<style>
+  :root{
+    --bg:#0d0e12; --bg2:#14161d; --bg3:#1b1e27; --line:#272b36;
+    --ink:#e6e3dc; --ink2:#9aa0ae; --ink3:#5e6677; --or:#c9a227; --rouge:#c4705a;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  /* palette data-viz — 4 emplacements catégoriels, pas cyclés,
+     validés sur cette surface exacte (#14161d) : bande de clarté, plancher de
+     chroma, séparation daltonienne ΔE 8.4, vision normale ΔE 19.8, contraste ≥3:1 */
+  .viz{
+    --surface:#14161d;
+    --serie-1:#3987e5;  /* figuration */
+    --serie-2:#d95926;  /* jargon */
+    --serie-3:#199e70;  /* ancrage */
+    --serie-4:#c98500;  /* esquive */
+    --grille:#2c2c2a; --axe:#383835; --muet:#898781;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.6}
+  button{font-family:inherit;font-size:inherit;cursor:pointer}
+  input,select,textarea{font-family:inherit;font-size:inherit}
+  a{color:#7ea8b8}
+  .app{display:grid;grid-template-columns:350px 1fr;height:100vh}
+  @media(max-width:960px){.app{grid-template-columns:1fr;height:auto}}
+  .panel{background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto;padding:20px 18px 50px}
+  .stage{overflow-y:auto;padding:26px 30px 90px}
+  .brand{display:flex;align-items:baseline;gap:9px}
+  .brand h1{font-family:var(--serif);font-size:22px;font-weight:600;margin:0}
+  .brand .v{font-size:10px;color:var(--ink3);font-family:var(--mono);letter-spacing:.08em}
+  .tag{color:var(--ink2);font-size:12.5px;margin:6px 0 18px;font-style:italic;font-family:var(--serif);line-height:1.5}
+  .sect{border-top:1px solid var(--line);padding:15px 0 4px}
+  .sect:first-of-type{border-top:none;padding-top:0}
+  .sect>h2{font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--ink3);margin:0 0 11px;font-weight:600}
+  label.f{display:block;margin-bottom:11px}
+  label.f>span{display:block;font-size:11.5px;color:var(--ink2);margin-bottom:4px}
+  .in{width:100%;background:var(--bg3);border:1px solid var(--line);color:var(--ink);border-radius:5px;padding:7px 9px;outline:none}
+  .in:focus{border-color:#7ea8b8}
+  .hint{font-size:11px;color:var(--ink3);line-height:1.45;margin:6px 0 0}
+  .drop{border:1px dashed var(--line);border-radius:7px;padding:18px 12px;text-align:center;color:var(--ink3);font-size:12.5px;cursor:pointer;background:var(--bg3)}
+  .drop:hover,.drop.over{border-color:var(--or);color:var(--ink2)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{background:var(--bg3);border:1px solid var(--line);color:var(--ink2);border-radius:20px;padding:4px 11px;font-size:11.5px}
+  .chip.on{background:rgba(201,162,39,.14);border-color:var(--or);color:var(--or)}
+  .sw{display:flex;gap:8px;margin-bottom:9px;font-size:12px;color:var(--ink2);align-items:flex-start}
+  .sw input{margin:3px 0 0;accent-color:var(--or)}
+  .sw small{display:block;color:var(--ink3);font-size:10.5px;line-height:1.4}
+  .go{width:100%;background:var(--or);color:#161206;border:none;border-radius:6px;padding:11px;font-weight:650;margin-top:6px}
+  .go:disabled{background:var(--bg3);color:var(--ink3);cursor:not-allowed}
+  .stop{width:100%;background:none;border:1px solid var(--rouge);color:var(--rouge);border-radius:6px;padding:8px;margin-top:8px}
+  .cost{text-align:center;font-size:10.5px;color:var(--ink3);margin-top:7px;font-family:var(--mono)}
+  .card{background:var(--bg2);border:1px solid var(--line);border-radius:9px;margin-bottom:18px;overflow:hidden}
+  .card>header{display:flex;align-items:center;gap:9px;padding:11px 16px;border-bottom:1px solid var(--line);background:var(--bg3)}
+  .card>header .t{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--or)}
+  .card>header .s{font-size:11px;color:var(--ink3);margin-left:auto;font-family:var(--mono)}
+  .card .body{padding:16px 20px}
+  .echelle{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:6px}
+  .echelle figure{margin:0;width:112px}
+  .echelle img{width:100%;border-radius:4px;border:1px solid var(--line);display:block}
+  .echelle figcaption{font-size:9.5px;color:var(--ink3);text-align:center;margin-top:3px;font-family:var(--mono)}
+  .empty{max-width:640px;margin:7vh auto;color:var(--ink3)}
+  .empty h2{font-family:var(--serif);font-size:24px;color:var(--ink2);font-weight:500;margin:0 0 14px;text-align:center}
+  .empty p{font-size:14px;line-height:1.75;font-family:var(--serif)}
+  .empty .glyph{font-size:44px;opacity:.2;text-align:center;margin-bottom:8px}
+  .banner{background:rgba(196,112,90,.1);border:1px solid rgba(196,112,90,.4);color:#e0a695;padding:10px 14px;border-radius:7px;font-size:12.5px;margin-bottom:16px}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
+  th,td{text-align:right;padding:5px 9px;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--ink3);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em}
+  .tbtn{background:var(--bg3);border:1px solid var(--line);color:var(--ink2);border-radius:5px;padding:4px 10px;font-size:11.5px}
+  .tbtn:hover,.tbtn.on{border-color:var(--or);color:var(--or)}
+  .lg{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;margin:0 0 10px}
+  .lg span{display:flex;align-items:center;gap:6px;color:var(--ink2)}
+  .lg i{width:11px;height:11px;border-radius:2px;display:block}
+  details.rep{border-top:1px solid var(--line);padding:9px 0}
+  details.rep summary{font-size:12px;color:var(--ink2);cursor:pointer}
+  details.rep .txt{font-size:13.5px;line-height:1.7;color:var(--ink2);margin-top:9px;white-space:pre-wrap}
+  .kpi{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:14px}
+  .kpi div{min-width:96px}
+  .kpi b{display:block;font-size:25px;font-weight:600;line-height:1.15;font-variant-numeric:tabular-nums}
+  .kpi small{color:var(--ink3);font-size:10.5px;text-transform:uppercase;letter-spacing:.07em}
+  textarea.lex{width:100%;height:110px;background:var(--bg3);border:1px solid var(--line);color:var(--ink2);border-radius:5px;padding:8px;font-family:var(--mono);font-size:10.5px;line-height:1.5;resize:vertical}
+  svg .tip{pointer-events:none}
+</style>
+</head>
+<body>
+<div class="app">
+
+<aside class="panel">
+  <div class="brand"><h1>Banc d'abstraction</h1><span class="v">v1</span></div>
+  <p class="tag">À quel moment le discours cesse-t-il de porter sur l'image ?</p>
+
+  <div class="sect">
+    <h2>Image</h2>
+    <div id="drop" class="drop">Dépose une image, ou clique</div>
+    <input type="file" id="file" accept="image/*" hidden>
+    <div id="prev" style="display:none;margin-top:10px">
+      <img id="thumb" style="width:100%;border-radius:6px;border:1px solid var(--line);display:block">
+      <div style="font-size:11px;color:var(--ink3);margin-top:6px" id="imeta"></div>
+    </div>
+  </div>
+
+  <div class="sect">
+    <h2>La sonde</h2>
+    <div class="chips" id="sondes"></div>
+    <p class="hint" id="sondeHint"></p>
+  </div>
+
+  <div class="sect">
+    <h2>L'échelle</h2>
+    <label class="f"><span>Barreaux</span><input type="number" id="nBar" class="in" value="6" min="3" max="9"></label>
+    <div id="echPrev" class="echelle"></div>
+    <p class="hint">Chaque barreau recule d'un pas : le détail se dissout, les masses restent. Le dernier barreau ne garde presque plus rien. La question est de savoir où le discours décroche — et vers quoi.</p>
+  </div>
+
+  <div class="sect">
+    <h2>Test apparié</h2>
+    <div class="sw"><input type="checkbox" id="apparie" checked><label for="apparie">Reconnaissable / recadré<small>La même œuvre entière, puis un fragment de 18 % non identifiable. L'écart entre les deux lectures mesure la part de récitation.</small></label></div>
+  </div>
+
+  <div class="sect">
+    <h2>Réglages</h2>
+    <label class="f"><span>Clé API Anthropic</span><input type="password" id="key" class="in" placeholder="sk-ant-..." autocomplete="off"></label>
+    <label class="f"><span>Modèle</span><select id="model" class="in">
+      <option value="claude-opus-5">claude-opus-5</option>
+      <option value="claude-sonnet-5">claude-sonnet-5</option>
+      <option value="claude-haiku-4-5">claude-haiku-4-5</option></select></label>
+    <details>
+      <summary style="font-size:11px;color:var(--ink3);cursor:pointer">lexiques de mesure</summary>
+      <p class="hint" style="margin-bottom:7px">Le banc compte, il ne juge pas avec un modèle. Corrige les listes si une mesure te paraît fausse.</p>
+      <label class="f"><span>mots creux → jargon</span><textarea class="lex" id="lexCreux"></textarea></label>
+      <label class="f"><span>noms concrets → figuration</span><textarea class="lex" id="lexConcret"></textarea></label>
+      <label class="f"><span>positions → ancrage</span><textarea class="lex" id="lexPos"></textarea></label>
+      <label class="f"><span>esquives</span><textarea class="lex" id="lexEsq"></textarea></label>
+      <label class="f"><span>récitation</span><textarea class="lex" id="lexRec"></textarea></label>
+    </details>
+  </div>
+
+  <button class="go" id="run" disabled>Lancer le banc</button>
+  <div class="cost" id="cost"></div>
+  <button class="stop" id="halt" style="display:none">Interrompre</button>
+</aside>
+
+<main class="stage" id="stage">
+  <div class="empty" id="empty">
+    <div class="glyph">◔</div>
+    <h2>Rien n'a encore été mesuré.</h2>
+    <p>Le banc dégrade une image par paliers et interroge le modèle à chaque palier. Il ne lui demande pas d'être bon : il regarde ce que devient son discours quand il n'y a plus rien à reconnaître.<br><br>
+    Quatre mesures, comptées et non jugées. La <b>figuration</b> — nommer des objets là où il n'y a plus d'objets. Le <b>jargon</b> — parler sans désigner. L'<b>ancrage</b> — situer ce qu'on avance. L'<b>esquive</b> — la densité de « semble », « pourrait », « il est difficile de ».<br><br>
+    Ces quatre courbes se croisent quelque part. C'est le seuil d'abstraction du modèle, et il se déplace selon la doctrine qu'on lui donne — d'où la sonde, qu'on peut lancer nue ou sous doctrine pour comparer.</p>
+  </div>
+</main>
+</div>
+
+<script src="doctrine.js"></script>
+<script>
+"use strict";
+if(typeof SOCLE==="undefined"){
+  document.getElementById("stage").innerHTML='<div class="banner"><b>doctrine.js n\'a pas pu être chargé.</b><br>Ouvre la page via un serveur local — <code>python3 -m http.server</code> — et non par double-clic.</div>';
+  throw new Error("doctrine manquante");
+}
+const $=s=>document.querySelector(s);
+const mem={};
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return mem[k]??null}},
+             set(k,v){try{localStorage.setItem(k,v)}catch(e){mem[k]=v}}};
+
+/* ══════════ sondes ══════════ */
+const SONDE_NUE = `Regarde cette image et dis ce que tu y vois.
+
+Entre 130 et 200 mots. Situe ce dont tu parles sur la grille : colonnes A à E de gauche à droite, lignes 1 à 5 de haut en bas.
+
+Pas de préambule, pas de conclusion.`;
+
+const SONDES = {
+  nue:{ label:"nue", hint:"Aucune doctrine. Mesure le comportement par défaut du modèle — la ligne de base contre laquelle tout se compare." },
+  fig:{ label:"sous doctrine figurative", hint:"Le socle, les gestes de trouvaille et le répertoire de signatures. Mesure ce que la doctrine figurative fait au discours quand il n'y a plus de figures possibles." },
+  sens:{ label:"sous doctrine sensible", hint:"Le socle sensible et les dix dimensions. Mesure si la lecture non-figurative résiste là où la figurative décroche." },
+  gram:{ label:"sensible + grammaire", hint:"La doctrine sensible plus les rapports admis de ta grammaire, injectés comme hypothèses à démentir. Comparée à la sonde sensible nue, elle dit si la grammaire sert à quelque chose — ou si elle ne fait que se confirmer elle-même." }
+};
+
+const state={ img:null, name:"", sonde:"nue", running:false, abort:null,
+              echelle:[], resultats:null, apparie:null, vue:"courbe" };
+
+/* ══════════ mesure ══════════ */
+const sansAcc=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+const lex=id=>sansAcc($(id).value).split(/[\s,;]+/).filter(w=>w.length>2);
+const motsDe=t=>sansAcc(t).replace(/[^a-z0-9'\- ]/g," ").split(/\s+/).filter(Boolean);
+
+function mesure(texte){
+  const mots=motsDe(texte), n=Math.max(1,mots.length);
+  const compte=liste=>{
+    const S=new Set(liste); let c=0;
+    for(const m of mots){
+      if(S.has(m)) {c++; continue;}
+      // pluriels et féminins simples
+      const r=m.replace(/(es|s|e)$/,"");
+      if(r.length>2 && S.has(r)) c++;
+    }
+    return c;
+  };
+  const creux=compte(lex("#lexCreux")), concret=compte(lex("#lexConcret"));
+  const esq=compte(lex("#lexEsq"));
+  const pos=compte(lex("#lexPos"));
+  const grille=(texte.match(/\b[A-E][1-5]\b/g)||[]).length;
+  const phrases=(texte.match(/[.!?…]+/g)||[]).length||1;
+  // densités pour 100 mots, ramenées dans [0,1] par un plafond raisonnable
+  const d=(c,plafond)=>Math.max(0,Math.min(1,(c/n*100)/plafond));
+  return {
+    mots:n,
+    figuration: d(concret,12),
+    jargon:     d(creux,8),
+    ancrage:    Math.max(0,Math.min(1,(grille+pos)/phrases/1.2)),
+    esquive:    d(esq,6),
+    brut:{creux,concret,esq,pos,grille,phrases}
+  };
+}
+const SERIES=[
+  {k:"figuration",l:"figuration",c:"var(--serie-1)",hex:"#3987e5"},
+  {k:"jargon",    l:"jargon",    c:"var(--serie-2)",hex:"#d95926"},
+  {k:"ancrage",   l:"ancrage",   c:"var(--serie-3)",hex:"#199e70"},
+  {k:"esquive",   l:"esquive",   c:"var(--serie-4)",hex:"#c98500"}
+];
+
+/* ══════════ images ══════════ */
+const MAXD=1100;
+function base(){
+  const im=state.img; let w=im.naturalWidth,h=im.naturalHeight;
+  const s=Math.min(1,MAXD/Math.max(w,h)); w=Math.round(w*s); h=Math.round(h*s);
+  const c=document.createElement("canvas"); c.width=w; c.height=h;
+  c.getContext("2d").drawImage(im,0,0,w,h); return c;
+}
+function recul(src,k){
+  const w=src.width,h=src.height;
+  const c=document.createElement("canvas"); c.width=w; c.height=h;
+  const x=c.getContext("2d");
+  if(k<=1){ x.drawImage(src,0,0); return c; }
+  const t=document.createElement("canvas");
+  t.width=Math.max(3,Math.round(w/k)); t.height=Math.max(3,Math.round(h/k));
+  const tx=t.getContext("2d"); tx.imageSmoothingEnabled=true; tx.drawImage(src,0,0,t.width,t.height);
+  x.imageSmoothingEnabled=true; x.drawImage(t,0,0,w,h);
+  return c;
+}
+function fragment(src){
+  // 18 % de la surface, pris au tiers pour éviter le centre canonique
+  const w=src.width,h=src.height, fw=Math.round(w*.42), fh=Math.round(h*.42);
+  const c=document.createElement("canvas"); c.width=fw*2; c.height=fh*2;
+  c.getContext("2d").drawImage(src, Math.round(w*.3), Math.round(h*.34), fw,fh, 0,0,c.width,c.height);
+  return c;
+}
+function grille(c){
+  const x=c.getContext("2d"),w=c.width,h=c.height;
+  x.strokeStyle="rgba(0,220,80,.5)"; x.lineWidth=Math.max(1,w/1100);
+  for(let i=1;i<5;i++){ x.beginPath();x.moveTo(w*i/5,0);x.lineTo(w*i/5,h);x.stroke();
+                        x.beginPath();x.moveTo(0,h*i/5);x.lineTo(w,h*i/5);x.stroke(); }
+  const fs=Math.max(10,Math.round(w/52)); x.font=`600 ${fs}px ui-monospace,monospace`;
+  const C="ABCDE";
+  for(let a=0;a<5;a++)for(let b=0;b<5;b++){
+    const L=C[a]+(b+1),px=w*a/5+fs*.3,py=h*b/5+fs*1.05;
+    x.lineWidth=3;x.strokeStyle="rgba(0,0,0,.75)";x.strokeText(L,px,py);
+    x.fillStyle="rgba(0,220,80,1)";x.fillText(L,px,py);
+  }
+  return c;
+}
+const b64=c=>c.toDataURL("image/jpeg",.85).split(",")[1];
+
+function bâtirEchelle(){
+  if(!state.img){ state.echelle=[]; return; }
+  const src=base(), N=Math.max(3,Math.min(9,+$("#nBar").value||6));
+  const out=[];
+  for(let i=0;i<N;i++){
+    const k = i===0 ? 1 : Math.round(Math.pow(2, i*(5/(N-1))));   // 1 → 32
+    const c=grille(recul(src,k));
+    out.push({i, k, label:i===0?"net":"÷"+k, b64:b64(c), url:c.toDataURL("image/jpeg",.6)});
+  }
+  state.echelle=out;
+  const z=$("#echPrev"); z.innerHTML="";
+  out.forEach(e=>{const f=document.createElement("figure");
+    f.innerHTML=`<img src="${e.url}" alt=""><figcaption>${e.label}</figcaption>`; z.appendChild(f);});
+  maj();
+}
+
+/* ══════════ API ══════════ */
+let sendTemp=false;
+const cfg=()=>({key:$("#key").value.trim(),model:$("#model").value});
+async function ask(system,content,signal,retried){
+  const {key,model}=cfg();
+  const p={model,max_tokens:1200,system,stream:false,messages:[{role:"user",content}]};
+  if(sendTemp) p.temperature=1;
+  const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",signal,
+    headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01",
+             "anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify(p)});
+  if(!r.ok){
+    let m=r.status+" "+r.statusText;
+    try{const e=await r.json(); if(e.error?.message) m=e.error.message;}catch(_){}
+    if(!retried && /temperature/i.test(m)){ sendTemp=!sendTemp; return ask(system,content,signal,true); }
+    throw new Error(m);
+  }
+  const j=await r.json();
+  return (j.content||[]).filter(c=>c.type==="text").map(c=>c.text).join("\n");
+}
+function grammaireAdmise(){
+  let g; try{ g=JSON.parse(store.get("nephele.grammaire")||"{}"); }catch(e){ return ""; }
+  const E=(g.entrees||[]).filter(e=>{
+    const v=e.verdicts||{}; const m=(e.matieres||[]).length;
+    const c=(e.contradictions||[]).length;
+    return !(v.faux>0) && !(c>=Math.max(2,(e.vues||0)/2)) && m>=2 && v.juste>0;
+  });
+  if(!E.length) return "";
+  return "\n\n─────\nTA GRAMMAIRE — hypothèses établies, pas des lois. Devant chaque rapport pertinent, demande-toi si CETTE image le dément.\n\n"
+    + E.map(e=>`— ${e.configuration} → ${e.effet}${e.pourquoi?` (${e.pourquoi})`:""}`).join("\n");
+}
+function systemeSonde(){
+  if(state.sonde==="fig")  return SOCLE+"\n\n"+TROUVER+"\n\n"+REPERTOIRE;
+  if(state.sonde==="sens") return SOCLE_SENSIBLE+"\n\n"+AFFECT+"\n\n"+DIMENSIONS;
+  if(state.sonde==="gram"){
+    const g=grammaireAdmise();
+    if(!g) return SOCLE_SENSIBLE+"\n\n"+AFFECT+"\n\n"+DIMENSIONS
+      +"\n\n(Aucun rapport admis dans la grammaire pour l'instant — cette sonde est identique à la sonde sensible tant que la grammaire est vide.)";
+    return SOCLE_SENSIBLE+"\n\n"+AFFECT+"\n\n"+DIMENSIONS+g;
+  }
+  return "Tu regardes des images et tu décris ce que tu y vois. Écris en français.";
+}
+
+/* ══════════ graphique ══════════ */
+function courbe(res){
+  const W=760,H=310,mL=44,mR=96,mT=14,mB=42;
+  const pw=W-mL-mR, ph=H-mT-mB, N=res.length;
+  const X=i=>mL+(N===1?pw/2:i*pw/(N-1)), Y=v=>mT+ph-v*ph;
+  let s=`<svg class="viz" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;overflow:visible" role="img" aria-label="Évolution des quatre mesures le long de l'échelle de recul">`;
+  // grille
+  for(let g=0;g<=4;g++){ const y=mT+ph-g/4*ph;
+    s+=`<line x1="${mL}" y1="${y}" x2="${mL+pw}" y2="${y}" stroke="var(--grille)" stroke-width="1"/>`;
+    s+=`<text x="${mL-9}" y="${y+4}" fill="var(--muet)" font-size="10.5" text-anchor="end" font-family="var(--mono)">${(g/4).toFixed(2)}</text>`;
+  }
+  s+=`<line x1="${mL}" y1="${mT+ph}" x2="${mL+pw}" y2="${mT+ph}" stroke="var(--axe)" stroke-width="1"/>`;
+  res.forEach((r,i)=>{
+    s+=`<text x="${X(i)}" y="${mT+ph+18}" fill="var(--muet)" font-size="10.5" text-anchor="middle" font-family="var(--mono)">${r.label}</text>`;
+  });
+  s+=`<text x="${mL+pw/2}" y="${H-4}" fill="var(--muet)" font-size="10.5" text-anchor="middle">recul croissant →</text>`;
+  // séries : lignes 2px, marqueurs 8px, étiquette directe en bout
+  const bouts=[];
+  SERIES.forEach(se=>{
+    const pts=res.map((r,i)=>[X(i),Y(r.m[se.k])]);
+    s+=`<polyline fill="none" stroke="${se.c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"
+         points="${pts.map(p=>p[0]+","+p[1]).join(" ")}"/>`;
+    pts.forEach(p=>{ s+=`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="${se.c}" stroke="var(--surface)" stroke-width="2"/>`; });
+    const last=pts[pts.length-1];
+    bouts.push({y:last[1], x:last[0], c:se.c, l:se.l});
+  });
+  // désencombrement : deux courbes qui finissent au même niveau auraient leurs
+  // étiquettes superposées — on les écarte verticalement sans bouger les points
+  bouts.sort((a,b)=>a.y-b.y);
+  const ECART=15;
+  for(let i=1;i<bouts.length;i++)
+    if(bouts[i].y - bouts[i-1].y < ECART) bouts[i].y = bouts[i-1].y + ECART;
+  const debord = bouts[bouts.length-1].y - (mT+ph);
+  if(debord>0) bouts.forEach(b=>b.y-=debord);
+  bouts.forEach(b=>{
+    s+=`<line x1="${b.x+4}" y1="${b.y}" x2="${b.x+9}" y2="${b.y}" stroke="${b.c}" stroke-width="1" opacity=".6"/>`;
+    s+=`<text x="${b.x+12}" y="${b.y+4}" fill="${b.c}" font-size="11.5" font-weight="600">${b.l}</text>`;
+  });
+  // couche de survol : bande par barreau + croix + infobulle
+  res.forEach((r,i)=>{
+    const bw=pw/Math.max(1,N-1||1);
+    s+=`<g class="hv" opacity="0">
+        <line x1="${X(i)}" y1="${mT}" x2="${X(i)}" y2="${mT+ph}" stroke="var(--muet)" stroke-width="1" stroke-dasharray="3 3"/>
+        <g class="tip" transform="translate(${Math.min(X(i)+10, mL+pw-150)},${mT+6})">
+          <rect width="150" height="88" rx="5" fill="#0d0e12" stroke="var(--axe)"/>
+          <text x="9" y="17" fill="#e6e3dc" font-size="11" font-weight="600">${r.label} · ${r.m.mots} mots</text>
+          ${SERIES.map((se,k)=>`<text x="9" y="${34+k*15}" fill="${se.c}" font-size="10.5" font-family="var(--mono)">${se.l} ${r.m[se.k].toFixed(2)}</text>`).join("")}
+        </g></g>`;
+    s+=`<rect x="${X(i)-bw/2}" y="${mT}" width="${bw}" height="${ph}" fill="transparent"
+         onmouseenter="this.parentNode.querySelectorAll('.hv')[${i}].setAttribute('opacity','1')"
+         onmouseleave="this.parentNode.querySelectorAll('.hv')[${i}].setAttribute('opacity','0')"/>`;
+  });
+  s+=`</svg>`;
+  return s;
+}
+const legende = `<div class="lg">${SERIES.map(s=>`<span><i style="background:${s.c}"></i>${s.l}</span>`).join("")}</div>`;
+
+function tableau(res){
+  let s=`<table><thead><tr><th>barreau</th><th>mots</th>${SERIES.map(x=>`<th>${x.l}</th>`).join("")}</tr></thead><tbody>`;
+  res.forEach(r=>{ s+=`<tr><td>${r.label}</td><td>${r.m.mots}</td>${
+    SERIES.map(x=>`<td>${r.m[x.k].toFixed(2)}</td>`).join("")}</tr>`; });
+  return s+"</tbody></table>";
+}
+
+function seuil(res){
+  // premier barreau où la figuration passe sous l'ancrage, ou où le jargon la dépasse
+  for(let i=1;i<res.length;i++){
+    const a=res[i].m, b=res[i-1].m;
+    if(b.figuration>=b.jargon && a.figuration<a.jargon) return {barreau:res[i].label, quoi:"le jargon passe devant la figuration"};
+  }
+  for(let i=1;i<res.length;i++) if(res[i].m.ancrage < res[0].m.ancrage*0.5)
+    return {barreau:res[i].label, quoi:"l'ancrage tombe sous la moitié de sa valeur initiale"};
+  return null;
+}
+
+/* ══════════ exécution ══════════ */
+async function lancer(){
+  if(!cfg().key){ $("#stage").innerHTML='<div class="banner">Il manque la clé API.</div>'; return; }
+  const stage=$("#stage"); stage.innerHTML="";
+  state.running=true; state.abort=new AbortController(); const signal=state.abort.signal;
+  $("#run").disabled=true; $("#halt").style.display="block";
+  const sys=systemeSonde();
+
+  try{
+    /* ── l'échelle ── */
+    const cE=document.createElement("section"); cE.className="card";
+    cE.innerHTML=`<header><span class="t">L'échelle de recul</span><span class="s">sonde ${SONDES[state.sonde].label}</span></header>
+      <div class="body"><div class="echelle">${state.echelle.map(e=>
+        `<figure><img src="${e.url}" alt=""><figcaption>${e.label}</figcaption></figure>`).join("")}</div>
+        <div id="prog" style="font-size:12px;color:var(--ink3);margin-top:10px">interrogation…</div></div>`;
+    stage.appendChild(cE);
+
+    const res=[];
+    for(const e of state.echelle){
+      $("#prog").textContent=`barreau ${e.label} — ${res.length+1}/${state.echelle.length}`;
+      const t=await ask(sys,[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:e.b64}},
+                             {type:"text",text:SONDE_NUE}],signal);
+      res.push({label:e.label, k:e.k, texte:t, m:mesure(t)});
+    }
+    $("#prog").remove();
+    state.resultats=res;
+
+    /* ── courbes ── */
+    const cC=document.createElement("section"); cC.className="card";
+    cC.innerHTML=`<header><span class="t">Ce que devient le discours</span>
+      <span class="s"><button class="tbtn on" id="vC">courbe</button> <button class="tbtn" id="vT">table</button></span></header>
+      <div class="body">${legende}<div id="viz">${courbe(res)}</div></div>`;
+    stage.appendChild(cC);
+    $("#vC").onclick=()=>{ $("#viz").innerHTML=courbe(res); $("#vC").classList.add("on"); $("#vT").classList.remove("on"); };
+    $("#vT").onclick=()=>{ $("#viz").innerHTML=tableau(res); $("#vT").classList.add("on"); $("#vC").classList.remove("on"); };
+
+    const s=seuil(res);
+    const cS=document.createElement("section"); cS.className="card";
+    const d0=res[0].m, dn=res[res.length-1].m;
+    cS.innerHTML=`<header><span class="t">Lecture</span></header><div class="body">
+      <div class="kpi">
+        <div><b style="color:${SERIES[0].hex}">${(dn.figuration-d0.figuration>=0?"+":"")}${((dn.figuration-d0.figuration)*100).toFixed(0)}</b><small>figuration, net → flou</small></div>
+        <div><b style="color:${SERIES[1].hex}">${(dn.jargon-d0.jargon>=0?"+":"")}${((dn.jargon-d0.jargon)*100).toFixed(0)}</b><small>jargon</small></div>
+        <div><b style="color:${SERIES[2].hex}">${(dn.ancrage-d0.ancrage>=0?"+":"")}${((dn.ancrage-d0.ancrage)*100).toFixed(0)}</b><small>ancrage</small></div>
+        <div><b style="color:${SERIES[3].hex}">${(dn.esquive-d0.esquive>=0?"+":"")}${((dn.esquive-d0.esquive)*100).toFixed(0)}</b><small>esquive</small></div>
+      </div>
+      <p style="font-size:13.5px;margin:0;color:var(--ink2)">${ s
+        ? `Le décrochage se produit au barreau <b style="color:var(--or)">${s.barreau}</b> : ${s.quoi}. C'est le seuil d'abstraction de ce modèle sous la sonde ${SONDES[state.sonde].label}, sur cette image.`
+        : `Aucun décrochage net sur cette échelle. Soit le modèle tient jusqu'au bout, soit l'échelle ne va pas assez loin — augmente les barreaux.` }</p></div>`;
+    stage.appendChild(cS);
+
+    /* ── réponses ── */
+    const cR=document.createElement("section"); cR.className="card";
+    cR.innerHTML=`<header><span class="t">Les réponses</span><span class="s">${res.length}</span></header><div class="body">${
+      res.map(r=>`<details class="rep"><summary><b>${r.label}</b> — ${r.m.mots} mots · figuration ${r.m.figuration.toFixed(2)} · jargon ${r.m.jargon.toFixed(2)} · ancrage ${r.m.ancrage.toFixed(2)}</summary><div class="txt">${
+        r.texte.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}</div></details>`).join("")}</div>`;
+    stage.appendChild(cR);
+
+    /* ── test apparié ── */
+    if($("#apparie").checked){
+      const src=base();
+      const entier=grille(recul(src,1)), frag=grille(fragment(src));
+      const cA=document.createElement("section"); cA.className="card";
+      cA.innerHTML=`<header><span class="t">Test apparié</span><span class="s">récitation</span></header>
+        <div class="body"><div class="echelle">
+          <figure style="width:150px"><img src="${entier.toDataURL("image/jpeg",.6)}"><figcaption>entière</figcaption></figure>
+          <figure style="width:150px"><img src="${frag.toDataURL("image/jpeg",.6)}"><figcaption>fragment 18 %</figcaption></figure>
+        </div><div id="progA" style="font-size:12px;color:var(--ink3);margin-top:10px">interrogation…</div></div>`;
+      stage.appendChild(cA);
+      const tA=await ask(sys,[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:b64(entier)}},
+                              {type:"text",text:SONDE_NUE}],signal);
+      const tB=await ask(sys,[{type:"image",source:{type:"base64",media_type:"image/jpeg",data:b64(frag)}},
+                              {type:"text",text:SONDE_NUE}],signal);
+      const rec=new Set(lex("#lexRec"));
+      const cite=t=>motsDe(t).filter(m=>rec.has(m));
+      const cA1=cite(tA), cA2=cite(tB);
+      const contenu=t=>new Set(motsDe(t).filter(w=>w.length>4));
+      const s1=contenu(tA), s2=contenu(tB);
+      const inter=[...s1].filter(w=>s2.has(w)).length;
+      const jac=inter/Math.max(1,(s1.size+s2.size-inter));
+      state.apparie={tA,tB,jac,cA1,cA2};
+      $("#progA").outerHTML=`
+        <div class="kpi" style="margin-top:14px">
+          <div><b style="color:${jac>.35?"#d95926":"#199e70"}">${(jac*100).toFixed(0)}%</b><small>recouvrement lexical</small></div>
+          <div><b style="color:${cA1.length?"#d95926":"#199e70"}">${cA1.length}</b><small>mots de catalogue, œuvre entière</small></div>
+          <div><b style="color:${cA2.length?"#d95926":"#199e70"}">${cA2.length}</b><small>mots de catalogue, fragment</small></div>
+        </div>
+        <p style="font-size:13.5px;color:var(--ink2);margin:0 0 12px">${
+          cA1.length>cA2.length+1
+            ? `L'œuvre entière déclenche <b>${cA1.length-cA2.length}</b> termes de catalogue de plus que son propre fragment${cA1.length?` (${[...new Set(cA1)].slice(0,6).join(", ")})`:""}. Le discours vient au moins en partie de ce qui est écrit sur cette image, pas de ce qu'elle montre.`
+            : jac>.35
+              ? `Fort recouvrement entre les deux lectures alors que les images n'ont presque rien en commun : le modèle dit la même chose quelle que soit l'image qu'on lui montre.`
+              : `Peu de récitation détectable. Les deux lectures divergent et aucun terme de catalogue ne domine — c'est le résultat qu'on espère.`}</p>
+        <details class="rep"><summary>lecture de l'œuvre entière</summary><div class="txt">${tA.replace(/</g,"&lt;")}</div></details>
+        <details class="rep"><summary>lecture du fragment</summary><div class="txt">${tB.replace(/</g,"&lt;")}</div></details>`;
+    }
+
+    const b=document.createElement("button"); b.className="tbtn"; b.textContent="Exporter en Markdown";
+    b.onclick=exporter; stage.appendChild(b);
+
+  }catch(e){
+    if(e.name!=="AbortError")
+      stage.appendChild(Object.assign(document.createElement("div"),{className:"banner",textContent:"Interrompu : "+e.message}));
+  }finally{ state.running=false; $("#halt").style.display="none"; maj(); }
+}
+
+function exporter(){
+  const r=state.resultats||[];
+  let s=`# Banc d'abstraction — ${state.name}\n\nSonde : ${SONDES[state.sonde].label}\nModèle : ${cfg().model}\n\n`;
+  s+=`| barreau | mots | ${SERIES.map(x=>x.l).join(" | ")} |\n|---|---|${SERIES.map(()=>"---").join("|")}|\n`;
+  r.forEach(x=>s+=`| ${x.label} | ${x.m.mots} | ${SERIES.map(k=>x.m[k.k].toFixed(2)).join(" | ")} |\n`);
+  r.forEach(x=>s+=`\n## Barreau ${x.label}\n\n${x.texte}\n`);
+  if(state.apparie) s+=`\n---\n\n# Test apparié\n\nRecouvrement lexical : ${(state.apparie.jac*100).toFixed(0)} %\nTermes de catalogue — entière : ${state.apparie.cA1.join(", ")||"aucun"} · fragment : ${state.apparie.cA2.join(", ")||"aucun"}\n\n## Œuvre entière\n\n${state.apparie.tA}\n\n## Fragment\n\n${state.apparie.tB}\n`;
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([s],{type:"text/markdown"}));
+  a.download=(state.name.replace(/\.[^.]+$/,"")||"banc")+"-banc.md"; a.click();
+}
+
+/* ══════════ interface ══════════ */
+function maj(){
+  $("#run").disabled = state.running || !state.img || !state.echelle.length;
+  $("#run").textContent = state.running ? "En cours…" : "Lancer le banc";
+  const n=state.echelle.length + ($("#apparie").checked?2:0);
+  $("#cost").textContent = state.img ? `${n} appels` : "";
+}
+function charge(f){
+  if(!f||!f.type.startsWith("image/")) return;
+  const r=new FileReader();
+  r.onload=e=>{ const im=new Image();
+    im.onload=()=>{ state.img=im; state.name=f.name||"image";
+      $("#thumb").src=e.target.result; $("#prev").style.display="block";
+      $("#drop").textContent="Changer d'image";
+      $("#imeta").textContent=`${im.naturalWidth}×${im.naturalHeight}`;
+      bâtirEchelle(); };
+    im.src=e.target.result; };
+  r.readAsDataURL(f);
+}
+const z=$("#sondes");
+Object.entries(SONDES).forEach(([k,v])=>{
+  const b=document.createElement("button");
+  b.className="chip"+(state.sonde===k?" on":""); b.dataset.s=k; b.textContent=v.label;
+  b.onclick=()=>{ state.sonde=k; store.set("banc.sonde",k);
+    z.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x.dataset.s===k));
+    $("#sondeHint").textContent=v.hint; };
+  z.appendChild(b);
+});
+const ss=store.get("banc.sonde"); if(ss&&SONDES[ss]){ state.sonde=ss;
+  z.querySelectorAll(".chip").forEach(x=>x.classList.toggle("on",x.dataset.s===ss)); }
+$("#sondeHint").textContent=SONDES[state.sonde].hint;
+
+$("#lexCreux").value=LEX_CREUX; $("#lexConcret").value=LEX_CONCRET;
+$("#lexPos").value=LEX_POSITION; $("#lexEsq").value=LEX_ESQUIVE; $("#lexRec").value=LEX_RECITATION;
+
+const dz=$("#drop");
+dz.onclick=()=>$("#file").click();
+$("#file").onchange=e=>charge(e.target.files[0]);
+["dragenter","dragover"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add("over")}));
+["dragleave","drop"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove("over")}));
+dz.addEventListener("drop",e=>charge(e.dataTransfer.files[0]));
+window.addEventListener("paste",e=>{const it=[...(e.clipboardData?.items||[])].find(i=>i.type.startsWith("image/"));
+  if(it) charge(it.getAsFile());});
+$("#nBar").addEventListener("change",bâtirEchelle);
+$("#apparie").addEventListener("change",maj);
+$("#run").onclick=lancer;
+$("#halt").onclick=()=>state.abort&&state.abort.abort();
+const sk=store.get("nephele.key"); if(sk) $("#key").value=sk;
+$("#key").addEventListener("change",()=>store.set("nephele.key",$("#key").value.trim()));
+const sm=store.get("nephele.model");
+if(sm){const o=[...$("#model").options].find(x=>x.value===sm); if(o)$("#model").value=sm;}
+maj();
+</script>
+</body>
+</html>
