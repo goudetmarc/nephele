@@ -161,7 +161,7 @@ const AUDACE = {
 2:{n:"Un pas de côté", d:"L'évidence, plus ce qui se trouve juste derrière.", p:
 `ÉCART — UN PAS DE CÔTÉ. Les figures immédiates, puis un second passage pour ce qui se trouve juste derrière : la même zone lue autrement, une figure à cheval sur deux masses.`},
 3:{n:"En chasse", d:"On descend dans le détail, on change d'échelle.", p:
-`ÉCART — EN CHASSE. Applique franchement les gestes de trouvaille : descends d'échelle, pivote, prends l'intervalle. Mélange les registres — du vivant, du fabriqué, du cartographique. Cite les figures évidentes en une ligne et consacre l'essentiel du travail aux autres.`},
+`ÉCART — EN CHASSE. Applique franchement les gestes de trouvaille : descends d'échelle, pivote, prends l'intervalle. Mélange les registres — du vivant, du fabriqué, du cartographique. Cite les figures évidentes en une ligne et consacre l'essentiel du travail aux autres. À partir d'ici, vise au moins deux figures portées sur un fragment traité comme un tout, et au moins deux venues d'un registre autre que le vivant.`},
 4:{n:"Loin", d:"On vise ce que personne n'aurait proposé.", p:
 `ÉCART — LOIN. Les figures évidentes ne comptent plus comme travail : une ligne chacune, et tu passes. Vise ce que personne n'aurait proposé sur cette planche, et va le chercher par le détail, pas par l'extravagance : c'est en descendant plus finement dans le contour qu'on s'éloigne, jamais en montant dans l'abstraction. Change de monde systématiquement — outils, anatomie, cartes, alphabets, instruments, architecture.`},
 5:{n:"Au bout", d:"Une seule règle : ça doit pouvoir se montrer.", p:
@@ -186,7 +186,7 @@ Applique les gestes de trouvaille dans l'ordre, et redescends la liste tant que 
 
 Repère-toi sur la grille : colonnes A à E de gauche à droite, lignes 1 à 5 de haut en bas. A1 est le coin haut-gauche, C3 le centre, E5 le coin bas-droit.
 
-QUOTA. Rends au moins SIX figures. Au moins deux doivent porter sur un fragment traité comme un tout, et au moins deux doivent venir d'un registre autre que le vivant. Rendre moins de six est un échec de méthode : cela signifie que tu t'es arrêté au premier geste de la liste. Si tu bloques, descends d'échelle encore une fois — il y a toujours une figure dans un fragment.
+QUOTA. Rends au moins SIX figures — à tout écart, sans exception : c'est la garantie contre la page vide. Rendre moins de six est un échec de méthode : cela signifie que tu t'es arrêté au premier geste de la liste. Si tu bloques, descends d'échelle encore une fois — il y a toujours une figure dans un fragment. La répartition — combien sur des fragments, combien hors du registre vivant — dépend de l'écart demandé, donnée avec la consigne d'écart ; à l'écart le plus proche, prends simplement les six figures les plus immédiates.
 
 Ne récuse aucune figure au motif qu'elle serait produite par le traitement de l'image. Cette objection est vide et te ferait tout rejeter.
 
