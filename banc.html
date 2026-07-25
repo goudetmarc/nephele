@@ -129,6 +129,7 @@
   <div class="sect">
     <h2>Réglages</h2>
     <label class="f"><span>Clé API Anthropic</span><input type="password" id="key" class="in" placeholder="sk-ant-..." autocomplete="off"></label>
+    <label class="f"><span>Endpoint</span><input type="text" id="base" class="in" value="https://api.anthropic.com" spellcheck="false"></label>
     <label class="f"><span>Modèle</span><select id="model" class="in">
       <option value="claude-opus-5">claude-opus-5</option>
       <option value="claude-sonnet-5">claude-sonnet-5</option>
@@ -300,12 +301,13 @@ function bâtirEchelle(){
 
 /* ══════════ API ══════════ */
 let sendTemp=false;
-const cfg=()=>({key:$("#key").value.trim(),model:$("#model").value});
+const cfg=()=>({key:$("#key").value.trim(),model:$("#model").value,
+  base:($("#base").value.trim()||"https://api.anthropic.com").replace(/\/+$/,"")});
 async function ask(system,content,signal,retried){
-  const {key,model}=cfg();
+  const {key,model,base}=cfg();
   const p={model,max_tokens:1200,system,stream:false,messages:[{role:"user",content}]};
   if(sendTemp) p.temperature=1;
-  const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",signal,
+  const r=await fetch(base+"/v1/messages",{method:"POST",signal,
     headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01",
              "anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify(p)});
   if(!r.ok){

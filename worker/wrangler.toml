@@ -1,0 +1,20 @@
+# Passerelle Nephélé — configuration Cloudflare Workers.
+#
+# Déploiement (avec TON compte Cloudflare) :
+#   npm i -g wrangler
+#   wrangler login
+#   wrangler secret put ANTHROPIC_API_KEY   # colle ta vraie clé Anthropic
+#   wrangler secret put ACCESS_TOKEN        # invente un jeton long et aléatoire
+#   wrangler deploy
+#
+# Les secrets ne sont JAMAIS dans ce fichier ni dans le dépôt.
+
+name = "nephele-gw"
+main = "index.js"
+compatibility_date = "2024-11-01"
+
+# --- Optionnel, étape suivante : corpus centralisé en R2 ---
+# Décommente pour lier un bucket R2 (crée-le d'abord : `wrangler r2 bucket create nephele-corpus`).
+# [[r2_buckets]]
+# binding = "CORPUS"
+# bucket_name = "nephele-corpus"
