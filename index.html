@@ -200,6 +200,12 @@
       <button class="tbtn" id="corpusArch">archive</button>
       <button class="tbtn" id="corpusClr">effacer</button>
     </div>
+    <div id="bkpEtat" style="font-size:11px;color:var(--ink3);line-height:1.5;margin-top:10px"></div>
+    <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+      <button class="tbtn" id="bkpLier">lier un dossier de sauvegarde</button>
+      <button class="tbtn" id="bkpNow" style="display:none">sauvegarder maintenant</button>
+    </div>
+    <p class="hint">Le corpus est le seul actif qui ne se refabrique pas, et le stockage du navigateur n'est pas éternel. Lie un dossier local : chaque séance et chaque verdict s'y recopient tout seuls — l'archive complète et les jeux SFT/DPO — sans rien envoyer nulle part.</p>
   </div>
 
   <div class="sect">
@@ -977,6 +983,97 @@ async function majCorpusUI(){
 }
 
 /* ══════════════════════════════════════════════════════════════
+   SAUVEGARDE DURABLE — sans backend (File System Access)
+   Le corpus est le seul actif non reproductible ; l'IndexedDB d'un
+   navigateur n'est pas éternelle. On lie une fois un dossier local et
+   chaque séance s'y recopie toute seule — archive + jeux SFT/DPO.
+   Rien ne part sur un serveur : l'écriture est locale, de disque à disque.
+   ══════════════════════════════════════════════════════════════ */
+const FS_OK = typeof window!=="undefined" && "showDirectoryPicker" in window;
+let bkpHandle=null;
+
+/* le handle de dossier se conserve entre sessions dans un petit store IDB */
+function bkpDB(){
+  return new Promise((ok,ko)=>{
+    const r=indexedDB.open("nephele-backup",1);
+    r.onupgradeneeded=()=>{ const d=r.result;
+      if(!d.objectStoreNames.contains("h")) d.createObjectStore("h"); };
+    r.onsuccess=()=>ok(r.result); r.onerror=()=>ko(r.error);
+  });
+}
+async function bkpGetHandle(){ const d=await bkpDB(); return new Promise((ok)=>{
+  const g=d.transaction("h","readonly").objectStore("h").get("dir");
+  g.onsuccess=()=>{d.close(); ok(g.result||null);}; g.onerror=()=>{d.close(); ok(null);}; }); }
+async function bkpPutHandle(h){ const d=await bkpDB(); return new Promise((ok,ko)=>{
+  const t=d.transaction("h","readwrite"); t.objectStore("h").put(h,"dir");
+  t.oncomplete=()=>{d.close(); ok();}; t.onerror=()=>{d.close(); ko(t.error);}; }); }
+
+async function bkpPermission(h, demande){
+  if(!h||!h.queryPermission) return "granted";           // handles de test
+  const opts={mode:"readwrite"};
+  if((await h.queryPermission(opts))==="granted") return "granted";
+  if(demande && h.requestPermission) return await h.requestPermission(opts);
+  return await h.queryPermission(opts);
+}
+
+/** écrit un fichier texte dans le dossier lié */
+async function bkpFichier(h, nom, contenu){
+  const f=await h.getFileHandle(nom,{create:true});
+  const w=await f.createWritable(); await w.write(contenu); await w.close();
+}
+
+/** recopie tout le corpus dans le dossier lié. Silencieux si permission acquise. */
+async function bkpEcrire(h=bkpHandle, demande=false){
+  if(!h) return false;
+  if((await bkpPermission(h, demande))!=="granted") return false;
+  const recs=await corpusTous();
+  await bkpFichier(h,"nephele-corpus.json",
+    JSON.stringify({version:1, exporte:new Date().toISOString(), seances:recs}));
+  const sft=(await corpusJSONL("sft")).join("\n"); if(sft) await bkpFichier(h,"nephele-sft.jsonl",sft);
+  const dpo=(await corpusJSONL("dpo")).join("\n"); if(dpo) await bkpFichier(h,"nephele-dpo.jsonl",dpo);
+  try{ await bkpFichier(h,"grammaire-nephele.json", JSON.stringify(state.grammaire,null,1)); }catch(_){}
+  store.set("nephele.bkpTs", String(Date.now()));
+  majBkpUI(); return true;
+}
+
+/** appelé après chaque séance et chaque verdict — n'écrit que si un dossier est lié */
+async function bkpAuto(){ if(bkpHandle){ try{ await bkpEcrire(); }catch(e){ console.warn("sauvegarde:",e.message); majBkpUI(e); } } }
+
+async function majBkpUI(err){
+  const z=$("#bkpEtat"), lier=$("#bkpLier"), now=$("#bkpNow"); if(!z) return;
+  if(!FS_OK){ z.innerHTML="<span style='color:var(--ink3)'>Ce navigateur ne permet pas la sauvegarde automatique. Exporte l'archive à la main de temps en temps.</span>";
+    if(lier) lier.style.display="none"; return; }
+  const ts=+store.get("nephele.bkpTs")||0;
+  const quand=ts?new Date(ts).toLocaleString():"jamais";
+  if(!bkpHandle){ z.innerHTML=`<span style="color:var(--ink3)">Aucun dossier lié. Le corpus ne vit que dans ce navigateur.</span>`;
+    if(now) now.style.display="none"; if(lier) lier.textContent="lier un dossier de sauvegarde"; return; }
+  const perm=await bkpPermission(bkpHandle,false);
+  if(now) now.style.display="inline-block";
+  if(lier) lier.textContent="changer de dossier";
+  const nom=bkpHandle.name?` <b>${esc(bkpHandle.name)}</b>`:"";
+  z.innerHTML = err
+    ? `<span style="color:var(--rouge)">Dernière sauvegarde en échec : ${esc(err.message||err)}. Clique « sauvegarder maintenant ».</span>`
+    : perm==="granted"
+      ? `Sauvegarde active vers${nom} · dernière : ${quand}`
+      : `<span style="color:var(--or,#c98500)">Dossier${nom} lié mais en veille — clique « sauvegarder maintenant » pour réautoriser l'accès.</span>`;
+}
+
+async function bkpLier(){
+  try{
+    const h=await window.showDirectoryPicker({mode:"readwrite", id:"nephele-corpus"});
+    bkpHandle=h; await bkpPutHandle(h);
+    await bkpEcrire(h, true);
+    majBkpUI();
+  }catch(e){ if(e.name!=="AbortError") alert("Dossier non lié : "+e.message); }
+}
+
+async function bkpInit(){
+  if(!FS_OK){ majBkpUI(); return; }
+  try{ bkpHandle=await bkpGetHandle(); }catch(_){}
+  majBkpUI();
+}
+
+/* ══════════════════════════════════════════════════════════════
    LA GRAMMAIRE — configuration → effet
    Rien n'entre sans avoir récurré sur deux matières sans rapport
    ET reçu un verdict humain. La récurrence trie, l'humain ratifie.
@@ -1115,7 +1212,7 @@ function lectureEl(L){
       if(state.verdicts[L.id]) b.classList.add("on");
       majReviser();
       if(state.corpusId!=null)
-        corpusMajVerdicts(state.corpusId, {...state.verdicts}).then(majCorpusUI).catch(()=>{});
+        corpusMajVerdicts(state.corpusId, {...state.verdicts}).then(majCorpusUI).then(bkpAuto).catch(()=>{});
     };
     nz.appendChild(b);
   });
@@ -1318,7 +1415,7 @@ async function run(){
       await majGrammaire(stage, signal);
     if($("#writeCarnet").checked) await majCarnet(stage, signal);
 
-    try{ state.corpusId = await corpusAjoute(corpusRecord(sysDe)); majCorpusUI(); }
+    try{ state.corpusId = await corpusAjoute(corpusRecord(sysDe)); majCorpusUI(); bkpAuto(); }
     catch(e){ console.warn("corpus:", e.message); }
 
     $("#exp").onclick=exportMd;
@@ -1706,7 +1803,9 @@ $("#corpusArch").onclick=async()=>{ const r=await corpusTous();
   dl(JSON.stringify({version:1,exporte:new Date().toISOString(),seances:r}),"nephele-corpus.json","application/json"); };
 $("#corpusClr").onclick=async()=>{ if(!confirm("Effacer le corpus ? Toutes les séances enregistrées disparaissent — c'est irréversible."))return;
   await corpusVide(); state.corpusId=null; majCorpusUI(); };
-majCorpusUI();
+$("#bkpLier").onclick=bkpLier;
+$("#bkpNow").onclick=async()=>{ try{ const ok=await bkpEcrire(bkpHandle,true); if(!ok) majBkpUI(); }catch(e){ majBkpUI(e); } };
+majCorpusUI(); bkpInit();
 
 state.grammaire = chargeGrammaire();
 $("#matiere").value = state.matiere;

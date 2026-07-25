@@ -149,7 +149,7 @@ Deux disciplines, et le corpus vaudra quelque chose :
 1. **Note les lectures.** Une séance sans verdict produit zéro exemple.
 2. **Renseigne la matière.** Elle sert à la grammaire ET à stratifier le futur entraînement.
 
-L'**archive** exporte tout (séances complètes, JSON) — fais-en une sauvegarde de temps en temps : le stockage du navigateur n'est pas éternel, et ces données ne se refabriquent pas.
+L'**archive** exporte tout (séances complètes, JSON) à la demande. Mieux : **lie un dossier de sauvegarde** une fois, et chaque séance comme chaque verdict s'y recopient tout seuls — l'archive complète et les jeux SFT/DPO, de disque à disque, sans rien envoyer nulle part. Le stockage du navigateur n'est pas éternel et ces données ne se refabriquent pas ; c'est le seul actif du projet qui compte vraiment. (Sauvegarde automatique sur navigateurs à base de Chromium ; ailleurs, l'export manuel reste.)
 
 ## Lancer
 
