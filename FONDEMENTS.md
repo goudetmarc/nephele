@@ -1,406 +1,401 @@
-# Fondements — sciences et arts
+# Foundations — science and art
 
-> *« Regarde certains murs couverts de taches, ou faits de pierres mêlées, et tu
-> pourras y voir la ressemblance de divers paysages, de batailles, de figures aux
-> gestes vifs, d'expressions de visages, de costumes. »*
-> — Léonard de Vinci, *Trattato della pittura*, §60 (v. 1500)
+> *“Look at walls covered with stains, or made of a mixture of stones, and you
+> will be able to see in them the likeness of various landscapes, of battles, of
+> figures in lively action, of expressions of faces, of costumes.”*
+> — Leonardo da Vinci, *Trattato della pittura*, §60 (c. 1500)
 
-Ce document expose la charpente intellectuelle de Nephélé : ce qu'on emprunte à
-la psychologie de la perception, à la théorie du signal, à l'esthétique formelle,
-à la théorie de la décision et à l'apprentissage automatique — et comment chaque
-emprunt se traduit en un mécanisme précis du code. Rien ici n'est décoratif :
-chaque référence répond à une décision d'ingénierie ou de doctrine.
+This document lays out the intellectual scaffolding of Nephélé: what it borrows
+from the psychology of perception, signal theory, formal aesthetics, decision
+theory and machine learning — and how each borrowing translates into a precise
+mechanism in the code. Nothing here is decorative: every reference answers to an
+engineering or doctrinal decision.
 
-Le projet a un objet unique : **l'appareillage de formes** — trouver des figures
-dans des matières qui n'en portent aucune (nuages, rouille, écorce, peinture), et
-lire les champs non figuratifs par ce qu'ils *font* plutôt que par ce qu'ils
-*montrent*. C'est un problème d'**apophénie dirigée** : provoquer, puis discipliner,
-la perception de structures dans le hasard.
-
----
-
-## 1. La lignée artistique de la trouvaille de formes
-
-Voir des figures dans la matière informe est une technique d'invention aussi
-ancienne que documentée.
-
-- **Léonard de Vinci** (*Trattato della pittura*, v. 1500) : la *macchia*, la tache
-  du mur comme déclencheur d'invention. C'est la matrice historique de Nephélé.
-- **Alexander Cozens**, *A New Method of Assisting the Invention in Drawing Original
-  Compositions of Landscape* (1785) : le *blot drawing* — partir d'une tache
-  aléatoire pour composer un paysage. Une méthode, pas un accident.
-- **Victor Hugo** (taches, pliages, lavis, ~1850–1870) et surtout **Max Ernst**
-  (*frottage* 1925, *décalcomanie* 1936) : l'automatisme graphique génère la
-  texture, l'œil y appareille la figure. Le surréalisme théorise l'**automatisme**
-  (Breton, *Manifeste* 1924) comme court-circuit du contrôle conscient.
-- **Hermann Rorschach**, *Psychodiagnostik* (1921) : la tache d'encre symétrique
-  comme instrument. Nephélé hérite du dispositif *et* de sa mise en garde (§4).
-- **Ludwig Wittgenstein** (*Recherches philosophiques*, II, xi, 1953) sur le
-  *voir-comme* (le canard-lapin de **Jastrow**, 1899) : une même configuration
-  supporte deux vues incompatibles, et « voir » est déjà une interprétation.
-
-> **Traduction dans le code.** On ne montre **jamais** la photographie au modèle,
-> seulement des planches binarisées ou recolorées (`faireLesPlanches` dans
-> `index.html`). C'est le mur de Léonard, le blot de Cozens : couper la
-> reconnaissance de scène en amont pour forcer l'appareillage plutôt que la
-> récitation.
+The project has a single object: **matching forms** — finding figures in matter
+that carries none (clouds, rust, bark, paint), and reading non-figurative fields
+by what they *do* rather than by what they *show*. It is a problem of **directed
+apophenia**: to provoke, then discipline, the perception of structure in chance.
 
 ---
 
-## 2. La perception comme inférence : Gestalt, Helmholtz, Bayes
+## 1. The artistic lineage of finding forms
 
-### 2.1 Théorie de la Gestalt
+Seeing figures in formless matter is a technique of invention as old as it is
+documented.
 
-La psychologie de la forme (**Wertheimer** 1923 ; **Koffka**, *Principles of Gestalt
-Psychology*, 1935 ; **Köhler**) établit que la perception groupe le champ selon des
-lois — proximité, similarité, clôture (*closure*), bonne continuation, destin
-commun — sous un principe directeur, la **Prägnanz** (tendance à la forme la plus
-simple/régulière).
+- **Leonardo da Vinci** (*Trattato della pittura*, c. 1500): the *macchia*, the
+  stain on the wall as a trigger for invention. This is the historical matrix of
+  Nephélé.
+- **Alexander Cozens**, *A New Method of Assisting the Invention in Drawing
+  Original Compositions of Landscape* (1785): *blot drawing* — starting from a
+  random stain to compose a landscape. A method, not an accident.
+- **Victor Hugo** (stains, folds, washes, ~1850–1870) and above all **Max Ernst**
+  (*frottage* 1925, *decalcomania* 1936): graphic automatism generates the
+  texture, the eye matches the figure to it. Surrealism theorizes **automatism**
+  (Breton, *Manifesto* 1924) as a short-circuit of conscious control.
+- **Hermann Rorschach**, *Psychodiagnostik* (1921): the symmetric inkblot as an
+  instrument. Nephélé inherits the apparatus *and* its warning (§4).
+- **Ludwig Wittgenstein** (*Philosophical Investigations*, II, xi, 1953) on
+  *seeing-as* (**Jastrow**’s duck-rabbit, 1899): one and the same configuration
+  supports two incompatible views, and “seeing” is already an interpretation.
 
-**Hochberg & McAlister** (1953) en donnent une formulation quantitative — le
-*principe du minimum* : la « bonté » d'une figure est inversement proportionnelle
-à la quantité d'information nécessaire pour la spécifier. Une figure « tient »
-quand elle est l'organisation la plus économique du contour.
+> **In the code.** The photograph is **never** shown to the model, only
+> binarized or recolored boards (`faireLesPlanches` in `index.html`). This is
+> Leonardo’s wall, Cozens’ blot: cutting off scene recognition upstream to force
+> matching rather than recitation.
 
-$$\text{bonté}(F) \;\propto\; \frac{1}{I(F)}, \qquad I(F) = \text{information de description de } F$$
+---
 
-> **Traduction.** Le critère de Nephélé — *« est-ce que ça tient le contour ? »* —
-> est un critère de Prägnanz : une figure est retenue quand on peut dire quelle
-> partie du tracé fait quoi (clôture, bonne continuation), c'est-à-dire quand elle
-> organise économiquement le contour. La **clôture** est exactement ce que le
-> second regard traque (`P_SECOND` : « les parties désignées font-elles ce qu'on
-> dit ? »).
+## 2. Perception as inference: Gestalt, Helmholtz, Bayes
 
-### 2.2 L'inférence inconsciente et le cerveau bayésien
+### 2.1 Gestalt theory
 
-**Helmholtz** (1867) : percevoir, c'est inférer inconsciemment la cause la plus
-probable des sensations. La lecture moderne — **perception bayésienne** et
-**codage prédictif** (**Friston**, *free-energy principle*, 2010) — écrit la
-perception comme une inférence a posteriori :
+The psychology of form (**Wertheimer** 1923; **Koffka**, *Principles of Gestalt
+Psychology*, 1935; **Köhler**) establishes that perception groups the field
+according to laws — proximity, similarity, closure, good continuation, common
+fate — under a governing principle, **Prägnanz** (the tendency toward the
+simplest / most regular form).
+
+**Hochberg & McAlister** (1953) give it a quantitative formulation — the
+*minimum principle*: the “goodness” of a figure is inversely proportional to the
+amount of information needed to specify it. A figure “holds” when it is the most
+economical organization of the contour.
+
+$$\text{goodness}(F) \;\propto\; \frac{1}{I(F)}, \qquad I(F) = \text{information to describe } F$$
+
+> **In the code.** Nephélé’s criterion — *“does it hold the contour?”* — is a
+> Prägnanz criterion: a figure is kept when you can say which part of the outline
+> does what (closure, good continuation), i.e. when it economically organizes the
+> contour. **Closure** is exactly what the second look tracks (`P_SECOND`: “do
+> the designated parts do what is claimed?”).
+
+### 2.2 Unconscious inference and the Bayesian brain
+
+**Helmholtz** (1867): to perceive is to unconsciously infer the most probable
+cause of the sensations. The modern reading — **Bayesian perception** and
+**predictive coding** (**Friston**, *free-energy principle*, 2010) — writes
+perception as a posterior inference:
 
 $$P(H \mid D) \;=\; \frac{P(D \mid H)\,P(H)}{P(D)} \;\propto\; P(D \mid H)\,P(H)$$
 
-La **paréidolie** est le cas où un **a priori** fort $P(H)$ (visages, animaux,
-corps) domine une évidence sensorielle $P(D\mid H)$ pauvre ou ambiguë : le cerveau
-« voit » l'hypothèse la plus attendue. Les visages sont le prior le plus fort —
-d'où l'activation du **gyrus fusiforme** (FFA ; **Kanwisher, McDermott & Chun**
-1997) devant de simples taches disposées en triade (**Liu et al.** 2014,
+**Pareidolia** is the case where a strong **prior** $P(H)$ (faces, animals,
+bodies) dominates weak or ambiguous sensory evidence $P(D\mid H)$: the brain
+“sees” the most expected hypothesis. Faces are the strongest prior — hence the
+activation of the **fusiform face area** (FFA; **Kanwisher, McDermott & Chun**
+1997) in front of mere blobs arranged in a triad (**Liu et al.** 2014,
 *Seeing Jesus in toast*).
 
-> **Traduction.** Le geste de trouvaille *« Cherche la tête »* (`TROUVER`) exploite
-> le prior le plus puissant ; *« Suivre un bord et laisser venir le mot, même
-> absurde »* relâche volontairement le contrôle pour laisser le prior parler.
+> **In the code.** The finding move *“Look for the head”* (`TROUVER`) exploits
+> the most powerful prior; *“Follow an edge and let the word come, even an
+> absurd one”* deliberately relaxes control to let the prior speak.
 
-### 2.3 L'information est dans le contour : Attneave, Marr, Biederman
+### 2.3 Information is in the contour: Attneave, Marr, Biederman
 
-**Attneave** (*Some informational aspects of visual perception*, 1954) montre que
-l'information visuelle se concentre aux **points de courbure maximale** du
-contour — son célèbre « chat » réduit à des segments joignant les extrema de
-courbure reste reconnaissable. **Marr** (*Vision*, 1982) formalise le primal
-sketch et ses trois niveaux (computationnel / algorithmique / implémentationnel).
-**Biederman** (*recognition-by-components*, 1987) : les objets se reconnaissent
-comme assemblages de primitives (*geons*) définies par leurs contours.
+**Attneave** (*Some informational aspects of visual perception*, 1954) shows
+that visual information concentrates at the **points of maximum curvature** of
+the contour — his famous “cat”, reduced to segments joining the curvature
+extrema, remains recognizable. **Marr** (*Vision*, 1982) formalizes the primal
+sketch and its three levels (computational / algorithmic / implementational).
+**Biederman** (*recognition-by-components*, 1987): objects are recognized as
+assemblies of primitives (*geons*) defined by their contours.
 
-> **Traduction.** Deux gestes de `TROUVER` en découlent directement :
-> - *« Descendre d'échelle »* — un fragment de contour porte plus d'information
->   locale exploitable qu'une silhouette entière : la plupart des figures fortes
->   sont des fragments promus.
-> - *« Chercher la pointe / l'extrémité »* — les extrema de courbure (au sens
->   d'Attneave) sont les ancres naturelles de la figure.
+> **In the code.** Two `TROUVER` moves follow directly:
+> - *“Drop down in scale”* — a fragment of contour carries more exploitable
+>   local information than a whole silhouette: most strong figures are promoted
+>   fragments.
+> - *“Look for the tip / the extremity”* — curvature extrema (in Attneave’s
+>   sense) are the natural anchors of the figure.
 >
-> Le biais mesuré au Rorschach (≈87–90 % de **réponses globales** chez GPT-4o et
-> Grok 3, cf. §3) est précisément l'échec à descendre au niveau où l'information est.
+> The bias measured on the Rorschach (≈87–90% of **whole responses** in GPT-4o
+> and Grok 3, cf. §3) is precisely the failure to descend to the level where the
+> information is.
 
 ---
 
-## 3. Perception multistable et monomanie interprétative
+## 3. Multistable perception and interpretive monomania
 
-Une configuration ambiguë (canard-lapin, cube de Necker, vase de Rubin) admet
-plusieurs organisations mutuellement exclusives ; la perception **bascule** mais
-n'en tient qu'une à la fois — c'est la **rivalité perceptive**. Le corollaire, la
-**monomanie interprétative**, est le risque central d'un lecteur de formes : se
-fixer sur la première lecture et ne plus voir les autres.
+An ambiguous configuration (duck-rabbit, Necker cube, Rubin’s vase) admits
+several mutually exclusive organizations; perception **flips** but holds only one
+at a time — this is **perceptual rivalry**. The corollary, **interpretive
+monomania**, is the central risk for a reader of forms: fixating on the first
+reading and no longer seeing the others.
 
-Références du projet (citations vérifiées, §Bibliographie) :
+Project references (verified citations, §Bibliography):
 
 - **Bistable Images** — Panagopoulou, Melkin & Callison-Burch (CMCL @ ACL 2024,
-  arXiv:2405.19423). Sur 29 images bistables et 116 manipulations (luminosité,
-  teinte, rotation), les modèles montrent une **préférence marquée pour une seule
-  interprétation** et une **variance minimale sous manipulation** (à quelques
-  exceptions près). Autrement dit : la monomanie interprétative est *robuste* —
-  elle ne se débloque pas d'un simple pivot, ce qui rend d'autant plus nécessaires
-  les gestes anti-monomanie.
-- **Rorschach × IA** — *Human Shadows in Machine Minds* (JMIR Mental Health 2026,
-  e88186) : quantifie le **biais de réponse globale**. GPT-4o et Grok 3 rendent
-  respectivement **86,7 % et 90 % de réponses « globales » (W)** là où l'humain
-  descend au détail ; Gemini, à dominante détail (D), fait exception.
+  arXiv:2405.19423). On 29 bistable images and 116 manipulations (brightness,
+  tint, rotation), the models show a **pronounced preference for a single
+  interpretation** and **minimal variance under manipulation** (with a few
+  exceptions). In other words: interpretive monomania is *robust* — it does not
+  unlock from a mere pivot, which makes the anti-monomania moves all the more
+  necessary.
+- **Rorschach × AI** — *Human Shadows in Machine Minds* (JMIR Mental Health 2026,
+  e88186): quantifies the **whole-response bias**. GPT-4o and Grok 3 return
+  **86.7% and 90% of “whole” (W) responses** respectively, where humans descend
+  to detail; Gemini, detail-dominant (D), is the exception.
 - **FacesInThings** — *Seeing Faces in Things*, Hamilton et al. (ECCV 2024, MIT,
-  arXiv:2409.16143 ; ~5 000 images de paréidolie de visages annotées, licence MIT).
-  Le papier modélise un **« pic paréidolique »** (une complexité d'image « juste
-  ce qu'il faut ») et montre que le besoin évolutif de détecter aussi les visages
-  d'**animaux** explique une part de l'écart machine/humain.
+  arXiv:2409.16143; ~5,000 annotated face-pareidolia images, MIT license). The
+  paper models a **“pareidolic peak”** (an image complexity that is “just right”)
+  and shows that the evolutionary need to also detect **animal** faces explains
+  part of the machine/human gap.
 
-> **Traduction.** Trois mécanismes :
-> - `TROUVER` impose *« Pivoter »* (la rotation d'ACL 2024) et *« Tenir deux
->   figures à la fois sur la même zone, sans choisir »* — anti-monomanie explicite.
-> - Le **second regard** ne démolit pas : il propose la meilleure lecture
->   concurrente (CONFIRME / AFFINE / REMPLACE), institutionnalisant la bistabilité.
-> - Le quota de six figures et la relance automatique (`P_AVEUGLE`) forcent à
->   dépasser la première réponse globale.
-
----
-
-## 4. Épistémologie : une paréidolie n'a pas de vérité de terrain
-
-C'est la leçon la plus chèrement payée du projet (l'échec « v2 »). Le chameau
-n'est pas dans le nuage ; il n'y a jamais été et aucune vérification ne l'y
-trouvera. Poser la question « cette figure existe-t-elle réellement ? » détruit
-l'objet qu'on examine.
-
-### 4.1 Critère de partage, pas de vérité — théorie de la détection du signal
-
-La **théorie de la détection du signal** (**Green & Swets**, 1966) sépare deux
-grandeurs orthogonales : la **sensibilité** $d'$ (capacité à distinguer signal et
-bruit) et le **critère** $\beta$ (le seuil de décision, librement placé) :
-
-$$d' = z(\text{taux de détection}) - z(\text{taux de fausse alarme})$$
-
-Devant une paréidolie, **il n'y a pas de signal au sens du terrain** : $d'$ n'est
-pas définissable. Reste le critère. Nephélé remplace donc explicitement le critère
-de **vérité** par un critère de **partage** : une figure réussie n'est pas une
-figure vraie, c'est une figure qu'on peut *faire voir* à autrui. C'est un critère
-inter-subjectif (ratification), non un test d'existence.
-
-### 4.2 Falsifiabilité et effet Barnum : l'épreuve de l'horoscope
-
-Pour les champs non figuratifs, on veut néanmoins se prémunir contre le discours
-vide. Deux outils classiques :
-
-- **Popper** (*Logik der Forschung*, 1934) : un énoncé n'a de contenu que s'il est
-  **falsifiable** — s'il existe une observation concevable qui le démentirait.
-- **Forer** (*The fallacy of personal validation*, 1949) — l'**effet Barnum** : un
-  énoncé assez vague pour s'appliquer à tout le monde (horoscope) est perçu comme
-  vrai précisément parce qu'il n'exclut rien.
-
-> **Traduction — l'épreuve de l'horoscope** (`AFFECT`, `P_GRAMMAIRE`). Avant qu'un
-> rapport *configuration → effet* entre dans la grammaire, une question et une
-> seule : *« Peux-tu imaginer une image où cette configuration est présente et
-> l'effet absent ? »* Si non, l'énoncé est un Barnum, non falsifiable, rejeté.
-> « Une diagonale montante interrompue par une horizontale produit une butée »
-> passe ; « le rouge est passionné » échoue. Chaque entrée porte donc le triplet
-> `configuration / effet / dementi_possible` — **les trois ou aucune**.
-
-### 4.3 Deux interdictions absolues
-
-Inscrites partout dans la doctrine : on ne récuse **jamais** une figure (i) au
-motif qu'elle serait produite par le traitement de l'image, ni (ii) au motif
-qu'elle « n'est pas réellement dans la matière ». La première objection est un
-**solvant universel** (toute silhouette de seuillage est produite par le seuil :
-l'argument invalide 100 % des figures, donc ne dit rien) ; la seconde est la
-faute de catégorie du §4.
+> **In the code.** Three mechanisms:
+> - `TROUVER` mandates *“Rotate”* (the ACL 2024 rotation) and *“Hold two figures
+>   at once over the same zone, without choosing”* — explicit anti-monomania.
+> - The **second look** does not demolish: it proposes the best competing reading
+>   (CONFIRME / AFFINE / REMPLACE), institutionalizing bistability.
+> - The six-figure quota and the automatic re-prompt (`P_AVEUGLE`) force going
+>   past the first, whole response.
 
 ---
 
-## 5. La grammaire configuration → effet : Arnheim, Kandinsky, Klee
+## 4. Epistemology: a pareidolia has no ground truth
 
-Un nom trouvé dans un nuage est une donnée morte (il ne vaut que pour ce nuage).
-Un **rapport** — *masse dense excentrée + quadrant opposé vide → chute* — vaut sur
-toute image qui présente cette configuration. C'est la différence entre un
-**catalogue** (qui s'allonge) et une **grammaire** (qui se resserre).
+This is the project’s most dearly paid lesson (the “v2” failure). The camel is
+not in the cloud; it was never there and no verification will find it there.
+Asking “does this figure really exist?” destroys the object under examination.
 
-La tradition qui écrit cette grammaire :
+### 4.1 A criterion of sharing, not of truth — signal detection theory
 
-- **Kandinsky**, *Du spirituel dans l'art* (1911), *Point et ligne sur plan*
-  (1926) : tentative de lexique des forces plastiques élémentaires.
-- **Paul Klee**, *Pädagogisches Skizzenbuch* (1925, Bauhaus) : la genèse de la
-  forme par le mouvement du point et de la ligne.
-- **Rudolf Arnheim**, *Art and Visual Perception* (1954) — la référence maîtresse :
-  de la Gestalt appliquée, où chaque qualité expressive est **dérivée** d'une
-  configuration et non posée. Le poids, la direction, la tension y sont des faits
-  perceptifs, pas des métaphores.
+**Signal detection theory** (**Green & Swets**, 1966) separates two orthogonal
+quantities: **sensitivity** $d'$ (the ability to distinguish signal from noise)
+and the **criterion** $\beta$ (the decision threshold, freely placed):
 
-Base de données du régime sensible :
+$$d' = z(\text{hit rate}) - z(\text{false-alarm rate})$$
 
-- **GalleryGPT / PaintingForm** (ACM MM 2024) : ~19 k tableaux, ~50 k analyses
-  formelles — référence pour l'analyse formelle non catalographique.
+In front of a pareidolia, **there is no signal in the ground-truth sense**: $d'$
+is not definable. The criterion remains. Nephélé therefore explicitly replaces
+the criterion of **truth** with a criterion of **sharing**: a successful figure
+is not a true figure, it is a figure you can *make someone see*. It is an
+inter-subjective criterion (ratification), not a test of existence.
 
-> **Traduction.** L'affect n'est **jamais** une affirmation ; il est toujours la
-> **seconde moitié** d'une affirmation dont la première est une configuration, le
-> mécanisme entre les deux (Arnheim). On apprend l'association vers **l'effet sur
-> un regardeur**, jamais vers l'intention de l'œuvre (inatteignable, et catalogue
-> déguisé). Le régime sensible mesure des **constatations ancrées**, pas des
-> impressions ; les « mots creux » (*vibrant, atmosphère, poétique*) sont les
-> dragons du non-figuratif — plus dangereux car ils passent pour de la culture.
+### 4.2 Falsifiability and the Barnum effect: the horoscope test
+
+For non-figurative fields, we still want to guard against empty discourse. Two
+classic tools:
+
+- **Popper** (*Logik der Forschung*, 1934): a statement has content only if it is
+  **falsifiable** — if there exists a conceivable observation that would refute
+  it.
+- **Forer** (*The fallacy of personal validation*, 1949) — the **Barnum effect**:
+  a statement vague enough to apply to everyone (a horoscope) is perceived as
+  true precisely because it excludes nothing.
+
+> **In the code — the horoscope test** (`AFFECT`, `P_GRAMMAIRE`). Before a
+> *configuration → effect* relation enters the grammar, one question and one
+> only: *“Can you imagine an image where this configuration is present and the
+> effect absent?”* If not, the statement is a Barnum, non-falsifiable, rejected.
+> “A rising diagonal interrupted by a horizontal produces a stop” passes; “red is
+> passionate” fails. Each entry therefore carries the triple
+> `configuration / effet / dementi_possible` — **all three or none**.
+
+### 4.3 Two absolute prohibitions
+
+Written throughout the doctrine: you **never** reject a figure (i) on the grounds
+that it was produced by image processing, nor (ii) on the grounds that it “is not
+really in the matter.” The first objection is a **universal solvent** (every
+thresholding silhouette is produced by the threshold: the argument invalidates
+100% of figures, hence says nothing); the second is the category error of §4.
 
 ---
 
-## 6. Le traitement des planches : méthodes et formules
+## 5. The configuration → effect grammar: Arnheim, Kandinsky, Klee
 
-Les planches transforment l'image en champs qui coupent la reconnaissance de
-scène tout en préservant l'information de contour et de rapport.
+A name found in a cloud is dead data (it holds only for that cloud). A
+**relation** — *off-center dense mass + empty opposite quadrant → fall* — holds
+for any image presenting that configuration. This is the difference between a
+**catalog** (which lengthens) and a **grammar** (which tightens).
 
-**Seuillage (planches binaires) — Otsu (1979).** Le seuil $t^\*$ maximise la
-variance inter-classes de l'histogramme des niveaux de gris :
+The tradition that writes this grammar:
+
+- **Kandinsky**, *Concerning the Spiritual in Art* (1911), *Point and Line to
+  Plane* (1926): an attempt at a lexicon of elementary plastic forces.
+- **Paul Klee**, *Pedagogical Sketchbook* (1925, Bauhaus): the genesis of form
+  through the movement of point and line.
+- **Rudolf Arnheim**, *Art and Visual Perception* (1954) — the master reference:
+  applied Gestalt, where each expressive quality is **derived** from a
+  configuration and not asserted. Weight, direction, tension are perceptual
+  facts, not metaphors.
+
+Database for the sensible regime:
+
+- **GalleryGPT / PaintingForm** (ACM MM 2024): ~19k paintings, ~50k formal
+  analyses — a reference for non-catalog formal analysis.
+
+> **In the code.** Affect is **never** an assertion; it is always the **second
+> half** of an assertion whose first half is a configuration, with the mechanism
+> in between (Arnheim). We learn the association toward the **effect on a
+> viewer**, never toward the intent of the work (unreachable, and the catalog in
+> disguise). The sensible regime measures **anchored observations**, not
+> impressions; the “empty words” (*vibrant, atmosphere, poetic*) are the dragons
+> of the non-figurative — more dangerous because they pass for culture.
+
+---
+
+## 6. Processing the boards: methods and formulas
+
+The boards turn the image into fields that cut scene recognition while preserving
+contour and relational information.
+
+**Thresholding (binary boards) — Otsu (1979).** The threshold $t^\*$ maximizes
+the between-class variance of the gray-level histogram:
 
 $$t^\* = \arg\max_t \; \sigma_b^2(t), \qquad \sigma_b^2(t) = \omega_0(t)\,\omega_1(t)\,\big(\mu_0(t)-\mu_1(t)\big)^2$$
 
-où $\omega_i$ sont les masses des deux classes et $\mu_i$ leurs moyennes.
+where $\omega_i$ are the masses of the two classes and $\mu_i$ their means.
 
-**Bords — Canny (1986).** Extraction du contour par gradient, suppression des
-non-maxima et hystérésis : la silhouette réduite aux lignes d'information
+**Edges — Canny (1986).** Contour extraction by gradient, non-maximum
+suppression and hysteresis: the silhouette reduced to its lines of information
 (Attneave, §2.3).
 
-**Familles de teintes — k-moyennes (Lloyd 1957/1982 ; MacQueen 1967).**
-Quantification des couleurs en $k$ aplats minimisant l'inertie intra-classe :
+**Color families — k-means (Lloyd 1957/1982; MacQueen 1967).** Quantizing colors
+into $k$ flats minimizing within-cluster inertia:
 
 $$\min_{\{\mu_j\}} \; \sum_{i} \min_{j\in\{1..k\}} \lVert x_i - \mu_j \rVert^2$$
 
-**Chaud / froid — théorie des couleurs opposées (Hering ; Hurvich & Jameson
-1957).** La projection sur l'axe chaud–froid (orange↔bleu) isole ce que la
-température fait à l'espace : le chaud avance, le froid recule — un opérateur de
-profondeur, pas une humeur. La grille gravée passe au vert pour ne pas être lue
-comme une zone chaude.
+**Warm / cool — opponent-color theory (Hering; Hurvich & Jameson 1957).** The
+projection onto the warm–cool axis (orange↔blue) isolates what temperature does
+to space: warm advances, cool recedes — an operator of depth, not a mood. The
+engraved grid turns green so as not to read as a warm zone.
 
-> **Traduction.** `planches` (recul, chaud/froid, valeur seule, la touche, chroma,
-> familles) dans `index.html`. La planche **chaud/froid** est la plus révélatrice
-> pour la peinture : l'impressionnisme *est* un système de rapports colorés.
+> **In the code.** `planches` (recul, chaud/froid, valeur seule, la touche,
+> chroma, familles) in `index.html`. The **warm/cool** board is the most
+> revealing for painting: impressionism *is* a system of color relations.
 
 ---
 
-## 7. Le banc d'abstraction : mesurer sans juger
+## 7. The abstraction bench: measuring without judging
 
-Le banc (`banc.html`) mesure ce que **devient le discours** du modèle à mesure que
-l'image s'abstrait (dégradation par paliers, de net à ÷32). Il ne convoque aucun
-modèle pour évaluer : il **compte**, contre des lexiques éditables. Quatre axes :
+The bench (`banc.html`) measures what the model’s **discourse becomes** as the
+image abstracts (step degradation, from sharp to ÷32). It summons no model to
+evaluate: it **counts**, against editable lexicons. Four axes:
 
-- **figuration** — densité de noms concrets (nommer là où il n'y a plus rien) ;
-- **jargon** — densité de mots creux (parler sans désigner) ;
-- **ancrage** — références à la grille et termes de position, par phrase ;
-- **esquive** — densité de *semble, pourrait, il est difficile de*.
+- **figuration** — density of concrete nouns (naming where there is nothing left);
+- **jargon** — density of empty words (speaking without designating);
+- **anchoring** — references to the grid and position terms, per sentence;
+- **evasion** — density of *seems, could, it is difficult to*.
 
-**Le jargon comme bruit — Shannon (1948).** Un discours qui n'augmente pas
-l'information sur l'image est du bruit. L'entropie
+**Jargon as noise — Shannon (1948).** Discourse that adds no information about
+the image is noise. Entropy
 
 $$H(X) = -\sum_i p(x_i)\,\log_2 p(x_i)$$
 
-donne le cadre : le croisement des courbes du banc est le **seuil d'abstraction**
-du modèle — le point où le discours cesse de désigner et se met à réciter.
+gives the frame: the crossing of the bench’s curves is the model’s **abstraction
+threshold** — the point where discourse stops designating and starts reciting.
 
-**Test apparié — mesure de récitation.** La même œuvre entière, puis un fragment
-non identifiable. Si l'œuvre reconnue déclenche des termes de catalogue (noms de
-peintres, d'écoles) et pas son propre fragment, le discours venait du catalogue,
-pas de l'œil. C'est une mesure directe de contamination par la mémoire.
+**Paired test — a measure of recitation.** The same whole work, then an
+unidentifiable fragment. If the recognized work triggers catalog terms (names of
+painters, schools) and its own fragment does not, the discourse came from the
+catalog, not the eye. It is a direct measure of contamination by memory.
 
-**Similarité textuelle (harnais de test).** Deux mesures exactes, sans embeddings :
+**Textual similarity (test harness).** Two exact measures, without embeddings:
 
-- **Cosinus** sac-de-mots entre deux lectures :
+- **Cosine** bag-of-words between two readings:
   $$\cos(\theta) = \frac{\mathbf{a}\cdot\mathbf{b}}{\lVert\mathbf{a}\rVert\,\lVert\mathbf{b}\rVert} = \frac{\sum_i a_i b_i}{\sqrt{\sum_i a_i^2}\,\sqrt{\sum_i b_i^2}}$$
-- **Distance de Levenshtein** (1966), nombre minimal d'éditions :
+- **Levenshtein distance** (1966), minimal number of edits:
   $$d(i,j) = \min\begin{cases} d(i{-}1,j)+1 \\ d(i,j{-}1)+1 \\ d(i{-}1,j{-}1) + \mathbb{1}[a_i \neq b_j] \end{cases}$$
 
-Elles bornent la **dérive** de la sortie normalisée face à des réponses déformées
-(`tests/similarity.js`) et vérifient la stabilité des mesures du banc.
+They bound the **drift** of the normalized output against deformed responses
+(`tests/similarity.js`) and check the stability of the bench’s measures.
 
 ---
 
-## 8. Apprentissage : mémoire lente, mémoire rapide
+## 8. Learning: slow memory, fast memory
 
-L'architecture d'apprentissage suit la théorie des **systèmes d'apprentissage
-complémentaires** (**McClelland, McNaughton & O'Reilly**, 1995) : une **mémoire
-lente** (le cortex — ici les poids du modèle, consolidés par fine-tuning) et une
-**mémoire rapide** (l'hippocampe — ici la grammaire injectée, apprise en séance).
-Le fine-tuning **consolide** la grammaire, il ne la remplace pas.
+The learning architecture follows the theory of **complementary learning
+systems** (**McClelland, McNaughton & O’Reilly**, 1995): a **slow memory** (the
+cortex — here the model weights, consolidated by fine-tuning) and a **fast
+memory** (the hippocampus — here the injected grammar, learned during a session).
+Fine-tuning **consolidates** the grammar, it does not replace it.
 
-### 8.1 Phase 0 — le corpus
+### 8.1 Phase 0 — the corpus
 
-Chaque séance s'enregistre au format d'entraînement (planche vue + doctrine
-injectée + verdicts). **Règle absolue : ne jamais entraîner sur du non-ratifié**
-(sinon amplificateur de défauts). Le banc arbitre chaque cycle sur des images
-**jamais vues** à l'entraînement — d'où le découpage held-out *par image*
-(`prepare_data.py`), sans fuite.
+Each session records itself in training format (board seen + injected doctrine +
+verdicts). **Absolute rule: never train on unratified data** (else an amplifier
+of defects). The bench arbitrates each cycle on images **never seen** during
+training — hence the held-out split *by image* (`prepare_data.py`), leak-free.
 
 ### 8.2 Phase 1 — SFT (Supervised Fine-Tuning)
 
-Apprentissage supervisé du format et du réflexe d'ancrage. Minimisation de
-l'entropie croisée token à token sur la cible ratifiée :
+Supervised learning of the format and the anchoring reflex. Token-wise
+cross-entropy minimization over the ratified target:
 
 $$\mathcal{L}_{\text{SFT}} = -\sum_{t} \log \pi_\theta\big(y_t \mid y_{<t},\, x,\, \text{image}\big)$$
 
-Support : VLM ouvert **Qwen2.5-VL-7B**, recette TRL/HF.
+Backbone: the open VLM **Qwen2.5-VL-7B**, TRL/HF recipe.
 
 ### 8.3 Phase 2 — DPO (Direct Preference Optimization)
 
-L'apprentissage de préférence part d'une modélisation classique du choix par
-paires, le modèle de **Bradley–Terry** (1952) :
+Preference learning starts from a classic model of pairwise choice, the
+**Bradley–Terry** (1952) model:
 
 $$P(y_w \succ y_l \mid x) = \frac{e^{\,r(x,y_w)}}{e^{\,r(x,y_w)} + e^{\,r(x,y_l)}} = \sigma\big(r(x,y_w) - r(x,y_l)\big)$$
 
-Le **RLHF** (**Christiano et al.** 2017 ; **Ouyang et al.** 2022, InstructGPT)
-apprenait d'abord une récompense $r$ puis optimisait par RL. **DPO** (**Rafailov
-et al.**, NeurIPS 2023) montre qu'on peut se passer du RL : la politique optimale
-sous contrainte KL exprime *implicitement* la récompense, et l'on optimise
-directement
+**RLHF** (**Christiano et al.** 2017; **Ouyang et al.** 2022, InstructGPT) first
+learned a reward $r$ then optimized by RL. **DPO** (**Rafailov et al.**, NeurIPS
+2023) shows RL can be dropped: the optimal policy under a KL constraint expresses
+the reward *implicitly*, and one directly optimizes
 
 $$\mathcal{L}_{\text{DPO}} = -\,\mathbb{E}_{(x,\,y_w,\,y_l)}\Big[\log \sigma\Big(\beta \log \frac{\pi_\theta(y_w\mid x)}{\pi_{\text{ref}}(y_w\mid x)} - \beta \log \frac{\pi_\theta(y_l\mid x)}{\pi_{\text{ref}}(y_l\mid x)}\Big)\Big]$$
 
-où $y_w$ (*chosen*) est la lecture ratifiée, $y_l$ (*rejected*) la rejetée, et
-$\beta$ règle l'écart au modèle de référence. **Le clic de Marc *est* la fonction
-de récompense.**
+where $y_w$ (*chosen*) is the ratified reading, $y_l$ (*rejected*) the rejected
+one, and $\beta$ tunes the deviation from the reference model. **Marc’s click *is*
+the reward function.**
 
-### 8.4 LoRA : adaptation à bas rang
+### 8.4 LoRA: low-rank adaptation
 
-**Hu et al.** (*LoRA*, ICLR 2022) : au lieu de mettre à jour $W_0$, on apprend une
-correction de rang faible, ce qui réduit d'ordres de grandeur les paramètres
-entraînés :
+**Hu et al.** (*LoRA*, ICLR 2022): instead of updating $W_0$, one learns a
+low-rank correction, cutting the trained parameters by orders of magnitude:
 
 $$W = W_0 + \Delta W, \qquad \Delta W = \frac{\alpha}{r}\,B A, \quad B\in\mathbb{R}^{d\times r},\; A\in\mathbb{R}^{r\times k},\; r \ll \min(d,k)$$
 
-Nephélé cible les modules d'attention avec $r=16,\ \alpha=32$. **QLoRA**
-(**Dettmers et al.**, 2023) ajoute la quantification 4 bits — mais on ne l'utilise
-**pas** sur Apple Silicon (bitsandbytes incompatible MPS) : avec 64 Go de mémoire
-unifiée, le 7B se charge en 16 bits natif.
+Nephélé targets the attention modules with $r=16,\ \alpha=32$. **QLoRA**
+(**Dettmers et al.**, 2023) adds 4-bit quantization — but we do **not** use it on
+Apple Silicon (bitsandbytes is MPS-incompatible): with 64 GB of unified memory,
+the 7B loads in native 16-bit.
 
-### 8.5 Piste parallèle : silhouette → concept (ZS-SBIR)
+### 8.5 Parallel track: silhouette → concept (ZS-SBIR)
 
-Un amorceur **non verbal**, incontaminable par le corpus verbal : un encodeur
-contrastif type **CLIP** (**Radford et al.**, ICML 2021) / **SigLIP** (**Zhai et
-al.**, ICCV 2023) fine-tuné pour la tâche *silhouette → concept* (champ du
-**zero-shot sketch-based image retrieval**). Les planches binarisées sont déjà des
-quasi-esquisses. L'objectif contrastif (InfoNCE) aligne image et concept :
+A **non-verbal** primer, uncontaminable by the verbal corpus: a contrastive
+encoder of the **CLIP** (**Radford et al.**, ICML 2021) / **SigLIP** (**Zhai et
+al.**, ICCV 2023) family, fine-tuned for the *silhouette → concept* task (the
+field of **zero-shot sketch-based image retrieval**). The binarized boards are
+already near-sketches. The contrastive objective (InfoNCE) aligns image and
+concept:
 
 $$\mathcal{L}_{\text{NCE}} = -\log \frac{\exp(\langle f(x), g(c^{+})\rangle / \tau)}{\sum_{c}\exp(\langle f(x), g(c)\rangle / \tau)}$$
 
-Ce chemin ne produit pas de texte : il ne peut donc pas réciter le catalogue.
+This path produces no text: it therefore cannot recite the catalog.
 
 ---
 
-## 9. Synthèse : chaque décision, sa raison
+## 9. Synthesis: every decision, its reason
 
-| Mécanisme du code | Fondement |
+| Mechanism in the code | Foundation |
 |---|---|
-| Ne jamais montrer la photo, seulement des planches | Léonard, Cozens ; couper la reconnaissance de scène |
-| *Descendre d'échelle*, *chercher la pointe* | Attneave 1954 (information aux extrema de courbure) |
-| *Pivoter*, *tenir deux figures* | Bistable Images ACL 2024 ; rivalité perceptive |
-| *Cherche la tête* | FFA (Kanwisher 1997) ; prior visage bayésien |
-| Second regard (confirme/affine/remplace) | Gestalt (clôture) ; anti-monomanie |
-| « Est-ce que ça tient le contour ? » | Prägnanz / principe du minimum (Hochberg 1953) |
-| Critère de partage, pas de vérité | Détection du signal (Green & Swets 1966) |
-| Épreuve de l'horoscope | Popper 1934 ; effet Barnum-Forer 1949 |
-| Grammaire configuration → effet | Arnheim 1954 ; Kandinsky ; Klee |
-| Chaud/froid comme opérateur d'espace | Couleurs opposées (Hering ; Hurvich & Jameson 1957) |
-| Planches binaires / familles | Otsu 1979 ; Canny 1986 ; k-moyennes |
-| Le banc compte le jargon | Shannon 1948 (jargon = bruit) |
-| Similarité cosinus / Levenshtein | Salton ; Levenshtein 1966 |
-| Grammaire injectée + poids fine-tunés | Systèmes complémentaires (McClelland 1995) |
-| DPO sur les verdicts | Bradley-Terry 1952 ; Rafailov 2023 |
-| LoRA r=16 sur l'attention | Hu et al. 2022 |
-| Amorceur non verbal | CLIP 2021 ; SigLIP 2023 ; ZS-SBIR |
+| Never show the photo, only boards | Leonardo, Cozens; cut scene recognition |
+| *Drop down in scale*, *look for the tip* | Attneave 1954 (information at curvature extrema) |
+| *Rotate*, *hold two figures* | Bistable Images ACL 2024; perceptual rivalry |
+| *Look for the head* | FFA (Kanwisher 1997); Bayesian face prior |
+| Second look (confirm/refine/replace) | Gestalt (closure); anti-monomania |
+| “Does it hold the contour?” | Prägnanz / minimum principle (Hochberg 1953) |
+| Criterion of sharing, not of truth | Signal detection (Green & Swets 1966) |
+| The horoscope test | Popper 1934; Barnum-Forer effect 1949 |
+| Configuration → effect grammar | Arnheim 1954; Kandinsky; Klee |
+| Warm/cool as an operator of space | Opponent color (Hering; Hurvich & Jameson 1957) |
+| Binary boards / families | Otsu 1979; Canny 1986; k-means |
+| The bench counts jargon | Shannon 1948 (jargon = noise) |
+| Cosine / Levenshtein similarity | Salton; Levenshtein 1966 |
+| Injected grammar + fine-tuned weights | Complementary learning systems (McClelland 1995) |
+| DPO on the verdicts | Bradley-Terry 1952; Rafailov 2023 |
+| LoRA r=16 on attention | Hu et al. 2022 |
+| Non-verbal primer | CLIP 2021; SigLIP 2023; ZS-SBIR |
 
 ---
 
-## Bibliographie
+## Bibliography
 
-**Perception, Gestalt, information visuelle**
+**Perception, Gestalt, visual information**
 - Wertheimer, M. (1923). *Untersuchungen zur Lehre von der Gestalt II.*
 - Koffka, K. (1935). *Principles of Gestalt Psychology.*
 - Hochberg, J. & McAlister, E. (1953). *A quantitative approach to figural goodness.* J. Exp. Psychol.
@@ -411,39 +406,39 @@ Ce chemin ne produit pas de texte : il ne peut donc pas réciter le catalogue.
 - Friston, K. (2010). *The free-energy principle.* Nature Rev. Neuroscience.
 - Kanwisher, McDermott & Chun (1997). *The fusiform face area.* J. Neuroscience.
 - Liu, J. et al. (2014). *Seeing Jesus in toast* (face pareidolia). Cortex.
-- Conrad, K. (1958). *Die beginnende Schizophrenie* (apophénie).
+- Conrad, K. (1958). *Die beginnende Schizophrenie* (apophenia).
 
-**Multistabilité, paréidolie, Rorschach**
+**Multistability, pareidolia, Rorschach**
 - Rorschach, H. (1921). *Psychodiagnostik.*
-- Jastrow, J. (1899) ; Wittgenstein, L. (1953). *Recherches philosophiques* (voir-comme).
+- Jastrow, J. (1899); Wittgenstein, L. (1953). *Philosophical Investigations* (seeing-as).
 - Panagopoulou, A., Melkin, C. & Callison-Burch, C. (2024). *Evaluating Vision-Language Models on Bistable Images.* CMCL @ ACL 2024. arXiv:2405.19423 — https://aclanthology.org/2024.cmcl-1.2/
 - *Human Shadows in Machine Minds: Quantitative Study Interpreting AI Responses to the Rorschach Test.* JMIR Mental Health, 2026;e88186 — https://mental.jmir.org/2026/1/e88186 (PMC13168847)
-- Hamilton, M. et al. (2024). *Seeing Faces in Things: A Model and Dataset for Pareidolia.* ECCV 2024, MIT. arXiv:2409.16143 — https://arxiv.org/abs/2409.16143 · code : https://github.com/mhamilton723/FacesInThings
-- *Diamonds in the Sky: Pareidolic Animals in Clouds.* arXiv:2606.01361 (directement sur la matière du projet — animaux dans les nuages).
+- Hamilton, M. et al. (2024). *Seeing Faces in Things: A Model and Dataset for Pareidolia.* ECCV 2024, MIT. arXiv:2409.16143 — https://arxiv.org/abs/2409.16143 · code: https://github.com/mhamilton723/FacesInThings
+- *Diamonds in the Sky: Pareidolic Animals in Clouds.* arXiv:2606.01361 (directly on the project’s matter — animals in clouds).
 
-**Décision, épistémologie**
+**Decision, epistemology**
 - Green, D. & Swets, J. (1966). *Signal Detection Theory and Psychophysics.*
 - Popper, K. (1934). *Logik der Forschung.*
-- Forer, B. (1949). *The fallacy of personal validation* (effet Barnum).
+- Forer, B. (1949). *The fallacy of personal validation* (Barnum effect).
 
-**Esthétique formelle**
-- Léonard de Vinci. *Trattato della pittura* (v. 1500).
+**Formal aesthetics**
+- Leonardo da Vinci. *Trattato della pittura* (c. 1500).
 - Cozens, A. (1785). *A New Method of Assisting the Invention…*
-- Kandinsky, W. (1911) *Du spirituel dans l'art* ; (1926) *Point et ligne sur plan.*
-- Klee, P. (1925). *Pädagogisches Skizzenbuch.*
+- Kandinsky, W. (1911) *Concerning the Spiritual in Art*; (1926) *Point and Line to Plane.*
+- Klee, P. (1925). *Pedagogical Sketchbook.*
 - Arnheim, R. (1954). *Art and Visual Perception.*
-- Bin, Y. et al. (2024). *GalleryGPT: Analyzing Paintings with Large Multimodal Models* (dataset PaintingForm, ~19 k tableaux / ~50 k analyses). ACM MM 2024. doi:10.1145/3664647.3681656 ; arXiv:2408.00491 — https://github.com/steven640pixel/GalleryGPT
+- Bin, Y. et al. (2024). *GalleryGPT: Analyzing Paintings with Large Multimodal Models* (PaintingForm dataset, ~19k paintings / ~50k analyses). ACM MM 2024. doi:10.1145/3664647.3681656; arXiv:2408.00491 — https://github.com/steven640pixel/GalleryGPT
 
-**Traitement d'image**
+**Image processing**
 - Otsu, N. (1979). *A threshold selection method from gray-level histograms.* IEEE TSMC.
 - Canny, J. (1986). *A computational approach to edge detection.* IEEE PAMI.
-- Lloyd, S. (1982). *Least squares quantization in PCM* ; MacQueen (1967).
+- Lloyd, S. (1982). *Least squares quantization in PCM*; MacQueen (1967).
 - Hurvich, L. & Jameson, D. (1957). *An opponent-process theory of color vision.* Psychol. Review.
 - Shannon, C. (1948). *A mathematical theory of communication.* Bell System Tech. J.
 - Levenshtein, V. (1966). *Binary codes capable of correcting deletions, insertions, and reversals.*
 
-**Apprentissage automatique**
-- McClelland, McNaughton & O'Reilly (1995). *Complementary learning systems.* Psychol. Review.
+**Machine learning**
+- McClelland, McNaughton & O’Reilly (1995). *Complementary learning systems.* Psychol. Review.
 - Bradley, R. & Terry, M. (1952). *Rank analysis of incomplete block designs.* Biometrika.
 - Christiano, P. et al. (2017). *Deep RL from human preferences.* NeurIPS.
 - Ouyang, L. et al. (2022). *Training language models to follow instructions* (InstructGPT).
@@ -456,7 +451,7 @@ Ce chemin ne produit pas de texte : il ne peut donc pas réciter le catalogue.
 
 ---
 
-*Les dates et attributions renvoient aux œuvres fondatrices ; les quatre
-références notées « réf. projet » (FacesInThings, Bistable Images, Rorschach × IA,
-GalleryGPT/PaintingForm) sont les points d'appui empiriques directs de Nephélé,
-détaillés dans `CLAUDE.md`.*
+*Dates and attributions point to the founding works; the four references marked
+“project ref.” (FacesInThings, Bistable Images, Rorschach × AI,
+GalleryGPT/PaintingForm) are the direct empirical anchors of Nephélé, detailed in
+`CLAUDE.md`.*
