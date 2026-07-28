@@ -27,6 +27,52 @@ Nephélé n'improvise pas : chaque décision de doctrine ou de code répond à u
 - **Les planches** appliquent **Otsu** (seuillage), **Canny** (bords), **k-moyennes** (familles de teintes), les **couleurs opposées** (chaud/froid = opérateur d'espace).
 - **L'apprentissage** suit les **systèmes complémentaires** (McClelland 1995) — poids fine-tunés (mémoire lente) + grammaire injectée (mémoire rapide) — via **SFT**, puis **DPO** (**Rafailov** 2023, sur **Bradley-Terry** 1952) et **LoRA** (**Hu** 2022), avec un amorceur non verbal **CLIP/SigLIP**.
 
+## Theoretical Foundation & Validation Metrics
+
+*(Research positioning, in English.)*
+
+Nephélé is a **perceptually-aligned vision framework** rather than a thin API layer. It treats pareidolia not as an image-synthesis problem but as a problem of **aligning a reading model to a single annotator's perceptual judgment**, while distilling reusable *configuration → effect* relations under an explicit falsifiability constraint. This section states the learning objective and the validation metrics, and situates the framework with respect to generative-reveal approaches.
+
+### Preference alignment (DPO)
+
+Readings are aligned to ratified human verdicts by **Direct Preference Optimization** (Rafailov et al., 2023), which reparameterizes the **Bradley–Terry** (1952) preference model so that the reward is implicit in the policy. For an input $x$ (system prompt + board image), a chosen reading $y_w$ and a rejected reading $y_l$, the objective is
+
+$$
+\mathcal{L}_{\mathrm{DPO}}(\pi_\theta;\pi_{\mathrm{ref}})
+= -\,\mathbb{E}_{(x,y_w,y_l)\sim\mathcal{D}}
+\left[\log\sigma\!\left(
+\beta\log\frac{\pi_\theta(y_w\mid x)}{\pi_{\mathrm{ref}}(y_w\mid x)}
+-\beta\log\frac{\pi_\theta(y_l\mid x)}{\pi_{\mathrm{ref}}(y_l\mid x)}
+\right)\right],
+$$
+
+where $\pi_\theta$ is the trainable policy, $\pi_{\mathrm{ref}}$ the frozen reference (post-SFT) model, $\sigma$ the logistic function, and $\beta$ the KL-deviation temperature. **The human verdict is the reward signal; no separate reward model is trained.**
+
+### Spatial and photometric validation (generative "show-me" track)
+
+A distinct, non-verbal track may *reveal* a figure by synthesizing a shape confined to the source region — the line represented by masked diffusion-editing scores such as the **Masked Delta Denoising Score (MDDS)**, after the Delta Denoising Score (Hertz et al., ICCV 2023), and by *Diamonds in the Sky* (Horovicz et al., arXiv:2606.01361). For that track we adopt two standard criteria.
+
+**Spatial agreement** between a generated binary mask $G$ and the source region $C$ is the Intersection-over-Union, with acceptance $\mathrm{IoU} > 0.5$:
+
+$$
+\mathrm{IoU}(G, C) = \frac{|G \cap C|}{|G \cup C|}.
+$$
+
+**Photometric preservation** of the surrounding structure is checked with the (global) Structural Similarity Index, with acceptance $\mathrm{SSIM} > 0.7$:
+
+$$
+\mathrm{SSIM}(x, y) = \frac{(2\mu_x\mu_y + c_1)(2\sigma_{xy} + c_2)}{(\mu_x^2 + \mu_y^2 + c_1)(\sigma_x^2 + \sigma_y^2 + c_2)},
+\qquad c_1 = (k_1 L)^2,\; c_2 = (k_2 L)^2,
+$$
+
+with $k_1 = 0.01$, $k_2 = 0.03$ and $L$ the pixel dynamic range. SSIM guarantees a reveal *preserves* the original structure of the field rather than overwriting it. Both metrics are implemented in `tests/similarity.js` and unit-tested.
+
+### Positioning (honest scope)
+
+Generative-reveal methods (DDS/MDDS, *Diamonds in the Sky*) **synthesize** the percept and validate the edit spatially (IoU) and photometrically (SSIM). Nephélé takes the **orthogonal, non-generative route**: it never alters the field; it reads the contour in language, teaches the eye *where to look*, aligns the reader to human judgment (DPO), and accumulates falsifiable configuration→effect relations. Its current outputs are linguistic, not pixel masks.
+
+We therefore make **no claim of outperforming MDDS on its own image-editing metrics**: the two paradigms operate on different outputs, and no head-to-head evaluation has been conducted. The IoU/SSIM criteria above are provided (i) to validate a *future* generative "show-me" track of Nephélé, and (ii) to render any eventual comparison well-defined. The framework's contribution is **perceptual alignment to a human annotator under a falsifiability constraint**, not image synthesis.
+
 ## La question, et les deux interdictions
 
 Jamais « est-ce que c'est là », toujours **est-ce que ça tient le contour ?**

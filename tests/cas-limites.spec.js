@@ -2,7 +2,7 @@
 const { test, expect } = require('@playwright/test');
 const { mockAnthropic, passResponder, hostileResponder } = require('./mock-anthropic');
 const { pngBuffer } = require('./make-image');
-const { levRatio, cosine } = require('./similarity');
+const { levRatio, cosine, iou, mse, ssimGlobal } = require('./similarity');
 
 /**
  * Cas limites — la doctrine et le pipeline aux endroits qui comptent :
@@ -252,4 +252,48 @@ test('flux SSE tronqué : planche perdue proprement, aucun plantage ni blocage',
   await expect(page.locator('.banner')).toContainText(/lecture|planche/i, { timeout: 30000 });
   await expect(page.locator('#run')).toBeEnabled();
   await expect(page.locator('#halt')).toBeHidden();
+});
+
+/* ── Métriques de validation de la piste générative « faire voir » ──
+   IoU (recouvrement spatial) et SSIM (préservation photométrique). Nephélé ne
+   produit pas encore de masque/image à valider ; ces tests exercent les
+   fonctions et leurs seuils sur des fixtures synthétiques, et ÉCHOUENT si
+   l'implémentation ou le seuil régresse. Réf. Diamonds in the Sky / MDDS. */
+
+test('IoU : une forme générée recouvrant la région source dépasse 0.5', () => {
+  const source = [
+    [0, 1, 1, 0],
+    [1, 1, 1, 1],
+    [1, 1, 1, 1],
+    [0, 1, 1, 0],
+  ];
+  const genereBon = [
+    [0, 1, 1, 0],
+    [1, 1, 1, 0],
+    [1, 1, 1, 1],
+    [0, 1, 1, 1],
+  ];
+  const genereMauvais = [
+    [1, 0, 0, 1],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [1, 0, 0, 1],
+  ];
+  expect(iou(source, source)).toBe(1);                 // identité
+  expect(iou(genereBon, source)).toBeGreaterThan(0.5); // acceptation
+  expect(iou(genereMauvais, source)).toBeLessThan(0.5); // rejet
+});
+
+test('SSIM/MSE : préservation photométrique au-dessus de 0.7', () => {
+  // Dégradé 4×4 en niveaux de gris.
+  const base = [[0, 60, 120, 180], [30, 90, 150, 210], [60, 120, 180, 240], [90, 150, 210, 255]];
+  const preserve = base.map((r) => r.map((v) => Math.min(255, v + 5))); // léger décalage
+  const detruit = base.map((r) => r.map((v) => 255 - v));               // inversion (structure cassée)
+
+  expect(ssimGlobal(base, base)).toBeCloseTo(1, 5); // identité
+  expect(ssimGlobal(preserve, base)).toBeGreaterThan(0.7); // acceptation
+  expect(ssimGlobal(detruit, base)).toBeLessThan(0.7);     // rejet
+
+  expect(mse(base, base)).toBe(0);
+  expect(mse(preserve, base)).toBeGreaterThan(0);
 });
