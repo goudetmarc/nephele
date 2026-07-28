@@ -70,13 +70,21 @@ async function mockAnthropic(page, { responder, onCall, models, stream = true } 
     calls.push(info);
     if (onCall) onCall(info);
 
-    const text = String(responder ? responder(info) : '{}');
+    // Le responder peut rendre une chaîne (texte du modèle) OU un objet pour
+    // les cas pathologiques : {sse:"…"} injecte un corps SSE brut (flux tronqué,
+    // événement d'erreur…), {text, chunks} contrôle le découpage.
+    const out = responder ? responder(info) : '{}';
+    const asObj = out && typeof out === 'object';
+    const text = String(asObj && 'text' in out ? out.text : out);
     if (stream) {
+      const body = asObj && typeof out.sse === 'string'
+        ? out.sse
+        : sseFromText(text, asObj && out.chunks ? { chunks: out.chunks } : {});
       await route.fulfill({
         status: 200,
         contentType: 'text/event-stream',
         headers: { 'cache-control': 'no-cache' },
-        body: sseFromText(text),
+        body,
       });
     } else {
       // Forme de banc.html : réponse JSON complète, non streamée.
@@ -147,4 +155,77 @@ function passResponder({ figures = 5 } = {}) {
   };
 }
 
-module.exports = { mockAnthropic, sseFromText, passResponder };
+/* ────────────────────────────────────────────────────────────────────────
+   CAS PATHOLOGIQUES — pour que les tests PLANTENT si le parsing régresse.
+
+   La doctrine du projet : le doute classe, il ne tait pas ; les dialectes
+   déformés doivent être absorbés, jamais faire planter le pipeline. Ces
+   fabriques produisent exactement ce que le vrai modèle peut renvoyer de pire.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/** JSON de figures « dialecte cassé » mais structurellement clos : guillemets
+ *  courbes, virgules traînantes (objets ET tableau), prose autour, sans fence.
+ *  C'est exactement ce que le normaliseur DOIT absorber ; le test régresse s'il
+ *  cesse de le faire. (La troncature réelle, elle, est le cas `tronque`.) */
+function figuresCasse(n = 5) {
+  const q = (s) => '“' + s + '”';                 // guillemets courbes “ ”
+  const items = Array.from({ length: n }, (_, i) =>
+    `{${q('nom')}:${q('figure ' + (i + 1))},${q('zone')}:${q(['A1', 'B2', 'C3', 'D4', 'B4'][i % 5])},}`
+  ).join(',');
+  return 'Voici ce que je vois :\n{' + q('figures') + ':[' + items + ',]}\nVoilà, à toi de juger.';
+}
+
+/** Figures « hallucinées » : mauvais types, clés parasites, imbrication absurde. */
+function figuresHallucinees(n = 5) {
+  return JSON.stringify({
+    figures: Array.from({ length: n }, (_, i) => ({
+      nom: i % 2 ? 12345 + i : ['un', 'chien'],            // nombre / tableau au lieu d'une chaîne
+      zone: { col: 'B', ligne: 2 },                         // objet au lieu d'une chaîne
+      tenue: 'beaucoup',                                    // texte au lieu d'un nombre
+      ecart: null,
+      parties: 'le dos et la tête',                          // chaîne au lieu d'un tableau
+      confidence: 0.99, hallucination: true, extra: { junk: [1, 2, 3] },
+    })),
+  });
+}
+
+/** Ni JSON ni figure : de la prose pure, là où on attend une structure. */
+function proseSansStructure() {
+  return "Je ressens une profonde harmonie dans cette œuvre, une atmosphère vibrante et poétique.";
+}
+
+/** Flux SSE tronqué : coupé en plein milieu d'un delta, sans clôture ni [DONE]. */
+function sseTronque(text) {
+  const t = String(text);
+  const moitie = t.slice(0, Math.max(1, Math.floor(t.length / 2)));
+  let body = 'event: message_start\ndata: {"type":"message_start"}\n\n';
+  body += 'event: content_block_delta\ndata: ' +
+    JSON.stringify({ type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: moitie } }) + '\n\n';
+  // volontairement : pas de content_block_stop, pas de message_stop, pas de [DONE]
+  return { sse: body };
+}
+
+/**
+ * Répondeur hostile : rend une forme pathologique pour la passe d'observation
+ * et des formes valides pour les autres, afin d'isoler la robustesse du parsing.
+ * @param {"casse"|"hallucine"|"prose"|"tronque"} mode
+ */
+function hostileResponder(mode = 'casse') {
+  return (info) => {
+    const blob = JSON.stringify(info.content || '');
+    if (blob.includes('Tu es le second regard'))
+      return JSON.stringify({ geste: 'confirme', pourquoi: 'ok' });
+    if (blob.includes('Tu reçois une forme') || blob.includes('champ visuel')) {
+      if (mode === 'casse') return figuresCasse();
+      if (mode === 'hallucine') return figuresHallucinees();
+      if (mode === 'prose') return proseSansStructure();
+      if (mode === 'tronque') return sseTronque(figuresCasse());
+    }
+    return 'prose de synthèse / relevé / carnet.';
+  };
+}
+
+module.exports = {
+  mockAnthropic, sseFromText, passResponder,
+  figuresCasse, figuresHallucinees, proseSansStructure, sseTronque, hostileResponder,
+};

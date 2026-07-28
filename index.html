@@ -722,7 +722,7 @@ function extraitJSON(t){
   essais.push(t);
   for(let s of essais){
     if(!s||!s.trim()) continue;
-    for(const v of [s, s.replace(/,\s*([}\]])/g,"$1"), s.replace(/,\s*([}\]])/g,"$1").replace(/[""]/g,'"').replace(/['']/g,"'")]){
+    for(const v of [s, s.replace(/,\s*([}\]])/g,"$1"), s.replace(/,\s*([}\]])/g,"$1").replace(/[“”]/g,'"').replace(/[‘’]/g,"'")]){
       try{ const j=JSON.parse(v); if(j&&typeof j==="object") return j; }catch(_){}
     }
   }

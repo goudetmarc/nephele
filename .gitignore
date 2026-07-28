@@ -15,3 +15,7 @@ carnet-nephele.md
 /blob-report/
 /.playwright/
 package-lock.json
+
+# artefacts Python
+__pycache__/
+*.pyc

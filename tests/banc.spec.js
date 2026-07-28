@@ -2,6 +2,7 @@
 const { test, expect } = require('@playwright/test');
 const { mockAnthropic } = require('./mock-anthropic');
 const { pngBuffer } = require('./make-image');
+const { cosine, levRatio } = require('./similarity');
 
 /**
  * Smoke test du banc d'abstraction (banc.html).
@@ -66,4 +67,21 @@ test('mesure : les lexiques couvrent les angles morts (chameau, coins composés,
   expect(r.chameau).toBeGreaterThanOrEqual(2);   // chameau + péninsule
   expect(r.coin).toBeGreaterThanOrEqual(2);      // bas-gauche + haut-droite
   expect(r.jargon).toBeGreaterThanOrEqual(3);    // chatoyant + spectaculaire + flamboyant
+});
+
+test('mesure : stable sous paraphrase (la dérive du juge reste bornée)', async ({ page }) => {
+  await page.goto('/banc.html');
+  // Deux paraphrases proches : même contenu, mots creux identiques, syntaxe
+  // différente. Le banc ne doit pas noter le jargon très différemment.
+  const a = 'Un rendu chatoyant et spectaculaire, vraiment flamboyant.';
+  const b = 'Un rendu chatoyant, spectaculaire et aussi flamboyant.';
+  // On confirme d'abord que ce sont bien des paraphrases (similarité élevée).
+  expect(cosine(a, b)).toBeGreaterThan(0.6);
+  expect(levRatio(a, b)).toBeGreaterThan(0.6);
+
+  const m = await page.evaluate(([x, y]) => ({
+    ja: mesure(x).brut.creux, jb: mesure(y).brut.creux,
+  }), [a, b]);
+  // Jargon compté identiquement malgré la reformulation : le juge ne dérive pas.
+  expect(Math.abs(m.ja - m.jb)).toBeLessThanOrEqual(1);
 });

@@ -1,7 +1,8 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
-const { mockAnthropic, passResponder } = require('./mock-anthropic');
+const { mockAnthropic, passResponder, hostileResponder } = require('./mock-anthropic');
 const { pngBuffer } = require('./make-image');
+const { levRatio, cosine } = require('./similarity');
 
 /**
  * Cas limites — la doctrine et le pipeline aux endroits qui comptent :
@@ -195,4 +196,60 @@ test('corpus : la séance s’enregistre et le verdict se persiste', async ({ pa
       return Object.values(s.verdicts || {}).filter(v => v === 'juste').length;
     }), { timeout: 5000 }
   ).toBeGreaterThanOrEqual(1);
+});
+
+/* ── Robustesse du parsing : ces tests PLANTENT si le normaliseur régresse ── */
+
+test('JSON cassé (guillemets courbes, virgules traînantes, prose) : absorbé, dérive bornée', async ({ page }) => {
+  await mockAnthropic(page, { responder: hostileResponder('casse') });
+  await page.goto('/index.html');
+  await page.fill('#key', 'test-mock-key');
+  await chargeImage(page);
+  await expect(page.locator('#run')).toBeEnabled({ timeout: 10000 });
+  await page.click('#run');
+
+  // Malgré le JSON cassé, le pipeline aboutit et rend des figures.
+  await expect(page.locator('.card.synth .prose')).toContainText(/\S/, { timeout: 30000 });
+  expect(await page.locator('.lec').count()).toBeGreaterThan(0);
+  await expect(page.locator('.banner')).toHaveCount(0);
+
+  // La dérive de la sortie normalisée reste bornée : le nom récupéré est
+  // « proche » du canonique attendu (Levenshtein), preuve que le parsing a
+  // bien reconstruit la structure et pas rendu du bruit.
+  const noms = await page.evaluate(() => state.lectures.map(L => L.nom));
+  const meilleur = Math.max(...noms.map(n => levRatio(n, 'figure 1')));
+  expect(meilleur).toBeGreaterThan(0.8);
+});
+
+test('figures hallucinées (types aberrants) : normalisées sans plantage', async ({ page }) => {
+  await mockAnthropic(page, { responder: hostileResponder('hallucine') });
+  await page.goto('/index.html');
+  await page.fill('#key', 'test-mock-key');
+  await chargeImage(page);
+  await expect(page.locator('#run')).toBeEnabled({ timeout: 10000 });
+  await page.click('#run');
+
+  await expect(page.locator('.card.synth .prose')).toContainText(/\S/, { timeout: 30000 });
+  // Nombres, tableaux et objets là où on attend des chaînes : normFigure coerce,
+  // rien ne plante, et chaque figure porte bien un nom sous forme de texte.
+  const nomsOk = await page.evaluate(() =>
+    state.lectures.length > 0 && state.lectures.every(L => typeof L.nom === 'string' && L.nom.length > 0));
+  expect(nomsOk).toBe(true);
+  await expect(page.locator('.card.err')).toHaveCount(0);
+});
+
+test('flux SSE tronqué : planche perdue proprement, aucun plantage ni blocage', async ({ page }) => {
+  await mockAnthropic(page, { responder: hostileResponder('tronque') });
+  await page.goto('/index.html');
+  await page.fill('#key', 'test-mock-key');
+  await chargeImage(page);
+  await expect(page.locator('#run')).toBeEnabled({ timeout: 10000 });
+  await page.click('#run');
+
+  // Toutes les observations arrivent tronquées → aucune lecture. Le doute
+  // classe : une bannière explicite, pas une exception, et le bouton se
+  // réactive (le bloc finally a tourné, pas de blocage).
+  await expect(page.locator('.banner')).toContainText(/lecture|planche/i, { timeout: 30000 });
+  await expect(page.locator('#run')).toBeEnabled();
+  await expect(page.locator('#halt')).toBeHidden();
 });
