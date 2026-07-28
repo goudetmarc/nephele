@@ -13,6 +13,20 @@ Deux régimes de lecture, sélectionnables planche par planche :
 
 Une **grammaire** apprise par-dessus les deux régimes accumule des rapports configuration → effet réutilisables d'une matière à l'autre.
 
+## Fondements — sciences et arts
+
+> *« Regarde certains murs couverts de taches […] et tu pourras y voir la ressemblance de divers paysages, de figures aux gestes vifs, d'expressions de visages. »* — **Léonard de Vinci**, *Trattato della pittura* (v. 1500)
+
+Nephélé n'improvise pas : chaque décision de doctrine ou de code répond à un résultat établi. **Le document complet, avec formules, méthodes et bibliographie, est dans [`FONDEMENTS.md`](FONDEMENTS.md).** En bref :
+
+- **Trouver des formes dans l'informe** est une méthode d'invention documentée — de la *macchia* de Léonard au *blot* de **Cozens** (1785), au *frottage* de **Max Ernst**, aux taches de **Rorschach** (1921).
+- **Percevoir, c'est inférer** (**Helmholtz** ; cerveau bayésien, **Friston**) : la paréidolie est un *a priori* fort sur une évidence pauvre. L'information est aux **extrema de courbure** du contour (**Attneave** 1954) — d'où *descendre d'échelle* et *chercher la pointe*.
+- **La bistabilité** (canard-lapin, **Wittgenstein**) et la **monomanie interprétative** (Bistable Images, ACL 2024 : *la rotation débloque la seconde lecture*) justifient *pivoter* et *tenir deux figures à la fois*.
+- **Une paréidolie n'a pas de vérité de terrain** : on remplace le critère de vérité par un **critère de partage** (théorie de la détection du signal, **Green & Swets** 1966), et on filtre le discours vide par l'**épreuve de l'horoscope** (**Popper** ; effet Barnum-**Forer** 1949).
+- **La grammaire configuration → effet** vient d'**Arnheim** (*Art and Visual Perception*, 1954), **Kandinsky**, **Klee** : l'affect est *dérivé* d'une configuration, jamais posé.
+- **Les planches** appliquent **Otsu** (seuillage), **Canny** (bords), **k-moyennes** (familles de teintes), les **couleurs opposées** (chaud/froid = opérateur d'espace).
+- **L'apprentissage** suit les **systèmes complémentaires** (McClelland 1995) — poids fine-tunés (mémoire lente) + grammaire injectée (mémoire rapide) — via **SFT**, puis **DPO** (**Rafailov** 2023, sur **Bradley-Terry** 1952) et **LoRA** (**Hu** 2022), avec un amorceur non verbal **CLIP/SigLIP**.
+
 ## La question, et les deux interdictions
 
 Jamais « est-ce que c'est là », toujours **est-ce que ça tient le contour ?**
