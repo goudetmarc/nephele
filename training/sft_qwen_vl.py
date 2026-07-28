@@ -8,17 +8,16 @@ lente), il ne la remplace pas. On n'entraîne que sur du ratifié : l'export SFT
 ne contient déjà que des planches propres (≥1 lecture « je la vois », aucune
 « je ne la vois pas »), la cible étant la version corrigée par le second regard.
 
-Recette standard TRL/PEFT pour VLM (voir le cookbook Hugging Face cité dans
-CLAUDE.md). NON exécutée dans l'environnement de dev (ni GPU ni poids) : c'est
-le point de départ à éprouver sur le GPU loué, puis à épingler.
+Matériel : optimisé Apple Silicon (MPS) — voir device.py — avec repli CUDA/CPU.
+PAS de bitsandbytes : incompatible MPS. Le modèle se charge en 16 bits natif
+(64 Go de RAM unifiée suffisent largement pour un 7B en LoRA).
 
 Données : nephele-sft.jsonl (via prepare_data.py → sft_train.jsonl), format
     {image:{mime,b64}, system, user, assistant}
 où `assistant` est une chaîne JSON {"figures":[...]}.
 
 Exemple :
-    accelerate launch sft_qwen_vl.py \
-        --data data/sft_train.jsonl --out out/nephele-sft-lora --epochs 2
+    python sft_qwen_vl.py --data data/sft_train.jsonl --out out/nephele-sft-lora --epochs 2
 """
 import argparse
 import base64
@@ -29,8 +28,10 @@ import torch
 from datasets import Dataset
 from peft import LoraConfig
 from PIL import Image
-from transformers import AutoProcessor, BitsAndBytesConfig, Qwen2_5_VLForConditionalGeneration
+from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
 from trl import SFTConfig, SFTTrainer
+
+from device import describe, pick_device
 
 MODEL_ID = "Qwen/Qwen2.5-VL-7B-Instruct"
 
@@ -50,7 +51,7 @@ def charge_dataset(path):
 
 
 def messages_de(row):
-    """Construit la conversation au format chat, image comprise."""
+    """Conversation au format chat, image comprise."""
     return [
         {"role": "system", "content": [{"type": "text", "text": row["system"]}]},
         {"role": "user", "content": [
@@ -62,8 +63,8 @@ def messages_de(row):
 
 
 def build_collate(processor):
-    # Repère les tokens image pour les masquer dans les labels : on n'entraîne
-    # la perte que sur le texte produit, jamais sur les patches d'image.
+    # Masque les tokens image dans les labels : on n'entraîne la perte que sur
+    # le texte produit, jamais sur les patches d'image.
     img_tok = processor.tokenizer.convert_tokens_to_ids("<|image_pad|>")
 
     def collate(batch):
@@ -89,33 +90,25 @@ def main():
     ap.add_argument("--lr", type=float, default=1e-4)
     ap.add_argument("--batch", type=int, default=1)
     ap.add_argument("--accum", type=int, default=8)
-    ap.add_argument("--qlora", action="store_true", help="charge le modèle en 4 bits (VRAM réduite)")
+    ap.add_argument("--cpu", action="store_true", help="force le CPU (debug)")
     a = ap.parse_args()
+
+    device, dtype = pick_device(prefer_mps=not a.cpu)
+    print(f"{describe(device, dtype)}")
 
     ds = charge_dataset(a.data)
     print(f"{len(ds)} exemples d'entraînement")
 
-    # min/max_pixels borne la taille des images (VRAM et vitesse). Les planches
+    # min/max_pixels borne la taille des images (mémoire et vitesse). Les planches
     # de Nephélé sont petites ; on reste modeste.
     processor = AutoProcessor.from_pretrained(
         a.model, min_pixels=256 * 28 * 28, max_pixels=1024 * 28 * 28
     )
 
-    quant = None
-    if a.qlora:
-        quant = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=torch.bfloat16,
-            bnb_4bit_use_double_quant=True,
-        )
-
-    model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
-        a.model,
-        torch_dtype=torch.bfloat16,
-        device_map="auto",
-        quantization_config=quant,
-    )
+    # Chargement 16 bits natif, SANS device_map (concept CUDA multi-GPU) : on
+    # place explicitement le modèle sur le backend choisi (mps/cuda/cpu).
+    model = Qwen2_5_VLForConditionalGeneration.from_pretrained(a.model, torch_dtype=dtype)
+    model.to(device)
 
     peft_config = LoraConfig(
         r=16,
@@ -123,11 +116,11 @@ def main():
         lora_dropout=0.05,
         bias="none",
         task_type="CAUSAL_LM",
-        # projections attention + MLP du décodeur ; on laisse la tour visuelle gelée.
-        target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
-                        "gate_proj", "up_proj", "down_proj"],
+        # Modules d'attention du décodeur ; la tour visuelle reste gelée.
+        target_modules=["q_proj", "k_proj", "v_proj", "o_proj"],
     )
 
+    on_cuda = device.type == "cuda"
     cfg = SFTConfig(
         output_dir=a.out,
         num_train_epochs=a.epochs,
@@ -138,8 +131,12 @@ def main():
         warmup_ratio=0.03,
         logging_steps=5,
         save_strategy="epoch",
-        bf16=True,
-        gradient_checkpointing=True,
+        # 16 bits piloté par nous (dtype) ; on laisse Trainer en fp32 master.
+        bf16=on_cuda,
+        fp16=False,
+        # gradient checkpointing : utile sur CUDA, capricieux sur MPS → CUDA seul.
+        gradient_checkpointing=on_cuda,
+        use_cpu=device.type == "cpu",
         report_to="none",
         remove_unused_columns=False,          # on garde image/system/user pour le collate
         dataset_kwargs={"skip_prepare_dataset": True},

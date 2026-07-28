@@ -77,6 +77,32 @@ def valide_dpo(rows):
         assert r["chosen"] != r["rejected"], "chosen == rejected (paire vide)"
 
 
+def to_dpo_hf(r):
+    """Transforme un enregistrement d'export vers le format HF standard DPO.
+
+    Format conversationnel attendu par TRL : les clés `prompt`, `chosen`,
+    `rejected` sont des LISTES DE MESSAGES. On conserve en plus `image` (b64) :
+    ce n'est pas superflu, c'est OBLIGATOIRE pour un DPO de modèle vision —
+    l'entraînement décode cette image en PIL. La retirer casserait le VLM DPO.
+    """
+    return {
+        "prompt": [
+            {"role": "system", "content": [{"type": "text", "text": r["system"]}]},
+            {"role": "user", "content": [
+                {"type": "image"},
+                {"type": "text", "text": r["user"]},
+            ]},
+        ],
+        "chosen": [
+            {"role": "assistant", "content": [{"type": "text", "text": r["chosen"]}]},
+        ],
+        "rejected": [
+            {"role": "assistant", "content": [{"type": "text", "text": r["rejected"]}]},
+        ],
+        "image": r["image"],
+    }
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--sft")
@@ -93,6 +119,9 @@ def main():
             continue
         rows = charge(path)
         valide(rows)
+        # Le DPO sort au format HF standard (prompt/chosen/rejected + image).
+        if kind == "dpo":
+            rows = [to_dpo_hf(r) for r in rows]
         train, heldout, n_img, n_eval = decoupe_par_image(rows, a.heldout, a.seed)
         ecris(os.path.join(a.out, f"{kind}_train.jsonl"), train)
         ecris(os.path.join(a.out, f"{kind}_heldout.jsonl"), heldout)
