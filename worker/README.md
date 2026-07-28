@@ -38,6 +38,22 @@ C'est tout. L'app envoie le jeton dans l'en-tête `x-api-key` ; le Worker le
 vérifie, le remplace par la vraie clé, et transmet à Anthropic. Le flux SSE
 revient à l'identique.
 
+## Robustesse (inférence lente / transitoire)
+
+- **Retry + backoff exponentiel** sur `502/503/504` et sur erreur réseau (3
+  tentatives, 250 ms → 500 ms). Le corps POST est bufferisé pour être rejoué ;
+  on ne réessaie jamais une fois le flux commencé (pas de double génération).
+- **Timeouts** : le plafond d'un Worker porte sur le *temps CPU*, pas sur
+  l'*attente réseau* — streamer une longue réponse ne le fait donc généralement
+  pas sauter. Sur le plan payant, `[limits] cpu_ms` (dans `wrangler.toml`) relève
+  ce plafond. On n'active pas `node_compat` : inutile ici (API Web standard).
+
+Tests de la logique de retry (sans réseau) :
+
+```bash
+cd worker && node --test
+```
+
 ## Ce que ça règle, ce que ça ne règle pas
 
 - ✅ La clé Anthropic ne quitte plus le serveur.

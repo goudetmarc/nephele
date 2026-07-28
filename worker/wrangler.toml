@@ -13,6 +13,18 @@ name = "nephele-gw"
 main = "index.js"
 compatibility_date = "2024-11-01"
 
+# Temps d'exécution. À savoir avant de « monter les timeouts » :
+# le plafond d'un Worker porte sur le TEMPS CPU, pas sur le temps d'ATTENTE.
+# Streamer une longue réponse d'inférence consomme surtout de l'attente réseau
+# (non facturée au CPU), donc un modèle lent ne fait généralement PAS sauter la
+# limite. Le retry + backoff (index.js) couvre les 502/503/504 transitoires.
+#
+# Sur le plan payant (Workers Standard), tu peux relever le plafond CPU :
+[limits]
+cpu_ms = 30000   # 30 s de CPU ; ignoré sur le plan gratuit (plafond fixe).
+# NB : on n'active PAS `node_compat` — ce Worker n'utilise que des API Web
+# standard (fetch, Headers, Response, setTimeout). Ce serait de la config morte.
+
 # --- Optionnel, étape suivante : corpus centralisé en R2 ---
 # Décommente pour lier un bucket R2 (crée-le d'abord : `wrangler r2 bucket create nephele-corpus`).
 # [[r2_buckets]]

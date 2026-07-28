@@ -1,27 +1,29 @@
 /**
  * Passerelle Nephélé — Cloudflare Worker.
  *
- * But unique : garder la clé Anthropic CÔTÉ SERVEUR. Aujourd'hui l'app la met
- * dans le navigateur (lisible par quiconque ouvre la page). Ici, le navigateur
- * ne détient plus qu'un JETON D'ACCÈS à la passerelle ; c'est le Worker qui
- * ajoute la vraie clé et parle à Anthropic.
+ * But unique : garder la clé Anthropic CÔTÉ SERVEUR. Le navigateur ne détient
+ * plus qu'un JETON D'ACCÈS ; c'est le Worker qui ajoute la vraie clé et parle à
+ * Anthropic, en laissant passer le flux SSE tel quel (streaming, pas de buffer).
  *
- * Le Worker est un proxy mince : il ne bufferise pas, il fait passer le flux
- * SSE tel quel (streaming) et les erreurs telles quelles. Il n'ouvre pas un
- * proxy public : sans le bon jeton, il refuse (sinon n'importe qui brûlerait
- * ta clé).
+ * Robustesse (objectif : appels vers une inférence potentiellement lente/lourde)
+ *   - Retry avec backoff exponentiel sur 502/503/504 et sur erreur réseau.
+ *   - Le corps POST est BUFFERISÉ avant la boucle, pour pouvoir être renvoyé
+ *     tel quel à chaque tentative.
+ *   - On ne réessaie JAMAIS une fois le flux commencé : un code 5xx arrive avant
+ *     tout octet de réponse, donc réessayer là est sûr ; une fois le corps
+ *     streamé, on le laisse passer sans le rejouer (pas de double génération).
  *
- * Secrets attendus (posés par `wrangler secret put`, jamais en clair) :
+ * Secrets attendus (via `wrangler secret put`, jamais en clair) :
  *   ANTHROPIC_API_KEY  — la vraie clé Anthropic
  *   ACCESS_TOKEN       — le jeton que l'app enverra (dans le champ « clé »)
- *
- * Wiring côté app : mettre le champ « Endpoint » sur l'URL du Worker, et le
- * champ « clé » sur la valeur d'ACCESS_TOKEN. Aucune autre modification.
  */
 
 const ANTHROPIC = "https://api.anthropic.com";
 const ALLOW_HEADERS =
   "content-type, x-api-key, authorization, anthropic-version, anthropic-dangerous-direct-browser-access";
+const RETRYABLE = new Set([502, 503, 504]);
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function cors(extra = {}) {
   return {
@@ -40,15 +42,42 @@ function erreur(status, type, message) {
   });
 }
 
+/**
+ * Appelle l'amont avec retry + backoff exponentiel. Réessaie sur 502/503/504 et
+ * sur erreur réseau, jamais au-delà de `attempts`. `sleepFn` est injectable pour
+ * les tests.
+ */
+export async function proxyWithRetry(fetchImpl, target, init, opts = {}) {
+  const { attempts = 3, base = 250, sleepFn = sleep } = opts;
+  let derniereErreur;
+  for (let i = 0; i < attempts; i++) {
+    let resp;
+    try {
+      resp = await fetchImpl(target, init);
+    } catch (e) {
+      derniereErreur = e;
+      if (i < attempts - 1) {
+        await sleepFn(base * 2 ** i);
+        continue;
+      }
+      throw e;
+    }
+    if (RETRYABLE.has(resp.status) && i < attempts - 1) {
+      await sleepFn(base * 2 ** i);
+      continue;
+    }
+    return resp; // succès, ou échec non-réessayable, ou dernière tentative
+  }
+  throw derniereErreur;
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // Préflight CORS.
     if (request.method === "OPTIONS")
       return new Response(null, { status: 204, headers: cors() });
 
-    // Seules les routes de l'API Messages / Models passent.
     if (!/^\/v1\/(messages|models)\b/.test(url.pathname))
       return erreur(404, "not_found", "route non proxifiée");
 
@@ -71,17 +100,15 @@ export default {
     headers.delete("authorization");
     headers.delete("host");
 
+    // Bufferise le corps POST une fois, pour pouvoir le rejouer à chaque essai.
+    const body = request.method === "POST" ? await request.arrayBuffer() : undefined;
+    const init = { method: request.method, headers, body };
+
     let resp;
     try {
-      resp = await fetch(cible, {
-        method: request.method,
-        headers,
-        body: request.method === "POST" ? request.body : undefined,
-        // laisse passer le corps en flux quand il y en a un
-        ...(request.method === "POST" ? { duplex: "half" } : {}),
-      });
+      resp = await proxyWithRetry(fetch, cible, init);
     } catch (e) {
-      return erreur(502, "upstream", "Anthropic injoignable : " + (e && e.message));
+      return erreur(502, "upstream", "Anthropic injoignable après plusieurs essais : " + (e && e.message));
     }
 
     // Renvoie la réponse telle quelle (flux SSE compris) + en-têtes CORS.
