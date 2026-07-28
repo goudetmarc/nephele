@@ -36,11 +36,13 @@ Application d'appareillage de formes : trouver des figures dans des matières qu
 
 ## Références clés
 
-- **FacesInThings** (ECCV 2024, MIT license, `pip install facesinthings`) : 5 000 images annotées — le banc d'essai visages. Résultat : fine-tuner sur des visages d'*animaux* réduit de moitié l'écart machine/humain.
-- **Bistable Images** (CMCL/ACL 2024) : la monomanie interprétative est générale ; la rotation est la manipulation d'image la plus efficace.
-- **Rorschach × IA** (JMIR Mental Health 2026) : biais de réponse globale quantifié — valide « descendre d'échelle ».
-- **Arnheim, *Art and Visual Perception*** : la référence de la grammaire configuration → effet.
-- **GalleryGPT / PaintingForm** (ACM MM 2024) : 19k tableaux + 50k analyses formelles — référence du régime sensible.
+Citations complètes, formules et filiations dans `FONDEMENTS.md`. Les quatre points d'appui empiriques (vérifiés) :
+
+- **FacesInThings** — Hamilton et al., *Seeing Faces in Things* (ECCV 2024, MIT, arXiv:2409.16143, `pip install facesinthings`) : ~5 000 images annotées, le banc d'essai visages. Le papier modélise un « pic paréidolique » ; le besoin évolutif de détecter aussi les visages d'*animaux* explique une part de l'écart machine/humain.
+- **Bistable Images** — Panagopoulou, Melkin & Callison-Burch (CMCL @ ACL 2024, arXiv:2405.19423) : sur 29 images et 116 manipulations (luminosité, teinte, rotation), la variance est *minimale* — la monomanie interprétative est **robuste** (elle ne se débloque pas d'un simple pivot). D'où la nécessité des gestes anti-monomanie, pas leur validation.
+- **Rorschach × IA** — *Human Shadows in Machine Minds* (JMIR Mental Health 2026, e88186) : biais de réponse globale quantifié — GPT-4o 86,7 % et Grok 3 90 % de réponses « globales » (W) ; Gemini à dominante détail (contre-exemple). Valide « descendre d'échelle » pour les modèles W-dominants.
+- **Arnheim, *Art and Visual Perception*** (1954) : la référence de la grammaire configuration → effet.
+- **GalleryGPT / PaintingForm** — Bin et al. (ACM MM 2024, doi:10.1145/3664647.3681656 ; arXiv:2408.00491) : ~19k tableaux + ~50k analyses formelles — référence du régime sensible.
 
 ## Conventions de travail
 
