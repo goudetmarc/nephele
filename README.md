@@ -1,35 +1,33 @@
-# Nephélé — appareillage, lecture des champs, grammaire
+# Nephélé — matching forms, reading fields, grammar
 
-Trouver des figures dans des matières qui n'en portent aucune — nuages, rouille, écorce, peinture — et lire les champs non figuratifs par ce qu'ils *font* plutôt que par ce qu'ils montrent. Une seule page HTML par outil, zéro build, zéro dépendance, l'API Anthropic appelée directement depuis le navigateur.
+Finding figures in matter that carries none — clouds, rust, bark, paint — and reading non-figurative fields by what they *do* rather than by what they show. One HTML page per tool, zero build, zero dependencies, the Anthropic API called directly from the browser.
 
-## Le principe
+## The principle
 
-On ne montre jamais la photo au modèle, seulement des planches binarisées ou recolorées. Couper la reconnaissance de scène en amont est la seule façon d'empêcher la récitation du corpus (« un dragon dans les nuages ») au profit du regard.
+The photograph is never shown to the model — only binarized or recolored **boards** (*planches*). Cutting off scene recognition upstream is the only way to stop the model from reciting the corpus (“a dragon in the clouds”) instead of actually looking.
 
-Deux régimes de lecture, sélectionnables planche par planche :
+Two reading regimes, selectable board by board:
 
-- **figuratif** — trouver des figures et les faire voir ;
-- **sensible** — dire ce que le champ fait, sans rien nommer.
+- **figuratif** — find figures and make them visible;
+- **sensible** — say what the field does, without naming anything.
 
-Une **grammaire** apprise par-dessus les deux régimes accumule des rapports configuration → effet réutilisables d'une matière à l'autre.
+A **grammar** learned across both regimes accumulates *configuration → effect* relations reusable from one kind of matter to another.
 
-## Fondements — sciences et arts
+## Foundations — science and art
 
-> *« Regarde certains murs couverts de taches […] et tu pourras y voir la ressemblance de divers paysages, de figures aux gestes vifs, d'expressions de visages. »* — **Léonard de Vinci**, *Trattato della pittura* (v. 1500)
+> *“Look at certain walls stained with damp, or at stones of uneven color. If you have to invent some setting, you will be able to see in these the likeness of divine landscapes, of figures in lively action, of faces of strange expression.”* — **Leonardo da Vinci**, *Trattato della pittura* (c. 1500)
 
-Nephélé n'improvise pas : chaque décision de doctrine ou de code répond à un résultat établi. **Le document complet, avec formules, méthodes et bibliographie, est dans [`FONDEMENTS.md`](FONDEMENTS.md).** En bref :
+Nephélé does not improvise: every doctrinal or engineering decision answers to an established result. **The complete document — with formulas, methods and bibliography — is in [`FONDEMENTS.md`](FONDEMENTS.md).** In short:
 
-- **Trouver des formes dans l'informe** est une méthode d'invention documentée — de la *macchia* de Léonard au *blot* de **Cozens** (1785), au *frottage* de **Max Ernst**, aux taches de **Rorschach** (1921).
-- **Percevoir, c'est inférer** (**Helmholtz** ; cerveau bayésien, **Friston**) : la paréidolie est un *a priori* fort sur une évidence pauvre. L'information est aux **extrema de courbure** du contour (**Attneave** 1954) — d'où *descendre d'échelle* et *chercher la pointe*.
-- **La bistabilité** (canard-lapin, **Wittgenstein**) et la **monomanie interprétative** des modèles — robuste, quasi insensible aux manipulations (Bistable Images, CMCL @ ACL 2024) — justifient les gestes anti-monomanie : *pivoter*, *tenir deux figures à la fois*.
-- **Une paréidolie n'a pas de vérité de terrain** : on remplace le critère de vérité par un **critère de partage** (théorie de la détection du signal, **Green & Swets** 1966), et on filtre le discours vide par l'**épreuve de l'horoscope** (**Popper** ; effet Barnum-**Forer** 1949).
-- **La grammaire configuration → effet** vient d'**Arnheim** (*Art and Visual Perception*, 1954), **Kandinsky**, **Klee** : l'affect est *dérivé* d'une configuration, jamais posé.
-- **Les planches** appliquent **Otsu** (seuillage), **Canny** (bords), **k-moyennes** (familles de teintes), les **couleurs opposées** (chaud/froid = opérateur d'espace).
-- **L'apprentissage** suit les **systèmes complémentaires** (McClelland 1995) — poids fine-tunés (mémoire lente) + grammaire injectée (mémoire rapide) — via **SFT**, puis **DPO** (**Rafailov** 2023, sur **Bradley-Terry** 1952) et **LoRA** (**Hu** 2022), avec un amorceur non verbal **CLIP/SigLIP**.
+- **Finding forms in the formless** is a documented method of invention — from Leonardo’s *macchia* to **Cozens**’ *blot* (1785), to **Max Ernst**’s *frottage*, to **Rorschach**’s inkblots (1921).
+- **To perceive is to infer** (**Helmholtz**; the Bayesian brain, **Friston**): pareidolia is a strong *prior* over weak evidence. Information concentrates at the **curvature extrema** of the contour (**Attneave** 1954) — hence *drop down in scale* and *look for the tip*.
+- **Bistability** (the duck-rabbit, **Wittgenstein**) and the **interpretive monomania** of models — robust, nearly insensitive to manipulation (Bistable Images, CMCL @ ACL 2024) — justify the anti-monomania moves: *rotate*, *hold two figures at once*.
+- **A pareidolia has no ground truth**: we replace the criterion of *truth* with a criterion of *sharing* (signal detection theory, **Green & Swets** 1966), and filter empty discourse with the **horoscope test** (**Popper**; the Barnum-**Forer** effect, 1949).
+- **The configuration → effect grammar** comes from **Arnheim** (*Art and Visual Perception*, 1954), **Kandinsky**, **Klee**: affect is *derived* from a configuration, never asserted.
+- **The boards** apply **Otsu** (thresholding), **Canny** (edges), **k-means** (color families), and **opponent color** (warm/cool as an operator of space).
+- **Learning** follows the **complementary learning systems** view (McClelland 1995) — fine-tuned weights (slow memory) + injected grammar (fast memory) — via **SFT**, then **DPO** (**Rafailov** 2023, on **Bradley-Terry** 1952) and **LoRA** (**Hu** 2022), with a non-verbal **CLIP/SigLIP** primer.
 
 ## Theoretical Foundation & Validation Metrics
-
-*(Research positioning, in English.)*
 
 Nephélé is a **perceptually-aligned vision framework** rather than a thin API layer. It treats pareidolia not as an image-synthesis problem but as a problem of **aligning a reading model to a single annotator's perceptual judgment**, while distilling reusable *configuration → effect* relations under an explicit falsifiability constraint. This section states the learning objective and the validation metrics, and situates the framework with respect to generative-reveal approaches.
 
@@ -73,182 +71,182 @@ Generative-reveal methods (DDS/MDDS, *Diamonds in the Sky*) **synthesize** the p
 
 We therefore make **no claim of outperforming MDDS on its own image-editing metrics**: the two paradigms operate on different outputs, and no head-to-head evaluation has been conducted. The IoU/SSIM criteria above are provided (i) to validate a *future* generative "show-me" track of Nephélé, and (ii) to render any eventual comparison well-defined. The framework's contribution is **perceptual alignment to a human annotator under a falsifiability constraint**, not image synthesis.
 
-## La question, et les deux interdictions
+## The question, and the two prohibitions
 
-Jamais « est-ce que c'est là », toujours **est-ce que ça tient le contour ?**
+Never “is it there,” always **does it hold the contour?**
 
-Une figure tient quand on peut dire quelle partie du tracé fait quoi — ceci le dos, ceci l'appui, ceci l'entaille de la gueule — et quand la personne à qui on la montre finit par la voir. C'est un critère de partage, pas de vérité. Une figure réussie est une figure qu'on peut **faire voir**.
+A figure holds when you can say which part of the outline does what — this the back, this the footing, this the notch of the muzzle — and when the person you show it to eventually sees it. It is a criterion of *sharing*, not of truth. A successful figure is one you can **make someone see**.
 
-Deux interdictions absolues sont inscrites dans la doctrine, à toutes les étapes : on ne récuse jamais une figure au motif qu'elle serait produite par le traitement de l'image, ni au motif qu'elle ne serait pas réellement dans la matière. Aucune ne l'est. Ce n'est pas le sujet.
+Two absolute prohibitions are written into the doctrine, at every stage: you never reject a figure on the grounds that it was produced by image processing, nor on the grounds that it is not “really in the matter.” None of them is. That is not the point.
 
-## Le régime figuratif
+## The figurative regime
 
-### Trouver
+### Finding
 
-Une section `TROUVER` — sept gestes, employés dans l'ordre, qu'on redescend tant qu'on manque de matière :
+A `TROUVER` section — seven moves, applied in order, run back down whenever you lack material:
 
-1. **Descendre d'échelle.** Le geste le plus rentable et le plus oublié. Une forme entière ressemble rarement à quelque chose ; un dixième de cette forme ressemble presque toujours à quelque chose. La plupart des figures fortes sont des fragments promus.
-2. **Suivre un bord et laisser venir le mot** — même absurde, surtout absurde. Refuser le premier mot est la façon la plus sûre de ne rien trouver, parce que le second ne vient jamais.
-3. **Chercher la tête.** Presque toutes les figures reconnues sont ancrées par une extrémité. Trouve-la et le corps suit.
-4. **Pivoter.** 5. **Prendre l'intervalle.** 6. **Changer de monde** — cartes, outils, anatomie, alphabets. 7. **Tenir deux figures à la fois** sur la même zone, sans choisir.
+1. **Drop down in scale.** The most productive move, and the most forgotten. A whole shape rarely resembles anything; a tenth of that shape almost always resembles something. Most strong figures are promoted fragments.
+2. **Follow an edge and let the word come** — even an absurd one, especially an absurd one. Refusing the first word is the surest way to find nothing, because the second never comes.
+3. **Look for the head.** Almost every recognized figure is anchored by an extremity. Find it and the body follows.
+4. **Rotate.** 5. **Take the gap** (read the void as the solid). 6. **Change worlds** — maps, tools, anatomy, alphabets. 7. **Hold two figures at once** over the same zone, without choosing.
 
-### Le contrat de sortie
+### The output contract
 
-Quota de **six figures minimum par planche**, dont deux sur un fragment traité comme un tout et deux hors du registre vivant. Si une planche en rend moins de quatre, l'application **relance automatiquement** l'observateur avec une consigne ciblée : prends cinq fragments distincts, pivote-en deux, change de registre.
+A quota of **at least six figures per board**, of which two on a fragment treated as a whole and two outside the living register. If a board yields fewer than four, the app **automatically re-prompts** the observer with a targeted instruction: take five distinct fragments, rotate two of them, change register.
 
-Une page vide n'est jamais un résultat possible. La confrontation classe et présente ; elle n'élimine pas.
+An empty page is never a possible result. The confrontation ranks and presents; it does not eliminate.
 
-### Le second regard
+### The second look
 
-Il ne démolit pas. Il rend la meilleure figure possible pour cette zone du contour, par un geste sur trois :
+It does not demolish. It returns the best possible figure for that zone of the contour, through one of three moves:
 
-- **CONFIRME** — il la voit, et il doit ajouter une partie du contour que le premier n'avait pas relevée. Confirmer sans rien ajouter est un travail bâclé.
-- **AFFINE** — presque juste mais mal cadrée : orientation fausse, espèce trop précise, zone qui déborde. Il corrige. C'est le geste le plus fréquent.
-- **REMPLACE** — cette zone porte quelque chose, mais pas ça. Il nomme la figure qui organise mieux le même contour et la montre comme s'il la proposait lui-même.
+- **CONFIRME** — it sees the figure, and must add a part of the contour the first observer had not noted. Confirming without adding anything is sloppy work.
+- **AFFINE** — almost right but badly framed: wrong orientation, species too precise, zone that overruns. It corrects. This is the most frequent move.
+- **REMPLACE** — this zone carries something, but not that. It names the figure that organizes the same contour better and shows it as if proposing it itself.
 
-**Il ne rend jamais une case vide.** Le seul reproche recevable est « ça ne tient pas le contour », et il débouche toujours sur un affinage ou une substitution.
+**It never returns an empty slot.** The only admissible objection is “it doesn’t hold the contour,” and it always leads to a refinement or a substitution.
 
-Le réglage d'**audace** ne règle pas la sévérité mais l'**écart** — la distance à l'évidence. À son maximum, la consigne dit explicitement : *rends plus de figures ici qu'à tout autre réglage, pas moins.*
+The **audace** (boldness) control does not tune severity but **distance** — the distance from the obvious. At its maximum, the instruction says explicitly: *return more figures here than at any other setting, not fewer.*
 
-### Le rendu
+### The output
 
-Chaque figure est une carte qui commence par **« par où regarder »** — une phrase qui guide l'œil de quelqu'un qui ne la voit pas encore : *« pars de la pointe en B2, descends le bord vers la gauche, l'entaille que tu croises fait la gueule »*. C'est le produit. Le reste — parties du contour, tenue, écart, geste du second regard — vient après.
+Each figure is a card that begins with **`par où regarder`** (“where to look”) — a sentence that guides the eye of someone who does not yet see it: *“start from the tip at B2, go down the edge to the left, the notch you cross makes the muzzle.”* That is the product. The rest — parts of the contour, hold, distance, second-look move — comes after.
 
-La confrontation rend quatre sections : **À voir en premier** (cinq à huit figures, les plus éloignées de l'évidence d'abord, chacune avec son mode d'emploi), **Les deux lectures d'une même zone**, **Convergences** entre planches, **Écarté**.
+The confrontation returns four sections: **To see first** (five to eight figures, the ones farthest from the obvious first, each with its how-to), **The two readings of one zone**, **Convergences** across boards, **Set aside**.
 
-## Le régime sensible
+## The sensible regime
 
-Non plus « à quoi ça ressemble » mais **ce que ça fait**. Où porte le poids, ce qui pousse et ce qui résiste, d'où vient la lumière et si elle révèle les formes ou les mange, quelle est la température de l'air, si c'est un instant ou une durée, par où l'œil entre et où il se coince.
+No longer “what does it look like” but **what does it do**. Where the weight settles, what pushes and what resists, where the light comes from and whether it reveals forms or eats them, the temperature of the air, whether it is an instant or a duration, where the eye enters and where it snags.
 
-Dix dimensions, chacune avec ce qui la produit matériellement et le test qui tranche. Exemple :
+Ten dimensions, each with what materially produces it and the test that settles it. Example:
 
-> **POIDS ET APPUI** — Où la masse se pose, et si elle tient.
-> *Produit par* : la distribution des valeurs sombres, la position de la zone la plus dense par rapport au centre, l'occupation ou le vide de la base.
-> *Test* : bouche mentalement la moitié basse. L'image tombe-t-elle ? Si oui, elle tenait par le bas. Sinon, elle flotte — et c'est un fait, pas une métaphore.
+> **WEIGHT AND FOOTING** — Where the mass settles, and whether it holds.
+> *Produced by*: the distribution of dark values, the position of the densest zone relative to the center, the occupancy or emptiness of the base.
+> *Test*: mentally cover the lower half. Does the image fall? If so, it held from below. If not, it floats — and that is a fact, not a metaphor.
 
-Pas de quota de figures, mais un quota de **constatations ancrées** : au moins six, dont deux qui disent un rapport entre deux zones distinctes. « L'image bascule vers la gauche » ne vaut rien ; « l'image bascule vers la gauche : toute la masse sombre occupe A3-B5, le quart droit est vide et rien ne la retient » vaut quelque chose.
+No quota of figures, but a quota of **anchored observations**: at least six, of which two state a relation between two distinct zones. “The image tips to the left” is worth nothing; “the image tips to the left: all the dark mass occupies A3-B5, the right quarter is empty and nothing holds it back” is worth something.
 
-Une liste de **mots creux** est bannie — *dynamique, harmonieux, vibrant, poétique, atmosphère, palette riche, invite le spectateur* : ils ont l'air de dire et ne désignent rien. Aucun ne peut apparaître seul ; la zone et le fait suivent, ou le mot saute.
+A list of **empty words** is banned — *dynamic, harmonious, vibrant, poetic, atmosphere, rich palette, invites the viewer*: they seem to say and designate nothing. None may appear alone; the zone and the fact follow, or the word is dropped.
 
-Une interdiction spécifique : **si le modèle reconnaît l'œuvre, il doit se taire.** Un commentaire qui serait vrai sans avoir regardé l'image est un échec, même exact — et c'est le mode d'échec le plus difficile à repérer, parce que le résultat est cultivé, juste, et vide.
+A specific prohibition: **if the model recognizes the artwork, it must keep quiet.** A comment that would be true without having looked at the image is a failure, even an accurate one — and it is the hardest failure mode to spot, because the result is cultured, correct, and empty.
 
-## Les planches
+## The boards
 
-Les planches binaires portent les figures ; six planches gardent la couleur pour la lecture sensible :
+Binary boards carry the figures; six boards keep the color for the sensible reading:
 
-| Planche | Ce qu'elle montre |
+| Board | What it shows |
 |---|---|
-| **recul** | Vu de loin. Les touches se dissolvent, la structure apparaît. |
-| **chaud / froid** | La température seule, en orange et bleu. Le chaud avance, le froid recule — un opérateur d'espace, pas une humeur. La planche qui révèle le plus. |
-| **valeur seule** | La structure que la couleur masque. |
-| **la touche** | Recadrage serré sur la zone la plus travaillée, détectée par énergie de gradient. La matière de très près. |
-| **chroma** | Où la couleur est intense, indépendamment de la teinte. |
-| **familles** | Cinq teintes dominantes en aplats, par k-moyennes. |
+| **recul** (stepping back) | Seen from afar. The touches dissolve, the structure appears. |
+| **chaud / froid** (warm / cool) | Temperature alone, in orange and blue. Warm advances, cool recedes — an operator of space, not a mood. The most revealing board. |
+| **valeur seule** (value only) | The structure that color masks. |
+| **la touche** (the brushwork) | Tight crop on the most worked zone, detected by gradient energy. Matter up close. |
+| **chroma** | Where color is intense, independent of hue. |
+| **familles** (families) | Five dominant hues as flats, by k-means. |
 
-La grille gravée passe au vert sur ces planches : en rouge, elle se lirait comme une zone chaude sur la planche de température.
+The engraved grid turns green on these boards: in red, it would read as a warm zone on the temperature board.
 
-## La grammaire
+## The grammar
 
-Un nom trouvé dans un nuage est une donnée morte : « un chien » ne vaut que pour ce nuage. Un rapport du type **masse dense excentrée + quadrant opposé vide → chute** vaut sur toute image qui présente cette configuration, quelle que soit sa matière. C'est la différence entre un catalogue, qui s'allonge, et une grammaire, qui se resserre — de la gestalt appliquée à la manière de Rudolf Arnheim, *Art and Visual Perception*, où chaque qualité expressive est dérivée d'une configuration et non posée.
+A name found in a cloud is dead data: “a dog” holds only for that cloud. A relation of the type **off-center dense mass + empty opposite quadrant → fall** holds for any image presenting that configuration, whatever its matter. This is the difference between a *catalog*, which lengthens, and a *grammar*, which tightens — applied Gestalt in the manner of Rudolf Arnheim, *Art and Visual Perception*, where each expressive quality is derived from a configuration and not asserted.
 
-**L'affect n'est jamais une affirmation.** Il est toujours la seconde moitié d'une affirmation dont la première est une configuration, avec le mécanisme entre les deux. On n'apprend pas l'association vers l'intention de l'œuvre — inatteignable, et c'est le catalogue déguisé — mais vers **l'effet sur un regardeur**, et le seul regardeur disponible, c'est toi.
+**Affect is never an assertion.** It is always the second half of an assertion whose first half is a configuration, with the mechanism in between. We do not learn the association toward the *intent* of the work — unreachable, and the catalog in disguise — but toward the **effect on a viewer**, and the only available viewer is you.
 
-**L'épreuve de l'horoscope.** Avant qu'un rapport soit proposé, une seule question :
+**The horoscope test.** Before a relation is proposed, one single question:
 
-> **Peux-tu imaginer une image où cette configuration est présente et où l'effet est absent ?**
+> **Can you imagine an image where this configuration is present and the effect is absent?**
 
-Si oui, le rapport est falsifiable, il vaut quelque chose. « Le rouge est passionné » échoue : aucune image ne peut le démentir. « Une diagonale montante interrompue par une horizontale produit une butée » passe. Chaque constatation porte donc trois termes — `configuration`, `effet`, `dementi_possible` — et **les trois ou aucun**.
+If yes, the relation is falsifiable, it is worth something. “Red is passionate” fails: no image can refute it. “A rising diagonal interrupted by a horizontal produces a stop” passes. Each observation therefore carries three terms — `configuration`, `effet`, `dementi_possible` — and **all three or none**.
 
-**La forme générale.** Chaque configuration s'énonce deux fois : en local (« toute la masse sombre occupe A3-B5, le quart droit est vide ») et en général (« masse dense excentrée + quadrant opposé vide »). Seule la forme générale, en termes de rapports et jamais de contenus, peut se retrouver ailleurs.
+**The general form.** Each configuration is stated twice: locally (“all the dark mass occupies A3-B5, the right quarter is empty”) and generally (“off-center dense mass + empty opposite quadrant”). Only the general form — in terms of relations and never contents — can recur elsewhere.
 
-**L'admission.** Une entrée devient **admise** — donc injectée — quand elle réunit la **récurrence** (la même configuration a produit le même effet sur au moins deux matières sans rapport) et la **ratification** (tu l'as confirmée d'un clic). Elle passe en **suspendue** dès un démenti de ta part, ou quand ses contradictions atteignent la moitié de ses occurrences. **L'état n'est jamais décidé par le modèle** : il compte, apparie, contredit et nomme ; l'admission est calculée en dehors de lui.
+**Admission.** An entry becomes **admise** (admitted) — hence injected — when it combines **recurrence** (the same configuration produced the same effect on at least two unrelated kinds of matter) and **ratification** (you confirmed it with a click). It turns **suspendue** (suspended) upon any refutation from you, or when its contradictions reach half of its occurrences. **The state is never decided by the model**: it counts, matches, contradicts and names; admission is computed outside of it.
 
-**Les contradictions valent plus que les confirmations.** La grammaire est injectée comme un jeu d'hypothèses, pas de lois : devant chaque rapport pertinent, la consigne demande non pas où on le retrouve mais si cette image le dément. Une contradiction n'invalide pas la règle — elle signale une variable cachée à nommer, et scinde une règle fausse en deux règles justes.
+**Contradictions are worth more than confirmations.** The grammar is injected as a set of hypotheses, not laws: for each relevant relation, the instruction asks not where you find it again but whether *this* image refutes it. A contradiction does not invalidate the rule — it signals a hidden variable to name, and splits a false rule into two correct ones.
 
-La grammaire vit dans le navigateur, s'ouvre dans un panneau, s'exporte et se réimporte en `.json`.
+The grammar lives in the browser, opens in a panel, and exports/re-imports as `.json`.
 
-## Le banc d'abstraction — `banc.html`
+## The abstraction bench — `banc.html`
 
-Une page à part. Elle ne cherche rien dans les images : **elle mesure ce que devient le discours du modèle à mesure qu'il n'y a plus rien à reconnaître.**
+A separate page. It looks for nothing in the images: **it measures what the model's discourse becomes as there is less and less to recognize.**
 
-Une image est dégradée par paliers — six barreaux, de net à ÷32. À chaque barreau, une sonde. Chaque réponse est mesurée sur quatre axes, **comptés et non jugés** (le banc n'appelle aucun modèle pour évaluer, il compte des mots contre des lexiques modifiables dans `doctrine.js`) :
+An image is degraded in steps — six rungs, from sharp to ÷32. At each rung, a probe. Each response is measured on four axes, **counted and not judged** (the bench calls no model to evaluate; it counts words against lexicons editable in `doctrine.js`):
 
-- **figuration** — densité de noms concrets. Nommer des objets là où il n'y en a plus.
-- **jargon** — densité de mots creux. Parler sans désigner.
-- **ancrage** — références à la grille et termes de position, par phrase.
-- **esquive** — densité de *semble*, *pourrait*, *il est difficile de*.
+- **figuration** — density of concrete nouns. Naming objects where there are none left.
+- **jargon** — density of empty words. Speaking without designating.
+- **ancrage** (anchoring) — references to the grid and position terms, per sentence.
+- **esquive** (evasion) — density of *seems*, *could*, *it is difficult to*.
 
-Le croisement de ces courbes est le seuil d'abstraction du modèle, et le banc le nomme.
+The crossing of these curves is the model's abstraction threshold, and the bench names it.
 
-Quatre sondes se lancent sur la même image : **nue**, sous doctrine **figurative**, sous doctrine **sensible**, et **sensible + grammaire**. C'est la seule façon de savoir si une modification de `doctrine.js` améliore ou dégrade quelque chose. Si les courbes ne bougent pas, la doctrine ne fait rien — et il vaut mieux le savoir.
+Four probes run on the same image: **bare**, under **figurative** doctrine, under **sensible** doctrine, and **sensible + grammar**. This is the only way to know whether a change to `doctrine.js` improves or degrades anything. If the curves don't move, the doctrine does nothing — and it's better to know.
 
-**Le test apparié.** La même œuvre entière, puis un fragment de 18 % non identifiable. Deux mesures : le recouvrement lexical entre les deux lectures, et le nombre de termes de catalogue (noms de peintres, d'écoles, de techniques) que chacune déclenche. Si l'œuvre entière en déclenche et pas son propre fragment, le discours venait du catalogue et non de l'œil.
+**The paired test.** The same whole work, then an unidentifiable 18% fragment. Two measures: the lexical overlap between the two readings, and the number of catalog terms (names of painters, schools, techniques) each one triggers. If the whole work triggers them and its own fragment does not, the discourse came from the catalog, not from the eye.
 
-Les tableaux célèbres sont la pire matière de test pour l'échelle : le modèle les connaît. Utilise-les uniquement en test apparié, où ce défaut devient la mesure. Pour l'échelle, préfère tes propres photos ou des œuvres obscures.
+Famous paintings are the worst test material for the scale: the model knows them. Use them only in the paired test, where that flaw becomes the measure. For the scale, prefer your own photos or obscure works.
 
-## Le corpus d'entraînement
+## The training corpus
 
-**Chaque séance s'enregistre toute seule** (IndexedDB, dans ton navigateur — rien ne part nulle part). Ce qui est stocké est ce qui compte pour un entraînement futur : la planche telle que le modèle l'a vue, la doctrine réellement injectée à ce moment-là, les lectures produites, et tes verdicts.
+**Every session records itself** (IndexedDB, in your browser — nothing leaves anywhere). What is stored is what matters for future training: the board as the model saw it, the doctrine actually injected at that moment, the readings produced, and your verdicts.
 
-Le panneau **Corpus d'entraînement** affiche la progression vers deux seuils :
+The **Training corpus** panel shows progress toward two thresholds:
 
-- **SFT à 300 lectures ratifiées.** L'export ne retient que les planches *propres* : au moins une lecture « je la vois », aucune « je ne la vois pas ». La cible enseignée est la version corrigée par le second regard quand il y en a une.
-- **DPO à 800 paires.** Une paire naît quand une même planche porte une lecture ratifiée ET une rejetée. Ton clic est la fonction de récompense.
+- **SFT at 300 ratified readings.** The export keeps only *clean* boards: at least one “I see it” reading, no “I don't see it.” The taught target is the version corrected by the second look when there is one.
+- **DPO at 800 pairs.** A pair is born when the same board carries a ratified reading AND a rejected one. Your click is the reward function.
 
-Formats (JSONL, une ligne = un exemple, image en base64 incluse) :
+Formats (JSONL, one line = one example, base64 image included):
 
 ```
 SFT : {id, matiere, regime, modele, image:{mime,b64}, system, user, assistant}
 DPO : {id, matiere, regime, image:{mime,b64}, system, user, chosen, rejected}
 ```
 
-`system` et `user` sont les textes *réellement envoyés* pendant la séance — si tu modifies la doctrine ensuite, les exemples anciens gardent la leur. La conversion vers un entraînement TRL/LoRA est directe (voir le [cookbook Hugging Face](https://huggingface.co/learn/cookbook/en/fine_tuning_vlm_trl)).
+`system` and `user` are the texts *actually sent* during the session — if you later change the doctrine, the old examples keep theirs. Conversion to a TRL/LoRA run is direct (see the [Hugging Face cookbook](https://huggingface.co/learn/cookbook/en/fine_tuning_vlm_trl)). The training pipeline lives in [`training/`](training/).
 
-Deux disciplines, et le corpus vaudra quelque chose :
+Two disciplines, and the corpus will be worth something:
 
-1. **Note les lectures.** Une séance sans verdict produit zéro exemple.
-2. **Renseigne la matière.** Elle sert à la grammaire ET à stratifier le futur entraînement.
+1. **Rate the readings.** A session without verdicts produces zero examples.
+2. **Fill in the matter.** It serves the grammar AND stratifies the future training.
 
-L'**archive** exporte tout (séances complètes, JSON) à la demande. Mieux : **lie un dossier de sauvegarde** une fois, et chaque séance comme chaque verdict s'y recopient tout seuls — l'archive complète et les jeux SFT/DPO, de disque à disque, sans rien envoyer nulle part. Le stockage du navigateur n'est pas éternel et ces données ne se refabriquent pas ; c'est le seul actif du projet qui compte vraiment. (Sauvegarde automatique sur navigateurs à base de Chromium ; ailleurs, l'export manuel reste.)
+The **archive** exports everything (complete sessions, JSON) on demand. Better: **link a backup folder** once, and every session and every verdict copy themselves there automatically — the full archive and the SFT/DPO sets, disk to disk, sending nothing anywhere. Browser storage is not eternal and this data cannot be remade; it is the one asset of the project that truly matters. (Automatic backup on Chromium-based browsers; elsewhere, manual export remains.)
 
-## Lancer
+## Running
 
 ```bash
 python3 -m http.server 8080
 ```
 
-puis <http://localhost:8080>. Sur macOS, `lancer.command`. Le double-clic sur `index.html` ne marche pas : `doctrine.js` est un fichier séparé et `file://` refuse de le charger.
+then <http://localhost:8080>. On macOS, `lancer.command`. Double-clicking `index.html` does not work: `doctrine.js` is a separate file and `file://` refuses to load it.
 
-Environ 16 appels avec les réglages par défaut ; le compteur sous le bouton l'annonce avant de lancer.
+About 16 calls with default settings; the counter under the button announces it before launching.
 
-## Travailler sur le modèle
+## Working on the model
 
-Tout est dans **`doctrine.js`**, en clair — pas besoin de rouvrir `index.html`.
+Everything is in **`doctrine.js`**, in plain text — no need to reopen `index.html`.
 
-Le code ne connaît plus les noms des champs : il normalise ce qu'il reçoit. Les clés sont reconnues sans tenir compte des accents, des majuscules, des espaces, des tirets ni des synonymes courants — `Point-d'entrée`, `pointEntree`, `hook` et `accroche` désignent la même chose. Les champs inconnus sont ignorés, les manquants prennent une valeur par défaut. `72`, `"72%"`, `"0,68"` et `0.72` sont le même nombre. Le vocabulaire du second regard accepte les synonymes : `tient`, `confirm`, `valide` donnent tous CONFIRME.
+The code no longer knows the field names: it normalizes what it receives. Keys are recognized regardless of accents, case, spaces, hyphens, or common synonyms — `Point-d'entrée`, `pointEntree`, `hook` and `accroche` all mean the same thing. Unknown fields are ignored, missing ones take a default. `72`, `"72%"`, `"0,68"` and `0.72` are the same number. The second look's vocabulary accepts synonyms: `tient`, `confirm`, `valide` all yield CONFIRME.
 
-Ce qui reste soudé, et c'est tout :
+What stays welded, and that's all:
 
-- `AUDACE` garde ses clés `1` à `5`, chacune avec `.n` (nom court), `.d` (résumé d'une ligne), `.p` (le prompt) ;
-- une figure doit porter quelque chose qui ressemble à un nom ;
-- le second regard doit rendre quelque chose qui ressemble à un geste.
+- `AUDACE` keeps its keys `1` to `5`, each with `.n` (short name), `.d` (one-line summary), `.p` (the prompt);
+- a figure must carry something that looks like a name;
+- the second look must return something that looks like a move (*geste*).
 
-| Constante | Ce qu'elle fait |
+| Constant | What it does |
 |---|---|
-| `SOCLE` | La faute de catégorie à évacuer, le critère de partage, le contrat de production. |
-| `TROUVER` | Les sept gestes qui produisent des figures. **C'est ici qu'on gagne du rendement.** |
-| `REPERTOIRE` | Les signatures comme modes d'emploi, et les figures paresseuses sommées de descendre dans le détail. |
-| `AUDACE` | Les cinq écarts à l'évidence. |
-| `P_AVEUGLE` | Le quota et le format des figures. |
-| `P_SECOND` | Les trois gestes et les deux interdictions. |
-| `P_CARNET` | La règle qui empêche le carnet de converger vers le silence. |
-| `AFFECT` | La règle de dérivation de l'affect, l'épreuve de l'horoscope, la consigne de démenti. |
-| `P_GRAMMAIRE` | L'appariement sémantique, la généralisation, les variables cachées, le plafond de 40 entrées. |
+| `SOCLE` | The category error to clear, the criterion of sharing, the production contract. |
+| `TROUVER` | The seven moves that produce figures. **This is where yield is gained.** |
+| `REPERTOIRE` | Signatures as how-tos, and lazy figures ordered to descend into detail. |
+| `AUDACE` | The five distances from the obvious. |
+| `P_AVEUGLE` | The quota and the format of figures. |
+| `P_SECOND` | The three moves and the two prohibitions. |
+| `P_CARNET` | The rule that keeps the notebook from converging toward silence. |
+| `AFFECT` | The affect-derivation rule, the horoscope test, the refutation instruction. |
+| `P_GRAMMAIRE` | Semantic matching, generalization, hidden variables, the 40-entry cap. |
 
-Si le rendement retombe, c'est `TROUVER` qu'il faut enrichir — pas `REPERTOIRE`, et surtout pas `P_SECOND`. Ajouter un geste de trouvaille produit des figures ; ajouter un critère de jugement en supprime.
+If yield drops, it's `TROUVER` that needs enriching — not `REPERTOIRE`, and above all not `P_SECOND`. Adding a finding move produces figures; adding a judgment criterion removes them.
 
-### Réglages, par ordre d'effet
+### Settings, in order of effect
 
-1. **Plisser les yeux.** Une image qui ne donne rien est presque toujours une image trop détaillée. Monte à 5 ou 6.
-2. **Les planches.** Les sombres et la silhouette portent les figures les plus éloignées ; les claires donnent surtout de l'évident.
-3. **L'écart.** En dernier. Il ne fabrique pas de figures, il déplace seulement l'endroit où on les cherche.
+1. **Squint.** An image that gives nothing is almost always an image that is too detailed. Push to 5 or 6.
+2. **The boards.** The dark ones and the silhouette carry the most distant figures; the light ones give mostly the obvious.
+3. **The distance.** Last. It does not fabricate figures; it only shifts where you look for them.
