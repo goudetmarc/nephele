@@ -1,54 +1,56 @@
-# Nephélé — contexte projet
+# Nephélé — project context
 
-Application d'appareillage de formes : trouver des figures dans des matières qui n'en portent aucune (nuages, rouille, écorce, peinture), et lire les champs non figuratifs par ce qu'ils *font* plutôt que par ce qu'ils montrent. Une seule page HTML par outil, zéro build, zéro dépendance, API Anthropic appelée directement depuis le navigateur.
+A form-matching application: finding figures in matter that carries none (clouds, rust, bark, paint), and reading non-figurative fields by what they *do* rather than by what they show. One HTML page per tool, zero build, zero dependencies, the Anthropic API called directly from the browser.
 
-## Les trois fichiers
+> Note: the app's interface and doctrine are written in **French** (see Working conventions). This `CLAUDE.md`, the `README.md` and `FONDEMENTS.md` are in English; the tool itself stays French. Code identifiers, doctrine constants (e.g. `AUDACE`, `TROUVER`), board names and move values (`CONFIRME`/`AFFINE`/`REMPLACE`) are literal app tokens — keep them as-is.
 
-| Fichier | Rôle | Règle |
+## The three files
+
+| File | Role | Rule |
 |---|---|---|
-| `doctrine.js` | **Tout ce que le modèle sait.** Socle, gestes de trouvaille, répertoire, régime sensible, dérivation de l'affect, prompts de toutes les passes, lexiques du banc. | C'est LE fichier de travail. 95 % des améliorations se font ici. |
-| `index.html` | La tuyauterie : planches (traitement d'image canvas), pipeline, second regard, carnet, grammaire, corpus. | N'y toucher que pour la mécanique, jamais pour le comportement du modèle. |
-| `banc.html` | L'instrument de mesure : 4 sondes, échelle de dégradation, test apparié. | Juge de paix de toute modification de doctrine. |
+| `doctrine.js` | **Everything the model knows.** Base (SOCLE), finding moves, repertoire, sensible regime, affect derivation, the prompts of every pass, the bench lexicons. | This is THE working file. 95% of improvements happen here. |
+| `index.html` | The plumbing: boards (canvas image processing), pipeline, second look, notebook, grammar, corpus. | Touch it only for mechanics, never for model behavior. |
+| `banc.html` | The measuring instrument: 4 probes, degradation scale, paired test. | The arbiter of any doctrine change. |
 
-## Le contrat doctrine ↔ code (à ne pas casser)
+## The doctrine ↔ code contract (do not break)
 
-`index.html` normalise tout ce qu'il reçoit : clés reconnues sans accents/casse/synonymes, champs inconnus ignorés, manquants avec défauts, `72`/`"72%"`/`0.72` équivalents. On peut donc réécrire les prompts et renommer les champs librement. Trois soudures seulement :
+`index.html` normalizes everything it receives: keys recognized regardless of accents/case/synonyms, unknown fields ignored, missing ones defaulted, `72`/`"72%"`/`0.72` equivalent. Prompts can therefore be rewritten and fields renamed freely. Only three welds:
 
-- `AUDACE` garde ses clés `1`–`5` avec `.n`, `.d`, `.p` ;
-- une figure doit porter quelque chose qui ressemble à un nom ;
-- le second regard rend quelque chose qui ressemble à un geste (confirme/affine/remplace, synonymes acceptés).
+- `AUDACE` keeps its keys `1`–`5` with `.n`, `.d`, `.p`;
+- a figure must carry something that looks like a name;
+- the second look returns something that looks like a move (confirme/affine/remplace, synonyms accepted).
 
-## L'histoire des versions — les leçons payées
+## Version history — the lessons paid for
 
-- **v1** : machine à prompts. Le modèle récitait le corpus (« un dragon dans les nuages ») au lieu de regarder. **Leçon : le problème est en amont du prompt — couper la reconnaissance de scène en ne montrant jamais la photo, seulement des planches binarisées.**
-- **v2** : rigueur importée des sciences → stérilité totale. L'attaque « artefact du seuil » invalidait 100 % des figures par construction ; le carnet apprenait à se taire. **Leçon : une paréidolie n'a pas de vérité de terrain. La seule question valide : « est-ce que ça tient le contour ? » (critère de partage, pas de vérité). On ne récuse JAMAIS une figure au motif qu'elle est produite par le traitement.**
-- **v3** : séparation trouver/trier. Gestes de trouvaille (descendre d'échelle en premier — biais mesuré : les modèles font 87-90 % de réponses globales au Rorschach), quota + relance, le contradicteur devient second regard qui ne rend jamais une case vide. **Leçon : ajouter un geste de trouvaille produit des figures ; ajouter un critère de jugement en supprime.**
-- **v4** : régime sensible (10 dimensions : poids, forces, lumière, température, temps, touche, trajet de l'œil, tension, rythme, économie) + planches couleur (chaud/froid est la plus révélatrice) + banc d'abstraction. **Leçon : les mots creux du discours sur l'art (« vibrant », « atmosphère ») sont les dragons du non-figuratif — plus dangereux car ils passent pour de la culture. Si le modèle reconnaît l'œuvre, il doit se taire.**
-- **v5** : la grammaire configuration → effet. L'affect n'est jamais une affirmation, toujours la seconde moitié d'une affirmation dont la première est une configuration. Épreuve de l'horoscope : tout rapport doit avoir un démenti imaginable. Admission = récurrence sur 2 matières sans rapport + ratification humaine. L'état (candidate/admise/suspendue) est calculé par le code, jamais déclaré par le modèle.
-- **v5.1** : le corpus (phase 0). Chaque séance s'enregistre en IndexedDB au format d'entraînement : planche vue + doctrine réellement injectée + verdicts. Exports SFT (planches propres uniquement) et DPO (paires je-la-vois/je-ne-la-vois-pas sur même planche).
+- **v1**: a prompt machine. The model recited the corpus (“a dragon in the clouds”) instead of looking. **Lesson: the problem is upstream of the prompt — cut scene recognition by never showing the photo, only binarized boards.**
+- **v2**: rigor imported from the sciences → total sterility. The “threshold artifact” attack invalidated 100% of figures by construction; the notebook learned to keep quiet. **Lesson: a pareidolia has no ground truth. The only valid question: “does it hold the contour?” (a criterion of sharing, not of truth). NEVER reject a figure on the grounds that it was produced by the processing.**
+- **v3**: separating finding from sorting. Finding moves (drop down in scale first — measured bias: models give 87-90% whole responses on the Rorschach), quota + re-prompt, the adversary becomes a second look that never returns an empty slot. **Lesson: adding a finding move produces figures; adding a judgment criterion removes them.**
+- **v4**: the sensible regime (10 dimensions: weight, forces, light, temperature, time, brushwork, eye path, tension, rhythm, economy) + color boards (warm/cool is the most revealing) + the abstraction bench. **Lesson: the empty words of art discourse (“vibrant”, “atmosphere”) are the dragons of the non-figurative — more dangerous because they pass for culture. If the model recognizes the artwork, it must keep quiet.**
+- **v5**: the configuration → effect grammar. Affect is never an assertion, always the second half of an assertion whose first half is a configuration. The horoscope test: every relation must have an imaginable refutation. Admission = recurrence over 2 unrelated kinds of matter + human ratification. The state (candidate/admitted/suspended) is computed by the code, never declared by the model.
+- **v5.1**: the corpus (phase 0). Each session records itself in IndexedDB in training format: board seen + doctrine actually injected + verdicts. SFT exports (clean boards only) and DPO exports (I-see-it / I-don't-see-it pairs on the same board).
 
-## La feuille de route
+## The roadmap
 
-- **Phase 1** (à 300 lectures ratifiées) : premier cycle SFT — LoRA sur un VLM ouvert 7B (Qwen2.5-VL), recette TRL/HF. Objectif : le format, le réflexe d'ancrage, le refus du jargon.
-- **Phase 2** (à 800 paires) : cycle DPO — apprendre la préférence de Marc.
-- **Règles absolues** : ne JAMAIS entraîner sur du non-ratifié (sinon amplificateur de défauts, cf. carnet v2). Le banc arbitre chaque cycle sur des images jamais vues à l'entraînement. Le fine-tuning consolide la grammaire, il ne la remplace pas (mémoire lente / mémoire rapide).
-- **Piste parallèle sous-cotée** : CLIP/SigLIP fine-tuné silhouette → concept (champ ZS-SBIR) comme amorceur non verbal, incontaminable par le corpus. Les planches binarisées sont déjà des quasi-esquisses.
+- **Phase 1** (at 300 ratified readings): first SFT cycle — LoRA on an open 7B VLM (Qwen2.5-VL), TRL/HF recipe. Goal: the format, the anchoring reflex, the refusal of jargon.
+- **Phase 2** (at 800 pairs): DPO cycle — learning Marc's preference.
+- **Absolute rules**: NEVER train on unratified data (else an amplifier of defects, cf. the v2 notebook). The bench arbitrates each cycle on images never seen during training. Fine-tuning consolidates the grammar, it does not replace it (slow memory / fast memory).
+- **Undervalued parallel track**: a CLIP/SigLIP fine-tuned silhouette → concept (ZS-SBIR field) as a non-verbal primer, uncontaminable by the corpus. The binarized boards are already near-sketches.
 
-## Références clés
+## Key references
 
-Citations complètes, formules et filiations dans `FONDEMENTS.md`. Les quatre points d'appui empiriques (vérifiés) :
+Full citations, formulas and lineages in `FONDEMENTS.md`. The four (verified) empirical anchors:
 
-- **FacesInThings** — Hamilton et al., *Seeing Faces in Things* (ECCV 2024, MIT, arXiv:2409.16143, `pip install facesinthings`) : ~5 000 images annotées, le banc d'essai visages. Le papier modélise un « pic paréidolique » ; le besoin évolutif de détecter aussi les visages d'*animaux* explique une part de l'écart machine/humain.
-- **Bistable Images** — Panagopoulou, Melkin & Callison-Burch (CMCL @ ACL 2024, arXiv:2405.19423) : sur 29 images et 116 manipulations (luminosité, teinte, rotation), la variance est *minimale* — la monomanie interprétative est **robuste** (elle ne se débloque pas d'un simple pivot). D'où la nécessité des gestes anti-monomanie, pas leur validation.
-- **Rorschach × IA** — *Human Shadows in Machine Minds* (JMIR Mental Health 2026, e88186) : biais de réponse globale quantifié — GPT-4o 86,7 % et Grok 3 90 % de réponses « globales » (W) ; Gemini à dominante détail (contre-exemple). Valide « descendre d'échelle » pour les modèles W-dominants.
-- **Arnheim, *Art and Visual Perception*** (1954) : la référence de la grammaire configuration → effet.
-- **GalleryGPT / PaintingForm** — Bin et al. (ACM MM 2024, doi:10.1145/3664647.3681656 ; arXiv:2408.00491) : ~19k tableaux + ~50k analyses formelles — référence du régime sensible.
+- **FacesInThings** — Hamilton et al., *Seeing Faces in Things* (ECCV 2024, MIT, arXiv:2409.16143, `pip install facesinthings`): ~5,000 annotated images, the face test bench. The paper models a “pareidolic peak”; the evolutionary need to also detect *animal* faces explains part of the machine/human gap.
+- **Bistable Images** — Panagopoulou, Melkin & Callison-Burch (CMCL @ ACL 2024, arXiv:2405.19423): over 29 images and 116 manipulations (brightness, tint, rotation), the variance is *minimal* — interpretive monomania is **robust** (it does not unlock from a mere pivot). Hence the necessity of the anti-monomania moves, not their validation.
+- **Rorschach × AI** — *Human Shadows in Machine Minds* (JMIR Mental Health 2026, e88186): whole-response bias quantified — GPT-4o 86.7% and Grok 3 90% of “whole” (W) responses; Gemini detail-dominant (counter-example). Validates “drop down in scale” for W-dominant models.
+- **Arnheim, *Art and Visual Perception*** (1954): the reference for the configuration → effect grammar.
+- **GalleryGPT / PaintingForm** — Bin et al. (ACM MM 2024, doi:10.1145/3664647.3681656; arXiv:2408.00491): ~19k paintings + ~50k formal analyses — reference for the sensible regime.
 
-## Conventions de travail
+## Working conventions
 
-- Test systématique en Playwright headless avec API Anthropic mockée (SSE simulé) avant toute livraison. Chromium préinstallé : `executablePath:'/opt/pw-browsers/chromium'` en session cloud.
-- Les tests incluent des cas hostiles : JSON déformés (dialectes), planches pauvres (relance), règles-horoscope (retrait).
-- Jamais de page vide comme résultat possible. Le doute classe, il ne tait pas.
-- Interface et doctrine en français, sobre, sans emphase.
-- Les données personnelles (corpus, grammaire, carnet, exports) sont dans `.gitignore` — ne jamais les versionner.
-- Modèles API valides : `claude-opus-5`, `claude-sonnet-5`, `claude-haiku-4-5`. Les modèles récents refusent `temperature` (auto-géré dans `ask()`).
+- Systematic testing in headless Playwright with a mocked Anthropic API (simulated SSE) before any delivery. Chromium is preinstalled: `executablePath:'/opt/pw-browsers/chromium'` in a cloud session.
+- Tests include hostile cases: deformed JSON (dialects), poor boards (re-prompt), horoscope rules (removal).
+- Never an empty page as a possible result. Doubt ranks, it does not silence.
+- The interface and doctrine are in French, sober, without emphasis. (The docs — this file, `README.md`, `FONDEMENTS.md` — are in English.)
+- Personal data (corpus, grammar, notebook, exports) is in `.gitignore` — never version it.
+- Valid API models: `claude-opus-5`, `claude-sonnet-5`, `claude-haiku-4-5`. Recent models reject `temperature` (auto-handled in `ask()`).
