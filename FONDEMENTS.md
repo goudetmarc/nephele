@@ -108,8 +108,8 @@ comme assemblages de primitives (*geons*) définies par leurs contours.
 > - *« Chercher la pointe / l'extrémité »* — les extrema de courbure (au sens
 >   d'Attneave) sont les ancres naturelles de la figure.
 >
-> Le biais mesuré au Rorschach (87–90 % de **réponses globales** chez les modèles,
-> cf. §4) est précisément l'échec à descendre au niveau où l'information est.
+> Le biais mesuré au Rorschach (≈87–90 % de **réponses globales** chez GPT-4o et
+> Grok 3, cf. §3) est précisément l'échec à descendre au niveau où l'information est.
 
 ---
 
@@ -121,18 +121,24 @@ n'en tient qu'une à la fois — c'est la **rivalité perceptive**. Le corollair
 **monomanie interprétative**, est le risque central d'un lecteur de formes : se
 fixer sur la première lecture et ne plus voir les autres.
 
-Références du projet :
+Références du projet (citations vérifiées, §Bibliographie) :
 
-- **Bistable Images** (CMCL / ACL 2024) : la monomanie interprétative des modèles
-  est générale, et **la rotation est la manipulation d'image la plus efficace**
-  pour débloquer une seconde lecture.
-- **Rorschach × IA** (JMIR Mental Health, réf. projet) : quantifie le **biais de
-  réponse globale** — les modèles répondent à la planche entière (87–90 %) là où
-  l'humain descend au détail.
-- **FacesInThings** (*Seeing Faces in Things*, ECCV 2024, MIT, licence MIT ;
-  `pip install facesinthings`) : ~5 000 images de paréidolie de visages annotées.
-  Résultat exploité par le projet : *fine-tuner sur des visages d'animaux réduit
-  de moitié l'écart machine/humain*.
+- **Bistable Images** — Panagopoulou, Melkin & Callison-Burch (CMCL @ ACL 2024,
+  arXiv:2405.19423). Sur 29 images bistables et 116 manipulations (luminosité,
+  teinte, rotation), les modèles montrent une **préférence marquée pour une seule
+  interprétation** et une **variance minimale sous manipulation** (à quelques
+  exceptions près). Autrement dit : la monomanie interprétative est *robuste* —
+  elle ne se débloque pas d'un simple pivot, ce qui rend d'autant plus nécessaires
+  les gestes anti-monomanie.
+- **Rorschach × IA** — *Human Shadows in Machine Minds* (JMIR Mental Health 2026,
+  e88186) : quantifie le **biais de réponse globale**. GPT-4o et Grok 3 rendent
+  respectivement **86,7 % et 90 % de réponses « globales » (W)** là où l'humain
+  descend au détail ; Gemini, à dominante détail (D), fait exception.
+- **FacesInThings** — *Seeing Faces in Things*, Hamilton et al. (ECCV 2024, MIT,
+  arXiv:2409.16143 ; ~5 000 images de paréidolie de visages annotées, licence MIT).
+  Le papier modélise un **« pic paréidolique »** (une complexité d'image « juste
+  ce qu'il faut ») et montre que le besoin évolutif de détecter aussi les visages
+  d'**animaux** explique une part de l'écart machine/humain.
 
 > **Traduction.** Trois mécanismes :
 > - `TROUVER` impose *« Pivoter »* (la rotation d'ACL 2024) et *« Tenir deux
@@ -410,9 +416,10 @@ Ce chemin ne produit pas de texte : il ne peut donc pas réciter le catalogue.
 **Multistabilité, paréidolie, Rorschach**
 - Rorschach, H. (1921). *Psychodiagnostik.*
 - Jastrow, J. (1899) ; Wittgenstein, L. (1953). *Recherches philosophiques* (voir-comme).
-- *Bistable Images* (CMCL/ACL, 2024).
-- *Rorschach × IA* (JMIR Mental Health, réf. projet).
-- *Seeing Faces in Things* — FacesInThings (ECCV 2024, MIT).
+- Panagopoulou, A., Melkin, C. & Callison-Burch, C. (2024). *Evaluating Vision-Language Models on Bistable Images.* CMCL @ ACL 2024. arXiv:2405.19423 — https://aclanthology.org/2024.cmcl-1.2/
+- *Human Shadows in Machine Minds: Quantitative Study Interpreting AI Responses to the Rorschach Test.* JMIR Mental Health, 2026;e88186 — https://mental.jmir.org/2026/1/e88186 (PMC13168847)
+- Hamilton, M. et al. (2024). *Seeing Faces in Things: A Model and Dataset for Pareidolia.* ECCV 2024, MIT. arXiv:2409.16143 — https://arxiv.org/abs/2409.16143 · code : https://github.com/mhamilton723/FacesInThings
+- *Diamonds in the Sky: Pareidolic Animals in Clouds.* arXiv:2606.01361 (directement sur la matière du projet — animaux dans les nuages).
 
 **Décision, épistémologie**
 - Green, D. & Swets, J. (1966). *Signal Detection Theory and Psychophysics.*
@@ -425,7 +432,7 @@ Ce chemin ne produit pas de texte : il ne peut donc pas réciter le catalogue.
 - Kandinsky, W. (1911) *Du spirituel dans l'art* ; (1926) *Point et ligne sur plan.*
 - Klee, P. (1925). *Pädagogisches Skizzenbuch.*
 - Arnheim, R. (1954). *Art and Visual Perception.*
-- *GalleryGPT / PaintingForm* (ACM MM 2024).
+- Bin, Y. et al. (2024). *GalleryGPT: Analyzing Paintings with Large Multimodal Models* (dataset PaintingForm, ~19 k tableaux / ~50 k analyses). ACM MM 2024. doi:10.1145/3664647.3681656 ; arXiv:2408.00491 — https://github.com/steven640pixel/GalleryGPT
 
 **Traitement d'image**
 - Otsu, N. (1979). *A threshold selection method from gray-level histograms.* IEEE TSMC.
