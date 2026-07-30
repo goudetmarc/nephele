@@ -876,3 +876,36 @@ D'abord, où les trois s'écartent : montre comment le même point de l'image �
 Ensuite, où malgré tout ils se touchent : s'il arrive que les trois, par des chemins opposés, butent sur le même endroit ou la même émotion, dis-le. Ce point de rencontre entre l'ignorant et le savant est précieux — c'est peut-être ce que l'œuvre fait à tout le monde, en deçà de la culture.
 
 Reste concret : cite les endroits de l'image dont il s'agit. Ne referme pas — laisse les trois voix ouvertes. Français sobre, un paragraphe pour chaque mouvement.`;
+
+
+/* ############################################################################
+   LE PONT — la passe aveugle nourrit le naïf (option 1)
+
+   Le naïf de dixit.html est un faux naïf : le modèle a déjà reconnu l'œuvre
+   avant de « ressentir », et son émotion est récitée — le dragon dans les
+   nuages, déplacé sur l'affect. Le régime sous œillères est le seul dispositif
+   qui produise une perception d'AVANT la reconnaissance. On s'en sert donc
+   comme d'un sol : une silhouette binarisée, lue en forces nues et sans nom
+   (P_REGARD_NU), devient l'amorce à partir de laquelle le naïf bâtit une
+   émotion honnête (P_NAIF_SUBSTRAT). Les œillères ne brident pas le cœur :
+   elles le libèrent du catalogue.
+   ############################################################################ */
+
+const P_REGARD_NU = `On te remet une silhouette : cette image réduite au noir et blanc, la luminance tranchée. Ni couleur, ni scène, ni titre — rien à reconnaître, et c'est voulu.
+
+Ne cherche pas ce que c'est. Dis ce que ce champ FAIT, en forces : où porte le poids et s'il tient, ce qui pousse et ce qui retient, d'où semble venir la lumière, par où l'œil entre et où il se coince, où le rythme se rompt, ce qui tire contre quoi. Chaque force nomme la zone qui la produit.
+
+Grille de repérage : colonnes A à E de gauche à droite, lignes 1 à 5 de haut en bas.
+
+Cinq à huit lignes, en prose serrée. Aucun nom d'objet, aucune interprétation, aucune émotion : seulement les forces et leurs lieux. Tu poses un sol, pas un tableau.`;
+
+
+const P_NAIF_SUBSTRAT = `—— UN SOL T'EST DONNÉ ——
+
+Tu ne regardes pas d'abord un tableau. Quelqu'un a regardé cette image réduite à une silhouette, sans savoir ce que c'était, et n'en a rapporté que des forces nues :
+
+{SUBSTRAT}
+
+Ces forces, tu les as dans le corps avant tout nom. Pars d'elles. Laisse l'œuvre en couleur t'arriver par-dessus, mais que ton émotion monte de ces forces-là — pas de ce que tu crois reconnaître. Tu ne récites rien : il n'y a rien à réciter dans un relevé de poids et de tensions.
+
+Ne rapporte pas les forces et ne les analyse pas. Ressens-les. Dis ce qu'elles réveillent, ce qu'elles serrent ou desserrent, ce qui remonte.`;

@@ -15,6 +15,12 @@ const { pngBuffer } = require('./make-image');
 
 /** Rend une prose différente selon la posture injectée dans le système. */
 function proseParPosture({ system }) {
+  // La passe aveugle : système = SOCLE_SENSIBLE (aucun marqueur de posture).
+  if (/sans le réduire à ce qu'il représente/.test(system))
+    return "Le poids bascule à gauche, A3-B5 ; le quart droit reste vide et rien ne le retient. Le rythme se rompt en C4.";
+  // Le naïf « à nu » : nourri du substrat (marqueur unique de l'amorce).
+  if (/UN SOL T'EST DONNÉ/.test(system))
+    return "Ce basculement à gauche m'oppresse avant que je sache quoi que ce soit ; le vide de droite me donne le vertige.";
   if (/TU ES LE NAÏF/.test(system))
     return "Je recule d'un pas. Ce rouge en bas me serre la gorge, il me revient une cuisine d'enfance.";
   if (/TU ES LE CHERCHEUR/.test(system))
@@ -79,6 +85,41 @@ test('dixit : sans tissage, trois appels et trois voix', async ({ page }) => {
   await expect(page.locator('.voix.tissage')).toHaveCount(0);
   await expect(page.locator('.banner')).toHaveCount(0);
   expect(calls.length).toBe(3);
+});
+
+test('dixit : la passe aveugle nourrit le naïf, deux naïfs en comparatif', async ({ page }) => {
+  const { calls } = await mockAnthropic(page, { responder: proseParPosture });
+  await page.goto('/dixit.html');
+
+  await page.fill('#key', 'test-mock-key');
+  await page.check('#doAveugle');
+  await chargeImage(page);
+
+  await expect(page.locator('#run')).toBeEnabled({ timeout: 10000 });
+  await page.click('#run');
+
+  // Six voix : le regard nu, deux naïfs, chercheur, connaisseur, tissage.
+  await expect(page.locator('.voix')).toHaveCount(6, { timeout: 30000 });
+
+  // Le regard nu montre la silhouette binarisée et un relevé de forces sans nom.
+  await expect(page.locator('.voix.nu')).toHaveCount(1);
+  await expect(page.locator('.voix.nu .board')).toBeVisible();
+  await expect(page.locator('.voix.nu .prose')).toContainText('bascule à gauche');
+
+  // Le comparatif tient les deux naïfs côte à côte, distincts.
+  const duo = page.locator('.compare .voix.naif');
+  await expect(duo).toHaveCount(2);
+  await expect(duo.nth(0)).toContainText('aveugle');            // en-tête
+  await expect(duo.nth(0).locator('.prose')).toContainText('cuisine');
+  await expect(duo.nth(1)).toContainText('à nu');               // en-tête
+  await expect(duo.nth(1).locator('.prose')).toContainText('avant que je sache');
+
+  await expect(page.locator('.voix.tissage')).toHaveCount(1);
+  await expect(page.locator('.voix.fail')).toHaveCount(0);
+  await expect(page.locator('.banner')).toHaveCount(0);
+
+  // Six appels : aveugle + 2 naïfs + chercheur + connaisseur + tissage.
+  expect(calls.length).toBe(6);
 });
 
 test('dixit : sans clé, un bandeau le dit et rien n’est appelé', async ({ page }) => {

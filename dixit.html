@@ -77,6 +77,16 @@
   .voix.fail{border-color:var(--rouge)}
   .voix.fail .prose{color:var(--rouge); font-family:var(--sans); font-size:13px}
 
+  /* passe aveugle : le sol de forces + le comparatif des deux naïfs */
+  .voix.nu{background:var(--bg2); border-style:dashed}
+  .voix.nu header .qui{color:var(--ink2)}
+  .voix.nu .board{float:right; width:96px; margin:0 0 8px 12px; border-radius:5px; border:1px solid var(--line); background:#fff}
+  .voix.nu .prose{font-family:var(--mono); font-size:12.5px; line-height:1.6; color:var(--ink2); white-space:pre-wrap}
+  .compare{display:flex; gap:16px; flex-wrap:wrap; max-width:760px; margin:0 auto 18px}
+  .compare .voix{flex:1 1 320px; margin:0; max-width:none}
+  .compare .voix header .quoi{font-size:11px}
+  .compare .tag2{width:100%; text-align:center; font-size:11px; color:var(--ink3); font-family:var(--mono); margin:-4px auto 0}
+
   .banner{background:var(--bg3); border:1px solid var(--rouge); color:var(--ink); border-radius:8px; padding:12px 14px; margin:14px auto; max-width:760px; font-size:13.5px}
   .spin{display:inline-block; width:11px; height:11px; border:2px solid var(--ink3); border-top-color:transparent; border-radius:50%; animation:sp .7s linear infinite; vertical-align:middle}
   @keyframes sp{to{transform:rotate(360deg)}}
@@ -98,6 +108,7 @@
 
   <div class="sect">
     <h2>Regards</h2>
+    <div class="sw"><input type="checkbox" id="doAveugle"><label for="doAveugle">Passe aveugle — nourrir le naïf<small>Une silhouette binarisée est lue en forces nues, sans nom, et sert de sol au naïf. On affiche alors les deux naïfs côte à côte : à l'aveugle vs à nu.</small></label></div>
     <div class="sw"><input type="checkbox" id="doTissage" checked><label for="doTissage">Tisser les trois<small>Un quatrième passage qui les tient ensemble sans les fondre.</small></label></div>
   </div>
 
@@ -183,7 +194,33 @@ async function ask({system, content, maxTokens=1400, temperature=1, onDelta, sig
   return out;
 }
 
-/* ── image : on la borne à 1024 px et on l'encode en JPEG ────────────────── */
+/* ── la silhouette aveugle : luminance tranchée à son seuil d'Otsu ────────── */
+function binarise(ctx, w, h){
+  const d=ctx.getImageData(0,0,w,h), p=d.data;
+  const lum=new Uint8Array(w*h), hist=new Array(256).fill(0);
+  for(let i=0,j=0;i<p.length;i+=4,j++){
+    const L=(p[i]*0.299+p[i+1]*0.587+p[i+2]*0.114)|0; lum[j]=L; hist[L]++;
+  }
+  // Otsu : le seuil qui maximise la variance inter-classes.
+  const tot=w*h; let sum=0; for(let t=0;t<256;t++) sum+=t*hist[t];
+  let sumB=0, wB=0, max=-1, seuil=127;
+  for(let t=0;t<256;t++){
+    wB+=hist[t]; if(!wB) continue; const wF=tot-wB; if(!wF) break;
+    sumB+=t*hist[t];
+    const mB=sumB/wB, mF=(sum-sumB)/wF, v=wB*wF*(mB-mF)*(mB-mF);
+    if(v>max){ max=v; seuil=t; }
+  }
+  const o=document.createElement("canvas"); o.width=w; o.height=h;
+  const octx=o.getContext("2d"), od=octx.createImageData(w,h), q=od.data;
+  for(let j=0,i=0;j<lum.length;j++,i+=4){
+    const v=lum[j]<seuil?0:255;             // sombre → noir, clair → blanc
+    q[i]=q[i+1]=q[i+2]=v; q[i+3]=255;
+  }
+  octx.putImageData(od,0,0);
+  return o.toDataURL("image/png");
+}
+
+/* ── image : on la borne à 1024 px, JPEG couleur + planche aveugle PNG ───── */
 function chargeFichier(file){
   if(!file || !/^image\//.test(file.type)) return;
   const rd=new FileReader();
@@ -193,9 +230,11 @@ function chargeFichier(file){
       const max=1024, r=Math.min(1,max/Math.max(im.width,im.height));
       const w=Math.round(im.width*r), h=Math.round(im.height*r);
       const c=document.createElement("canvas"); c.width=w; c.height=h;
-      c.getContext("2d").drawImage(im,0,0,w,h);
+      const ctx=c.getContext("2d"); ctx.drawImage(im,0,0,w,h);
       const url=c.toDataURL("image/jpeg",.9);
-      state.img={ b64:url.split(",")[1], mime:"image/jpeg", url, nom:file.name };
+      const bUrl=binarise(ctx,w,h);
+      state.img={ b64:url.split(",")[1], mime:"image/jpeg", url, nom:file.name,
+                  board:{ b64:bUrl.split(",")[1], mime:"image/png", url:bUrl } };
       $("#prev").innerHTML=`<img src="${url}" alt="">`;
       refresh();
     };
@@ -204,13 +243,6 @@ function chargeFichier(file){
   rd.readAsDataURL(file);
 }
 
-/* ── les trois postures ──────────────────────────────────────────────────── */
-const POSTURES = [
-  { cls:"naif",        qui:"Le naïf",        quoi:"il ne sait rien, et reçoit tout",        prompt:()=>P_NAIF },
-  { cls:"chercheur",   qui:"Le chercheur",   quoi:"il pressent un sens caché, et creuse",   prompt:()=>P_CHERCHEUR },
-  { cls:"connaisseur", qui:"Le connaisseur", quoi:"il reconnaît, et cherche l'intention",   prompt:()=>P_CONNAISSEUR },
-];
-
 function voixCard(cls, qui, quoi){
   const el=document.createElement("section"); el.className="voix "+cls;
   el.innerHTML=`<header><span class="qui">${qui}</span><span class="quoi">${quoi}</span></header>
@@ -218,6 +250,7 @@ function voixCard(cls, qui, quoi){
   const prose=el.querySelector(".prose");
   el.__set = t => { prose.classList.remove("pending"); prose.textContent=t; };
   el.__fail = m => { el.classList.add("fail"); prose.classList.remove("pending"); prose.textContent=m; };
+  el.__board = url => { const b=new Image(); b.className="board"; b.src=url; prose.before(b); };
   return el;
 }
 
@@ -234,38 +267,66 @@ async function run(){
   fig.innerHTML=`<img src="${state.img.url}" alt=""><figcaption>${esc(state.img.nom||"l'œuvre")}</figcaption>`;
   stage.appendChild(fig);
 
-  const cards=POSTURES.map(p=>{ const c=voixCard(p.cls,p.qui,p.quoi); stage.appendChild(c); return c; });
+  const img = imgBlock(state.img.b64, state.img.mime);
+  const cue = {type:"text", text:"Voici l'œuvre. Regarde-la, et parle."};
+
+  // Lance une voix dans sa carte ; renvoie le texte, ou null si le regard se perd.
+  const lire = async (c, system, content, temp=1) => {
+    try{ const t=await ask({system, maxTokens:1400, temperature:temp, signal, content, onDelta:x=>c.__set(x)}); c.__set(t); return t; }
+    catch(e){ if(e.name==="AbortError") throw e; c.__fail("Ce regard s'est perdu : "+e.message); return null; }
+  };
 
   try{
-    /* Les trois regards, en parallèle et INDÉPENDANTS : aucun ne voit ce que
-       les autres disent, pour que le naïf ne soit pas teinté par le savant. */
-    const lectures = await Promise.all(POSTURES.map(async (p,i)=>{
-      const c=cards[i];
-      try{
-        const t=await ask({ system:SOCLE_PROJECTIF+"\n\n"+p.prompt(), maxTokens:1400, temperature:1, signal,
-          content:[imgBlock(state.img.b64,state.img.mime),
-                   {type:"text",text:"Voici l'œuvre. Regarde-la, et parle."}],
-          onDelta:t=>c.__set(t) });
-        c.__set(t);
-        return { qui:p.qui, texte:t };
-      }catch(e){
-        if(e.name==="AbortError") throw e;
-        c.__fail("Ce regard s'est perdu : "+e.message);
-        return null;
-      }
-    }));
+    const aveugle = $("#doAveugle").checked;
+    let naifTexte = null;    // la voix du naïf qui nourrira le tissage
+
+    if(aveugle){
+      /* 1. la passe aveugle : une silhouette lue en forces nues, sans nom. */
+      const cNu=voixCard("nu","Regard nu","à l'aveugle, sans le nom — un sol de forces");
+      stage.appendChild(cNu); cNu.__board(state.img.board.url);
+      const substrat = await lire(cNu, SOCLE_SENSIBLE,
+        [imgBlock(state.img.board.b64, state.img.board.mime), {type:"text",text:P_REGARD_NU}], .7);
+
+      /* 2. le comparatif : le même naïf deux fois, sur la même œuvre. */
+      const comp=document.createElement("div"); comp.className="compare";
+      comp.innerHTML=`<div class="tag2">le même naïf, deux fois — à gauche sans le sol, à droite monté des forces</div>`;
+      const cA=voixCard("naif","Le naïf — à l'aveugle","reçoit l'œuvre, et ce qu'il reconnaît déjà");
+      const cB=voixCard("naif","Le naïf — à nu","reçoit d'abord les forces, puis l'œuvre");
+      comp.append(cA,cB); stage.appendChild(comp);
+
+      const sysA = SOCLE_PROJECTIF+"\n\n"+P_NAIF;
+      const sysB = substrat
+        ? SOCLE_PROJECTIF+"\n\n"+P_NAIF+"\n\n"+P_NAIF_SUBSTRAT.replace("{SUBSTRAT}", substrat)
+        : sysA;
+      const [ , tB] = await Promise.all([ lire(cA, sysA, [img, cue]), lire(cB, sysB, [img, cue]) ]);
+      naifTexte = tB;        // c'est le naïf « à nu » qui entre dans le tissage
+    }else{
+      const c=voixCard("naif","Le naïf","il ne sait rien, et reçoit tout");
+      stage.appendChild(c);
+      naifTexte = await lire(c, SOCLE_PROJECTIF+"\n\n"+P_NAIF, [img, cue]);
+    }
+
+    /* Le chercheur et le connaisseur, en parallèle et indépendants. */
+    const cCh=voixCard("chercheur","Le chercheur","il pressent un sens caché, et creuse");
+    const cCo=voixCard("connaisseur","Le connaisseur","il reconnaît, et cherche l'intention");
+    stage.append(cCh,cCo);
+    const [tCh,tCo]=await Promise.all([
+      lire(cCh, SOCLE_PROJECTIF+"\n\n"+P_CHERCHEUR, [img, cue]),
+      lire(cCo, SOCLE_PROJECTIF+"\n\n"+P_CONNAISSEUR, [img, cue]),
+    ]);
 
     /* Le tissage — tient les trois ensemble sans les fondre. */
-    const bons=lectures.filter(Boolean);
+    const bons=[ naifTexte&&{qui:"Le naïf",texte:naifTexte},
+                 tCh&&{qui:"Le chercheur",texte:tCh},
+                 tCo&&{qui:"Le connaisseur",texte:tCo} ].filter(Boolean);
     if($("#doTissage").checked && bons.length>=2){
       const c=voixCard("tissage","Le tissage","ce qui les sépare, ce qui malgré tout les touche");
       stage.appendChild(c);
       const lecturesTxt = bons.map(L=>`### ${L.qui}\n${L.texte}`).join("\n\n");
       try{
         const t=await ask({ system:SOCLE_PROJECTIF+"\n\n"+P_TISSAGE, maxTokens:1400, temperature:.9, signal,
-          content:[imgBlock(state.img.b64,state.img.mime),
-                   {type:"text",text:"<lectures>\n"+lecturesTxt+"\n</lectures>"}],
-          onDelta:t=>c.__set(t) });
+          content:[img, {type:"text",text:"<lectures>\n"+lecturesTxt+"\n</lectures>"}],
+          onDelta:x=>c.__set(x) });
         c.__set(t);
       }catch(e){ if(e.name==="AbortError") throw e; c.__fail("Le tissage s'est perdu : "+e.message); }
     }
@@ -280,9 +341,12 @@ async function run(){
 function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
 function refresh(){
-  const n = 3 + ($("#doTissage").checked?1:0);
+  const aveugle = $("#doAveugle").checked;
+  const n = (aveugle?3:1) + 2 + ($("#doTissage").checked?1:0);
   $("#run").disabled = state.running || !state.img || !cfg().key;
-  $("#cost").textContent = state.img ? `${n} appels — trois regards${$("#doTissage").checked?" et un tissage":""}.` : "";
+  $("#cost").textContent = state.img
+    ? `${n} appels${aveugle?" — passe aveugle, deux naïfs, chercheur, connaisseur":" — trois regards"}${$("#doTissage").checked?" et un tissage":""}.`
+    : "";
 }
 
 /* ── entrées ─────────────────────────────────────────────────────────────── */
@@ -296,6 +360,7 @@ window.addEventListener("paste",e=>{ const it=[...(e.clipboardData?.items||[])].
 $("#run").addEventListener("click",()=>{ if(!state.running) run(); });
 $("#halt").addEventListener("click",()=>{ if(state.abort) state.abort.abort(); });
 $("#doTissage").addEventListener("change",refresh);
+$("#doAveugle").addEventListener("change",refresh);
 
 $("#key").addEventListener("change",()=>{ if($("#remember").checked) store.set("nephele.key",$("#key").value.trim()); refresh(); });
 $("#key").addEventListener("input",refresh);
