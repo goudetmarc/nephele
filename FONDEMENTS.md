@@ -422,6 +422,8 @@ Unfinished, and deliberately so. What remains:
 
 The wager is that the observed and the observer are one subject seen from two sides, and that the discipline learned on the first — look before you name, derive rather than assert, keep only what could be refuted — is exactly what keeps the second honest.
 
+The working plan that turns this direction into next steps — the two axes (education × disposition to the unknown), the friction obligation as an anti-monomania move for personas, the small-model architecture, and the day's experiments — is kept, with diagrams, in [`RECHERCHE.md`](RECHERCHE.md).
+
 ---
 
 ## Bibliography
