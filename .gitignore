@@ -19,3 +19,5 @@ package-lock.json
 # artefacts Python
 __pycache__/
 *.pyc
+.venv/
+.venv-local/

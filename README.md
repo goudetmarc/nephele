@@ -130,6 +130,22 @@ A list of **empty words** is banned — *dynamic, harmonious, vibrant, poetic, a
 
 A specific prohibition: **if the model recognizes the artwork, it must keep quiet.** A comment that would be true without having looked at the image is a failure, even an accurate one — and it is the hardest failure mode to spot, because the result is cultured, correct, and empty.
 
+## The projective regime — `dixit.html` (research in progress)
+
+The two regimes above are built to *suppress* projection: the photograph is hidden, recognition is cut, so that meaning does not come from the one who looks. This third regime, still an experiment, does the opposite. The work is shown whole and in color, and what it stirs *in the beholder* is no longer the contaminant to filter but the thing to collect.
+
+Its premise: a picture has no single meaning to deliver; meaning rises in whoever receives it, out of their culture, their memories, their mood. Three people see three works. The same image is therefore offered to three **postures**, and none is right against the others:
+
+- **the naïve one** — knows nothing, and takes the work full in the chest: sensation, memory, what the body does before it knows;
+- **the seeker** — does not know, but senses there is something beneath what is painted, and digs;
+- **the connoisseur** — recognizes the hand, the movement, and looks for the intention.
+
+They run independently, so the naïve reading is not colored by the learned one. A final **weave** holds the three side by side without flattening them: where the same spot of the canvas becomes three different things, and where — by opposite roads — they touch the same point. No judgment here, no quota, no second look, no horoscope test: projection is Barnum-like by nature, and that is exactly the point.
+
+**The bridge — the blind pass feeds the naïve one.** A vision model's naïveté is a fake: it has already recognized the work before it "feels," so its emotion is recited — the dragon in the clouds, moved onto affect. The blind regime is the only device that yields a percept from *before* recognition. So it is put to work as a ground: the image is reduced to an Otsu silhouette and read as bare forces, without a name (`P_REGARD_NU`); that substrate then primes the naïve gaze (`P_NAIF_SUBSTRAT`), whose emotion now rises from the forces instead of the catalog. The two naïve readings — *à l'aveugle* and *à nu* — are shown side by side, to weigh the effect by feel on the same work. This is Arnheim's derivation turned into a method: form is the soil of emotion.
+
+The doctrine of the postures lives in `doctrine.js` (`SOCLE_PROJECTIF`, `P_NAIF`, `P_CHERCHEUR`, `P_CONNAISSEUR`, `P_TISSAGE`, plus the bridge `P_REGARD_NU`, `P_NAIF_SUBSTRAT`); `dixit.html` is only plumbing. **This is open research.** The wider bet is a *personification of the gaze* — personas for the observer, beyond the observed — and the next step is to give the naïve one the sensible grammar itself as a vocabulary of emotion: form→effect relations learned blind, on unrelated matter, ratified by hand. See [`FONDEMENTS.md`](FONDEMENTS.md) §10.
+
 ## The boards
 
 Binary boards carry the figures; six boards keep the color for the sensible reading:
@@ -215,9 +231,11 @@ The **archive** exports everything (complete sessions, JSON) on demand. Better: 
 python3 -m http.server 8080
 ```
 
-then <http://localhost:8080>. On macOS, `lancer.command`. Double-clicking `index.html` does not work: `doctrine.js` is a separate file and `file://` refuses to load it.
+then <http://localhost:8080>. On macOS, `lancer.command`. Double-clicking `index.html` does not work: `doctrine.js` is a separate file and `file://` refuses to load it. The projective tool opens the same way, at <http://localhost:8080/dixit.html>.
 
 About 16 calls with default settings; the counter under the button announces it before launching.
+
+**A local model, offline.** Every tool calls an Anthropic-format endpoint directly from the browser, so nothing forces that endpoint to be Anthropic's. To run entirely on-device — no API, no data leaving the machine — point the endpoint at a local vision model through a translating proxy. The full recipe (LM Studio + a LiteLLM proxy, a one-click launcher) is in [`local/`](local/). Only the endpoint changes; the doctrine and pipeline are untouched.
 
 ## Working on the model
 
@@ -242,6 +260,10 @@ What stays welded, and that's all:
 | `P_CARNET` | The rule that keeps the notebook from converging toward silence. |
 | `AFFECT` | The affect-derivation rule, the horoscope test, the refutation instruction. |
 | `P_GRAMMAIRE` | Semantic matching, generalization, hidden variables, the 40-entry cap. |
+| `SOCLE_PROJECTIF` | The projective ground (`dixit.html`): work shown, projection collected, no judgment. |
+| `P_NAIF` · `P_CHERCHEUR` · `P_CONNAISSEUR` | The three gazes. |
+| `P_TISSAGE` | Holds the three together without flattening them. |
+| `P_REGARD_NU` · `P_NAIF_SUBSTRAT` | The bridge: bare forces read without a name, then used to prime the naïve gaze. |
 
 If yield drops, it's `TROUVER` that needs enriching — not `REPERTOIRE`, and above all not `P_SECOND`. Adding a finding move produces figures; adding a judgment criterion removes them.
 

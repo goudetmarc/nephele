@@ -390,6 +390,37 @@ This path produces no text: it therefore cannot recite the catalog.
 | DPO on the verdicts | Bradley-Terry 1952; Rafailov 2023 |
 | LoRA r=16 on attention | Hu et al. 2022 |
 | Non-verbal primer | CLIP 2021; SigLIP 2023; ZS-SBIR |
+| Projective regime, the three gazes (`dixit.html`) | Rorschach 1921; Iser 1974; Fish 1980 (reader-response) |
+| Blind pass feeding the naïve gaze | Arnheim 1954 (affect derived from configuration), turned into a mechanism |
+
+---
+
+## 10. The projective turn: personas for the observer (research in progress)
+
+Everything above concerns the *observed*: how to read matter or a field without reciting a corpus. The question it leaves untouched is the *observer*. A pareidolia, a reading, is never produced by a viewer in general; it is produced by *someone*, with a history, a culture, a mood. The move Nephélé is beginning to make is to take that seriously — to **personify the gaze**, give the reader explicit personas, and treat interpretation as a function of who looks as much as of what is looked at. This section records a direction, not a settled result.
+
+### 10.1 A different question, and an inversion
+
+The figurative and sensible regimes are anti-projective by construction (§4): they hide the photograph and forbid recognition precisely so that meaning does not come from the reader. The projective regime asks the opposite question — the one a Rorschach card or a Dixit image is *designed* for. Hermann Rorschach's inkblots (1921) are the canonical projective test: the stimulus is deliberately ambiguous so that what the subject brings is what shows. Literary theory made the same reversal — Wolfgang Iser's *implied reader* (1974), Stanley Fish's *interpretive communities* (1980): a text does not carry a meaning to be extracted; meaning is completed by the reader, and readers differently equipped complete it differently. The projective regime is an attempt to instrument that reversal — with the anchoring reflexes of the rest of the project carried over, so the projection does not dissolve into the empty words of §4.2.
+
+### 10.2 The three gazes
+
+Three postures face the same work: the naïve one (feels before it knows), the seeker (senses a hidden sense and digs), the connoisseur (recognizes, and reads for intention). They are run independently, so the naïve reading is not colored by the learned one; a fourth pass weaves them without choosing. The horoscope test (§4.2) does not apply here — projection is Barnum-like by nature, and that is now the phenomenon, not the failure. Symmetrically, what was an error mode elsewhere (a comment true without having looked) becomes, for the connoisseur, a named and bounded risk rather than a disqualification.
+
+### 10.3 The fake naïveté, and the blind-pass bridge
+
+A vision-language model cannot un-know. Asked to be naïve, it performs naïveté over a recognition it has already made; its "feeling" is the average of what is written about the work — affect as recitation, the dragon of §1 moved onto emotion. The one device that yields a percept from *before* recognition is the blind regime itself: boards with no scene, no color, no title. This is where the two halves of the project join. An Otsu silhouette (§6) is read as bare, anchored, unnamed forces (`P_REGARD_NU`); that substrate primes the naïve gaze (`P_NAIF_SUBSTRAT`), whose emotion then rises from the forces rather than the catalog. This is Arnheim's derivation (§5) used as a *mechanism*: a configuration is the antecedent of an affect, so a reading of pure configuration is the honest ground of a feeling. The interface shows both naïve readings — *à l'aveugle* and *à nu* — side by side, so the shift can be judged by feel, on the same work, by the human it is meant to move.
+
+### 10.4 Open questions
+
+Unfinished, and deliberately so. What remains:
+
+- **The grammar as a vocabulary of emotion.** The sensible grammar (§5) already stores falsifiable form→effect relations, learned blind on unrelated matter and ratified by hand. The next step is to prime the naïve gaze with *it* — not the culture's associations, but relations earned under blinders. The naïve one would then feel in a language the project itself learned. (This is the "option 3" beyond the current blind-pass bridge.)
+- **Which personas, and how many.** Three is a first cut. Culture, age, era, discipline, mood are all axes along which a gaze varies. The danger is caricature: a persona that recites a stereotype is the dragon again, one remove out.
+- **Validation.** The bench (§7) measures the observed. Measuring a projection is another problem: the criterion is not accuracy but resonance and plurality — how many distinct, non-empty readings a work supports, and whether a human recognizes the feeling as their own. No metric here is settled.
+- **The dividing line.** How far a persona may be pushed before it stops looking and starts reciting the person it imitates — the projective analogue of the empty-word failure — is not yet drawn.
+
+The wager is that the observed and the observer are one subject seen from two sides, and that the discipline learned on the first — look before you name, derive rather than assert, keep only what could be refuted — is exactly what keeps the second honest.
 
 ---
 
@@ -407,6 +438,11 @@ This path produces no text: it therefore cannot recite the catalog.
 - Kanwisher, McDermott & Chun (1997). *The fusiform face area.* J. Neuroscience.
 - Liu, J. et al. (2014). *Seeing Jesus in toast* (face pareidolia). Cortex.
 - Conrad, K. (1958). *Die beginnende Schizophrenie* (apophenia).
+
+**Projection, reader-response, personas**
+- Iser, W. (1974). *The Implied Reader.*
+- Fish, S. (1980). *Is There a Text in This Class?* (interpretive communities).
+- (Rorschach 1921 and the Barnum-Forer effect 1949, below, belong here too: the projective stimulus, and its epistemic hazard.)
 
 **Multistability, pareidolia, Rorschach**
 - Rorschach, H. (1921). *Psychodiagnostik.*
