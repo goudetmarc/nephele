@@ -1,0 +1,25 @@
+# Proxy LiteLLM pour Nephélé en local.
+#
+# Rôle : exposer un endpoint /v1/messages au FORMAT ANTHROPIC (celui que
+# ask() attend dans index.html) et le TRADUIRE vers LM Studio, qui sert le
+# modèle en OpenAI local sur le Mac. Nephélé ne voit qu'un « faux Anthropic ».
+#
+# Le champ « Endpoint » de Nephélé pointe sur ce proxy (http://localhost:4000),
+# le modèle réel tourne dans LM Studio (http://localhost:1234).
+
+model_list:
+  - model_name: nephele-vl                          # ce nom apparaît dans le menu « Modèle »
+    litellm_params:
+      # ⚠️ Remplace par l'ID EXACT affiché dans LM Studio (onglet Developer,
+      #    colonne « API model name » du modèle chargé). Ex. de valeurs vues :
+      #    qwen2.5-vl-32b-instruct  /  qwen2.5-vl-7b-instruct  /  mlx-community/...
+      model: lm_studio/qwen2.5-vl-32b-instruct
+      api_base: http://localhost:1234/v1
+      api_key: "lm-studio"                            # factice — LM Studio l'ignore
+
+litellm_settings:
+  drop_params: true      # ignore un paramètre non supporté (ex. temperature) au lieu d'échouer
+
+general_settings:
+  # Pas de master_key : le proxy accepte la clé factice (sk-local) envoyée par Nephélé.
+  # N'expose ce proxy que sur localhost.
