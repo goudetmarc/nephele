@@ -13,6 +13,10 @@ cd "$(dirname "$0")/.."                 # racine du dépôt
 CONFIG="local/litellm.config.yaml"
 PROXY_PORT=4000
 
+# Environnement Python isolé s'il existe (évite les conflits avec proto/pyenv/homebrew).
+# Une fois activé, litellm et python3 se résolvent DANS le venv, devant les shims.
+[ -f ".venv-local/bin/activate" ] && source ".venv-local/bin/activate"
+
 # 1. Dépendances -------------------------------------------------------------
 command -v litellm >/dev/null 2>&1 || {
   echo "✗ LiteLLM introuvable.  Installe-le :  pip install 'litellm[proxy]'"; exit 1; }

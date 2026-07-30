@@ -30,9 +30,19 @@ donc un VLM, pas un LLM texte) et il parle le **format Anthropic**
 
 ## 2. LiteLLM (le proxy)
 
+Dans un **environnement Python isolé** à la racine du dépôt (recommandé : ça
+évite tout conflit avec `proto`, `pyenv` ou Homebrew, et le lanceur le détecte
+automatiquement) :
+
 ```bash
-pip install 'litellm[proxy]'
+/usr/bin/python3 -m venv .venv-local          # python système, contourne les shims
+.venv-local/bin/pip install 'litellm[proxy]'
 ```
+
+> Si `pip install` échoue avec `proto::detect::failed` (ou un message pyenv/xxx),
+> c'est qu'un gestionnaire de versions intercepte `python`/`pip`. Le venv
+> ci-dessus, créé avec le chemin absolu `/usr/bin/python3`, règle le problème.
+> (Si `/usr/bin/python3` manque : `xcode-select --install`.)
 
 Puis, dans [`litellm.config.yaml`](litellm.config.yaml), remplacer la valeur
 `model:` par l'ID exact relevé à l'étape 1.
