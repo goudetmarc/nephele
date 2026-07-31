@@ -101,8 +101,10 @@ test('dixit : la passe aveugle nourrit le naïf, deux naïfs en comparatif', asy
   // Six voix : le regard nu, deux naïfs, chercheur, connaisseur, tissage.
   await expect(page.locator('.voix')).toHaveCount(6, { timeout: 30000 });
 
-  // Le regard nu montre la silhouette binarisée et un relevé de forces sans nom.
-  await expect(page.locator('.voix.nu')).toHaveCount(1);
+  // Le regard nu = l'analyse en direct, SOUS l'image (pas dans les résultats),
+  // avec la silhouette binarisée et un relevé de forces sans nom.
+  await expect(page.locator('.direct .voix.nu')).toHaveCount(1);
+  await expect(page.locator('.dossier .voix.nu')).toHaveCount(0);
   await expect(page.locator('.voix.nu .board')).toBeVisible();
   await expect(page.locator('.voix.nu .prose')).toContainText('bascule à gauche');
 
