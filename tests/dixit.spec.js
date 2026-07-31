@@ -122,6 +122,41 @@ test('dixit : la passe aveugle nourrit le naïf, deux naïfs en comparatif', asy
   expect(calls.length).toBe(6);
 });
 
+test('dixit : la table lumineuse trace la grille, les plans et les marqueurs', async ({ page }) => {
+  const { calls } = await mockAnthropic(page, { responder: ({ system }) => {
+    if (/TU ES LE NAÏF/.test(system)) return "Le rouge à gauche m'appelle. La masse tient en A3-E5, et un point en C3 me fixe.";
+    if (/TU ES LE CHERCHEUR/.test(system)) return "Quelque chose se cache en bas, vers D4.";
+    if (/TU ES LE CONNAISSEUR/.test(system)) return "Le bleu en haut, en B2, situe l'intention.";
+    return "…";
+  }});
+  await page.goto('/dixit.html');
+
+  await page.fill('#key', 'test-mock-key');
+  await page.uncheck('#doTissage');
+  await chargeImage(page);
+  await expect(page.locator('#run')).toBeEnabled({ timeout: 10000 });
+  await page.click('#run');
+
+  // La table et ses deux plans (couleur + niveaux), plus les contrôles.
+  await expect(page.locator('.table .planes img.pc')).toBeVisible({ timeout: 30000 });
+  await expect(page.locator('.table .planes img.pl')).toHaveCount(1);
+  await expect(page.locator('.tctrls .opL')).toHaveCount(1);
+
+  // La matrice A–E × 1–5 : 8 lignes internes + 10 étiquettes.
+  await expect(page.locator('.ov .grid line')).toHaveCount(8);
+  await expect(page.locator('.ov .grid .glabel')).toHaveCount(10);
+
+  // On attend la fin (trois voix) puis on compte les marqueurs tracés.
+  await expect(page.locator('.voix')).toHaveCount(3, { timeout: 30000 });
+  const nMk = await page.locator('.ov .markers g.mk').count();
+  expect(nMk).toBeGreaterThanOrEqual(3);           // croix, zones, couleurs, bandes
+  await expect(page.locator('.tlegend .chip')).toHaveCount(3); // une par voix
+
+  await expect(page.locator('.voix.fail')).toHaveCount(0);
+  await expect(page.locator('.banner')).toHaveCount(0);
+  expect(calls.length).toBe(3);
+});
+
 test('dixit : sans clé, un bandeau le dit et rien n’est appelé', async ({ page }) => {
   const { calls } = await mockAnthropic(page, { responder: proseParPosture });
   await page.goto('/dixit.html');
