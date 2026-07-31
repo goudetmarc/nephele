@@ -62,6 +62,33 @@
   .oeuvre img{width:100%; border-radius:9px; border:1px solid var(--line); display:block}
   .oeuvre figcaption{text-align:center; font-size:11px; color:var(--ink3); margin-top:8px; font-family:var(--mono)}
 
+  /* ── la table lumineuse : plans superposés + matrice de zones + marqueurs ── */
+  .table{max-width:860px; margin:0 auto 26px}
+  .planes{position:relative; border-radius:11px; overflow:hidden; border:1px solid var(--line);
+          background:#000; line-height:0; box-shadow:0 0 0 1px rgba(142,208,214,.06), 0 10px 40px rgba(0,0,0,.5)}
+  .planes .plane{display:block; width:100%; height:auto}
+  .planes .plane.pl{position:absolute; inset:0; height:100%; opacity:0; mix-blend-mode:screen; transition:opacity .15s}
+  .planes .ov{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible}
+  .ov .grid line{stroke:rgba(142,208,214,.16); stroke-width:.12}
+  .ov .grid .frame{stroke:rgba(142,208,214,.32); stroke-width:.25; fill:none}
+  .ov .glabel{fill:rgba(230,227,220,.42); font:2.4px var(--mono)}
+  .ov g.mk{transform-box:fill-box; transform-origin:center; animation:pop .45s cubic-bezier(.2,1.4,.4,1)}
+  .ov .cx{stroke-width:.5; fill:none; filter:drop-shadow(0 0 .8px currentColor)}
+  .ov .ring{fill:none; stroke-width:.4; opacity:.85}
+  .ov .rect{stroke-width:.35}
+  .ov .conv{fill:none; stroke:#fff; stroke-width:.5; animation:convp 1.7s ease-in-out infinite}
+  @keyframes pop{from{opacity:0; transform:scale(.35)} to{opacity:1; transform:scale(1)}}
+  @keyframes convp{0%,100%{opacity:.3} 50%{opacity:.95}}
+  .tctrls{display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-top:11px;
+          font-size:11px; color:var(--ink3); font-family:var(--mono); letter-spacing:.02em}
+  .tctrls label{display:flex; align-items:center; gap:7px}
+  .tctrls input[type=range]{width:84px; accent-color:var(--bleu)}
+  .tctrls input[type=checkbox]{accent-color:var(--bleu)}
+  .tlegend{display:flex; gap:14px; flex-wrap:wrap; margin-top:9px; font-size:10.5px; font-family:var(--mono); color:var(--ink2)}
+  .tlegend .chip{display:flex; align-items:center; gap:6px; opacity:0; animation:pop .3s forwards}
+  .tlegend .dot{width:9px; height:9px; border-radius:50%; box-shadow:0 0 7px currentColor}
+  .tcap{text-align:center; font-size:10.5px; color:var(--ink3); font-family:var(--mono); margin-top:7px}
+
   .voix{background:var(--bg2); border:1px solid var(--line); border-radius:11px; padding:18px 20px; margin:0 auto 18px; max-width:760px}
   .voix.tissage{background:var(--bg3); border-color:var(--bg4)}
   .voix header{display:flex; align-items:baseline; gap:10px; margin-bottom:10px}
@@ -233,7 +260,15 @@ function chargeFichier(file){
       const ctx=c.getContext("2d"); ctx.drawImage(im,0,0,w,h);
       const url=c.toDataURL("image/jpeg",.9);
       const bUrl=binarise(ctx,w,h);
-      state.img={ b64:url.split(",")[1], mime:"image/jpeg", url, nom:file.name,
+      // couleur moyenne par cellule de la matrice 5×5 — pour éclairer les mots de couleur
+      const gd=ctx.getImageData(0,0,w,h).data, cells=[];
+      for(let col=0;col<5;col++)for(let row=0;row<5;row++){
+        let R=0,G=0,B=0,n=0;
+        const x0=(col*w/5)|0,x1=((col+1)*w/5)|0,y0=(row*h/5)|0,y1=((row+1)*h/5)|0;
+        for(let y=y0;y<y1;y+=2)for(let x=x0;x<x1;x+=2){const i=(y*w+x)*4; R+=gd[i];G+=gd[i+1];B+=gd[i+2];n++;}
+        n=n||1; cells.push({col,row,r:R/n,g:G/n,b:B/n});
+      }
+      state.img={ b64:url.split(",")[1], mime:"image/jpeg", url, nom:file.name, cells,
                   board:{ b64:bUrl.split(",")[1], mime:"image/png", url:bUrl } };
       $("#prev").innerHTML=`<img src="${url}" alt="">`;
       refresh();
@@ -254,6 +289,113 @@ function voixCard(cls, qui, quoi){
   return el;
 }
 
+/* ── la table lumineuse ──────────────────────────────────────────────────── */
+const VOICES = {
+  nu:          {label:"regard nu",    color:"#8fd0d6"},
+  naif_a:      {label:"naïf à l'aveugle", color:"#c4705a"},
+  naif_b:      {label:"naïf à nu",    color:"#e0975a"},
+  naif:        {label:"le naïf",      color:"#c4705a"},
+  chercheur:   {label:"chercheur",    color:"#7ea8b8"},
+  connaisseur: {label:"connaisseur",  color:"#c9a227"},
+  tissage:     {label:"tissage",      color:"#6f9c73"},
+};
+
+function rgbToHsl(r,g,b){
+  r/=255; g/=255; b/=255;
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn, l=(mx+mn)/2;
+  let h=0, s=0;
+  if(d){ s=d/(1-Math.abs(2*l-1));
+    h = mx===r ? ((g-b)/d)%6 : mx===g ? (b-r)/d+2 : (r-g)/d+4;
+    h*=60; if(h<0)h+=360; }
+  return [h,s,l];
+}
+function colorTest(w,h,s,l){
+  if(w==='blanc') return l>0.72 && s<0.22;
+  if(w==='noir')  return l<0.20;
+  if(w==='gris')  return s<0.15 && l>=0.20 && l<=0.72;
+  if(s<0.18) return false;
+  if(w==='rouge')  return h<18||h>=340;
+  if(w==='orange') return h>=18&&h<42;
+  if(w==='jaune')  return h>=42&&h<70;
+  if(w==='vert')   return h>=70&&h<165;
+  if(w==='bleu')   return h>=165&&h<255;
+  if(w==='violet') return h>=255&&h<300;
+  if(w==='rose')   return h>=300&&h<340;
+  return false;
+}
+
+const NS="http://www.w3.org/2000/svg";
+const svg=(t,a)=>{const e=document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); return e;};
+
+function makeInstrument(stage, im){
+  const wrap=document.createElement("div"); wrap.className="table";
+  wrap.innerHTML=`
+    <div class="planes">
+      <img class="plane pc" alt="">
+      <img class="plane pl" alt="">
+      <svg class="ov" viewBox="0 0 100 100" preserveAspectRatio="none"><g class="grid"></g><g class="markers"></g></svg>
+    </div>
+    <div class="tctrls">
+      <label>couleur <input type="range" class="opC" min="0" max="100" value="100"></label>
+      <label>niveaux <input type="range" class="opL" min="0" max="100" value="0"></label>
+      <label><input type="checkbox" class="grille" checked> grille</label>
+      <label><input type="checkbox" class="marq" checked> marqueurs</label>
+    </div>
+    <div class="tlegend"></div>
+    <div class="tcap">${esc(im.nom||"l'œuvre")} — matrice A–E × 1–5, chaque regard vise en sa couleur</div>`;
+  stage.appendChild(wrap);
+  const pc=wrap.querySelector(".pc"), pl=wrap.querySelector(".pl");
+  pc.src=im.url; pl.src=(im.board&&im.board.url)||im.url;
+  const gGrid=wrap.querySelector(".grid"), gMk=wrap.querySelector(".markers"), legend=wrap.querySelector(".tlegend");
+
+  for(let i=1;i<5;i++){ gGrid.appendChild(svg("line",{x1:i*20,y1:0,x2:i*20,y2:100})); gGrid.appendChild(svg("line",{x1:0,y1:i*20,x2:100,y2:i*20})); }
+  gGrid.appendChild(svg("rect",{x:0,y:0,width:100,height:100,class:"frame"}));
+  "ABCDE".split("").forEach((L,c)=>{const t=svg("text",{x:c*20+1.4,y:3.3,class:"glabel"}); t.textContent=L; gGrid.appendChild(t);});
+  for(let r=0;r<5;r++){const t=svg("text",{x:.5,y:r*20+4.1,class:"glabel"}); t.textContent=r+1; gGrid.appendChild(t);}
+
+  wrap.querySelector(".opC").oninput=e=>pc.style.opacity=e.target.value/100;
+  wrap.querySelector(".opL").oninput=e=>pl.style.opacity=e.target.value/100;
+  wrap.querySelector(".grille").onchange=e=>gGrid.style.display=e.target.checked?"":"none";
+  wrap.querySelector(".marq").onchange=e=>gMk.style.display=e.target.checked?"":"none";
+
+  const seen={}, conv={}, chips={};
+  const ci=L=>"ABCDE".indexOf(L);
+  const ctr=(c,r)=>[c*20+10,r*20+10];
+  function chip(voice){ if(chips[voice])return; const v=VOICES[voice]; const e=document.createElement("span");
+    e.className="chip"; e.style.color=v.color; e.innerHTML=`<span class="dot" style="background:${v.color}"></span>${v.label}`;
+    legend.appendChild(e); chips[voice]=e; }
+  function cross(voice,c,r){ const v=VOICES[voice], [x,y]=ctr(c,r), g=svg("g",{class:"mk"});
+    g.appendChild(svg("line",{x1:x-2.6,y1:y-2.6,x2:x+2.6,y2:y+2.6,class:"cx",stroke:v.color}));
+    g.appendChild(svg("line",{x1:x-2.6,y1:y+2.6,x2:x+2.6,y2:y-2.6,class:"cx",stroke:v.color}));
+    g.appendChild(svg("circle",{cx:x,cy:y,r:3.3,class:"ring",stroke:v.color}));
+    gMk.appendChild(g);
+    const k=c+","+r, set=(conv[k]=conv[k]||new Set()); set.add(voice);
+    if(set.size>=2 && !set._r){ set._r=true; gMk.appendChild(svg("circle",{cx:x,cy:y,r:6,class:"conv"})); } }
+  function rangeRect(voice,c1,r1,c2,r2){ const v=VOICES[voice], g=svg("g",{class:"mk"});
+    g.appendChild(svg("rect",{x:Math.min(c1,c2)*20+.6,y:Math.min(r1,r2)*20+.6,width:(Math.abs(c1-c2)+1)*20-1.2,height:(Math.abs(r1-r2)+1)*20-1.2,
+      rx:1.4,class:"rect",fill:v.color,"fill-opacity":.09,stroke:v.color,"stroke-opacity":.55})); gMk.appendChild(g); }
+  function band(voice,c1,c2,r1,r2){ const v=VOICES[voice], g=svg("g",{class:"mk"});
+    g.appendChild(svg("rect",{x:c1*20,y:r1*20,width:(c2-c1+1)*20,height:(r2-r1+1)*20,fill:v.color,"fill-opacity":.06})); gMk.appendChild(g); }
+  function colorPulse(voice,w){ if(!im.cells)return; const v=VOICES[voice];
+    im.cells.forEach(cell=>{ const [h,s,l]=rgbToHsl(cell.r,cell.g,cell.b); if(colorTest(w,h,s,l)){ const g=svg("g",{class:"mk"});
+      g.appendChild(svg("rect",{x:cell.col*20+1,y:cell.row*20+1,width:18,height:18,rx:1.4,fill:"none",stroke:v.color,"stroke-opacity":.5,"stroke-dasharray":"2 2"})); gMk.appendChild(g); } }); }
+
+  const COLW=["rouge","orange","jaune","vert","bleu","violet","rose","blanc","noir","gris"];
+  const SPACE={gauche:[0,1,0,4],droite:[3,4,0,4],haut:[0,4,0,1],bas:[0,4,3,4],centre:[1,3,1,3],milieu:[1,3,1,3]};
+
+  function feed(voice,text){
+    if(!text) return; chip(voice);
+    const s=(seen[voice]=seen[voice]||new Set());
+    let m; const rng=/([A-E])\s?([1-5])\s*[–—-]\s*([A-E])\s?([1-5])/g;
+    while((m=rng.exec(text))){ const sig="R"+m[0].replace(/\s/g,""); if(s.has(sig))continue; s.add(sig); rangeRect(voice,ci(m[1]),+m[2]-1,ci(m[3]),+m[4]-1); }
+    const one=/\b([A-E])\s?([1-5])\b/g;
+    while((m=one.exec(text))){ const sig="C"+m[1]+m[2]; if(s.has(sig))continue; s.add(sig); cross(voice,ci(m[1]),+m[2]-1); }
+    COLW.forEach(w=>{ if(!s.has("W"+w) && new RegExp("\\b"+w,"i").test(text)){ s.add("W"+w); colorPulse(voice,w); } });
+    Object.keys(SPACE).forEach(w=>{ if(!s.has("S"+w) && new RegExp("\\b"+w,"i").test(text)){ s.add("S"+w); const a=SPACE[w]; band(voice,a[0],a[1],a[2],a[3]); } });
+  }
+  return { feed, wrap };
+}
+
 async function run(){
   const {key}=cfg();
   if(!key){ $("#stage").innerHTML='<div class="banner">Il manque la clé API, dans le panneau de gauche.</div>'; return; }
@@ -263,16 +405,17 @@ async function run(){
   $("#run").disabled=true; $("#halt").style.display="block";
 
   const stage=$("#stage"); stage.innerHTML="";
-  const fig=document.createElement("figure"); fig.className="oeuvre";
-  fig.innerHTML=`<img src="${state.img.url}" alt=""><figcaption>${esc(state.img.nom||"l'œuvre")}</figcaption>`;
-  stage.appendChild(fig);
+  const instrument = makeInstrument(stage, state.img);
 
   const img = imgBlock(state.img.b64, state.img.mime);
   const cue = {type:"text", text:"Voici l'œuvre. Regarde-la, et parle."};
 
-  // Lance une voix dans sa carte ; renvoie le texte, ou null si le regard se perd.
-  const lire = async (c, system, content, temp=1) => {
-    try{ const t=await ask({system, maxTokens:1400, temperature:temp, signal, content, onDelta:x=>c.__set(x)}); c.__set(t); return t; }
+  // Lance une voix dans sa carte, alimente la table en temps réel ; renvoie le
+  // texte, ou null si le regard se perd.
+  const lire = async (c, voice, system, content, temp=1) => {
+    try{ const t=await ask({system, maxTokens:1400, temperature:temp, signal, content,
+          onDelta:x=>{ c.__set(x); instrument.feed(voice,x); }});
+      c.__set(t); instrument.feed(voice,t); return t; }
     catch(e){ if(e.name==="AbortError") throw e; c.__fail("Ce regard s'est perdu : "+e.message); return null; }
   };
 
@@ -284,7 +427,7 @@ async function run(){
       /* 1. la passe aveugle : une silhouette lue en forces nues, sans nom. */
       const cNu=voixCard("nu","Regard nu","à l'aveugle, sans le nom — un sol de forces");
       stage.appendChild(cNu); cNu.__board(state.img.board.url);
-      const substrat = await lire(cNu, SOCLE_SENSIBLE,
+      const substrat = await lire(cNu, "nu", SOCLE_SENSIBLE,
         [imgBlock(state.img.board.b64, state.img.board.mime), {type:"text",text:P_REGARD_NU}], .7);
 
       /* 2. le comparatif : le même naïf deux fois, sur la même œuvre. */
@@ -298,12 +441,12 @@ async function run(){
       const sysB = substrat
         ? SOCLE_PROJECTIF+"\n\n"+P_NAIF+"\n\n"+P_NAIF_SUBSTRAT.replace("{SUBSTRAT}", substrat)
         : sysA;
-      const [ , tB] = await Promise.all([ lire(cA, sysA, [img, cue]), lire(cB, sysB, [img, cue]) ]);
+      const [ , tB] = await Promise.all([ lire(cA, "naif_a", sysA, [img, cue]), lire(cB, "naif_b", sysB, [img, cue]) ]);
       naifTexte = tB;        // c'est le naïf « à nu » qui entre dans le tissage
     }else{
       const c=voixCard("naif","Le naïf","il ne sait rien, et reçoit tout");
       stage.appendChild(c);
-      naifTexte = await lire(c, SOCLE_PROJECTIF+"\n\n"+P_NAIF, [img, cue]);
+      naifTexte = await lire(c, "naif", SOCLE_PROJECTIF+"\n\n"+P_NAIF, [img, cue]);
     }
 
     /* Le chercheur et le connaisseur, en parallèle et indépendants. */
@@ -311,8 +454,8 @@ async function run(){
     const cCo=voixCard("connaisseur","Le connaisseur","il reconnaît, et cherche l'intention");
     stage.append(cCh,cCo);
     const [tCh,tCo]=await Promise.all([
-      lire(cCh, SOCLE_PROJECTIF+"\n\n"+P_CHERCHEUR, [img, cue]),
-      lire(cCo, SOCLE_PROJECTIF+"\n\n"+P_CONNAISSEUR, [img, cue]),
+      lire(cCh, "chercheur",   SOCLE_PROJECTIF+"\n\n"+P_CHERCHEUR,   [img, cue]),
+      lire(cCo, "connaisseur", SOCLE_PROJECTIF+"\n\n"+P_CONNAISSEUR, [img, cue]),
     ]);
 
     /* Le tissage — tient les trois ensemble sans les fondre. */
@@ -326,8 +469,8 @@ async function run(){
       try{
         const t=await ask({ system:SOCLE_PROJECTIF+"\n\n"+P_TISSAGE, maxTokens:1400, temperature:.9, signal,
           content:[img, {type:"text",text:"<lectures>\n"+lecturesTxt+"\n</lectures>"}],
-          onDelta:x=>c.__set(x) });
-        c.__set(t);
+          onDelta:x=>{ c.__set(x); instrument.feed("tissage",x); } });
+        c.__set(t); instrument.feed("tissage",t);
       }catch(e){ if(e.name==="AbortError") throw e; c.__fail("Le tissage s'est perdu : "+e.message); }
     }
   }catch(e){

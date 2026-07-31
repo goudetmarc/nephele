@@ -100,4 +100,28 @@ flowchart LR
 - **The v2 trap:** enthusiasm builds an amplifier of defects. We will *want* the bridge and the personas to work — so we distrust the single pretty output and lean on the contrast (A vs the abstract; A vs B) and, later, on the bench (§7) extended to count anchoring vs empty-words on projective prose.
 - **Do not chase a bigger model.** What advances the work is the doctrine, the disposition, and the measurement — not the parameter count. The 12B already gave a striking result. The big model comes once we know what "right" looks like.
 
+## First measured result — the Notre-Dame occlusion gradient
+
+The first real run, and a real finding. A night-time light-show over Notre-Dame (red dramatic sky, a colored electric grid projected on the stone, the towers and rose window lit). The naïve reading spoke of *fire*, of a *wounded building propped up to keep it from collapsing* — and the operator's doubt was immediate: **you cannot describe that without knowing it is Notre-Dame.**
+
+We resolved it not by argument but by **occlusion**: the same image, cropped in stages, so recognition is stripped while the mood (red night, scaffolding) is held.
+
+| | full image (towers + rose) | cropped (one tower left) | cropped (towers gone) |
+|---|---|---|---|
+| **Fire / drama** | "incendie", "brûlant" | "signal d'alarme", suffocating red | "**incendie** seen from afar", "burns without being consumed" |
+| **Catastrophe of the *monument*** | "the **building wounded**, light bandages, **keep it from collapsing**", reconstruction | "an armature to keep **the stone** from crumbling" | **gone** — no saved building, no bandages, no reconstruction |
+
+The gradient is the proof, and it **splits the disagreement down the middle**:
+
+- The **monument-specific rescue narrative** (a wounded cathedral saved from collapse) **faded as the landmarks were removed** → that layer *was* recognition. The operator was right.
+- The **generic fire/consuming drama** (it looks ablaze, it could go out) **survived the occlusion** → that layer is *in the image*: the red sky and the grid "gnawing the stone" genuinely read as fire. It does not depend on knowing the subject.
+
+**Recognition did not fabricate the fire; it amplified an already-visible cue into a subject-specific story.** The tell is therefore not the presence of a dramatic word (the drama is in the red) nor of "wound" (scaffolding licenses it faintly) — it is **the distance travelled beyond what the image can support**, i.e. the *subject-specificity*. "It looks like it's burning" = image. "*This cathedral* being saved" = recognition.
+
+Two side notes, both kept:
+- **The bridge's value scales with the recognition risk.** On the full image the *à nu* reading was markedly soberer than the *à l'aveugle* one; on the anonymous crop the two converged — when there is nothing to recite, the fed and unfed naïve gazes agree. That is the wanted behavior, not a failure.
+- **The judge has a prior too, both ways.** The operator's suspicion first over-convicted (all the drama read as recitation); the assistant then over-acquitted (seduced by the anchored elements). Only the occlusion test settled it. The ratifier must anchor as much as the observer.
+
+**Doctrine consequence — the metric we were missing has a name: *distance to the visible*.** A persona must be able to point, in the image, to what licenses each degree of its claim; the degree it cannot point to is the degree it recited. This is the friction obligation made measurable, and the next refinement to write into the postures.
+
 **The compass, one line:** *we are not after an observer without a prior — that is sterile; we are after a permeable prior, strong enough to see and open enough to be refuted.* Look before you name, derive rather than assert, keep only what could be refuted — the discipline that keeps the observed honest is exactly what keeps the observer honest.
