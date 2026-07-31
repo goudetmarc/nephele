@@ -203,6 +203,16 @@
   @keyframes ping{from{opacity:.9; transform:scale(.3)}to{opacity:0; transform:scale(2)}}
   .ov .flash{animation:flash 1.1s ease-out forwards}
   @keyframes flash{from{opacity:.38}to{opacity:0}}
+  /* pré-repérage client : les cellules chargées pulsent dès la seconde zéro */
+  .ov .cand{fill:none; stroke:#ff8f93; stroke-width:.35; stroke-dasharray:1.6 1.6; animation:candp 2.4s ease-in-out infinite}
+  @keyframes candp{0%,100%{opacity:.22}50%{opacity:.72}}
+
+  /* qui écrit maintenant + l'analyse en direct sous l'image */
+  .writing{margin-top:8px; font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; color:#e6a9ad; min-height:16px}
+  .writing b{color:#ffd9d9; font-weight:600}
+  .direct{margin-top:10px; display:flex}
+  .direct .voix{flex:1 1 100%; max-width:none; background:rgba(22,6,9,.5)}
+  .direct .voix .prose{font-family:var(--mono); font-size:13px; line-height:1.62; color:#ffe2e2}
 
   .loupes{flex:0 0 158px; display:flex; flex-direction:column; gap:11px; max-height:min(56vh,640px); overflow-y:auto; padding:2px}
   .loupes .lhead{font-family:var(--mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.12em; color:#d09296}
@@ -387,10 +397,12 @@ function chargeFichier(file){
       // couleur moyenne par cellule de la matrice 5×5 — pour éclairer les mots de couleur
       const gd=ctx.getImageData(0,0,w,h).data, cells=[];
       for(let col=0;col<5;col++)for(let row=0;row<5;row++){
-        let R=0,G=0,B=0,n=0;
+        let R=0,G=0,B=0,L=0,L2=0,n=0;
         const x0=(col*w/5)|0,x1=((col+1)*w/5)|0,y0=(row*h/5)|0,y1=((row+1)*h/5)|0;
-        for(let y=y0;y<y1;y+=2)for(let x=x0;x<x1;x+=2){const i=(y*w+x)*4; R+=gd[i];G+=gd[i+1];B+=gd[i+2];n++;}
-        n=n||1; cells.push({col,row,r:R/n,g:G/n,b:B/n});
+        for(let y=y0;y<y1;y+=2)for(let x=x0;x<x1;x+=2){const i=(y*w+x)*4;
+          R+=gd[i];G+=gd[i+1];B+=gd[i+2];
+          const lu=(gd[i]*299+gd[i+1]*587+gd[i+2]*114)/1000; L+=lu; L2+=lu*lu; n++;}
+        n=n||1; cells.push({col,row,r:R/n,g:G/n,b:B/n,va:Math.max(0,L2/n-(L/n)*(L/n))});
       }
       state.img={ b64:url.split(",")[1], mime:"image/jpeg", url, nom:file.name, cells, w, h,
                   board:{ b64:bUrl.split(",")[1], mime:"image/png", url:bUrl } };
@@ -405,12 +417,12 @@ function chargeFichier(file){
 const GLYPH={nu:"◎",naif:"✦",chercheur:"⌕",connaisseur:"❖",tissage:"⧉"};
 const CARDVC={nu:"#8fd8de",naif:"#ffb066",chercheur:"#8fc3d8",connaisseur:"#ffd24a",tissage:"#9ed4a6"};
 function voixCard(cls, qui, quoi){
-  const el=document.createElement("section"); el.className="voix "+cls;
+  const el=document.createElement("section"); el.className="voix on "+cls;
   const g=GLYPH[cls]||"◇"; el.style.setProperty("--vc",CARDVC[cls]||"#ff8a8a");
   el.innerHTML=`<header><span class="vg">${g}</span><span class="qui">${qui}</span><span class="quoi">${quoi}</span></header>
-    <div class="prose"></div>`;
+    <div class="prose live"></div>`;
   const prose=el.querySelector(".prose");
-  // pas de loader : la carte se révèle au premier mot et streame, curseur ▌ tant que ça écrit
+  // pas de loader : la carte est là d'emblée, curseur ▌ ; le texte s'y écrit dès le premier mot
   el.__set = t => { el.classList.add("on"); prose.classList.add("live"); prose.textContent=t; };
   el.__end = () => prose.classList.remove("live");
   el.__fail = m => { el.classList.add("on"); el.classList.add("fail"); prose.classList.remove("live"); prose.textContent=m; };
@@ -476,13 +488,16 @@ function makeHUD(stage, im){
       <label><input type="checkbox" class="grille" checked> grille</label>
       <label><input type="checkbox" class="marq" checked> points</label>
     </div>
+    <div class="writing"></div>
+    <div class="direct"></div>
     <div class="hlegend"></div>
-    <div class="dossier"><div class="dhead">réflexions — en direct, une par regard, et elles restent</div></div>`;
+    <div class="dossier"><div class="dhead">les regards — la lecture arrive à la fin, l'analyse est au-dessus</div></div>`;
   stage.appendChild(wrap);
   const $$=s=>wrap.querySelector(s);
   const scanner=$$(".scanner"), pc=$$(".pc"), pl=$$(".pl");
   pc.src=im.url; pl.src=(im.board&&im.board.url)||im.url;
-  const gGrid=$$(".grid"), gLocks=$$(".locks"), legend=$$(".hlegend"), loupes=$$(".loupes"), dossier=$$(".dossier");
+  const gGrid=$$(".grid"), gLocks=$$(".locks"), legend=$$(".hlegend"), loupes=$$(".loupes"),
+        dossier=$$(".dossier"), direct=$$(".direct"), writing=$$(".writing");
 
   // matrice de repérage
   for(let i=1;i<5;i++){ gGrid.appendChild(svg("line",{x1:i*20,y1:0,x2:i*20,y2:100})); gGrid.appendChild(svg("line",{x1:0,y1:i*20,x2:100,y2:i*20})); }
@@ -494,6 +509,23 @@ function makeHUD(stage, im){
   $$(".opL").oninput=e=>pl.style.opacity=e.target.value/100;
   $$(".grille").onchange=e=>gGrid.style.display=e.target.checked?"":"none";
   $$(".marq").onchange=e=>gLocks.style.display=e.target.checked?"":"none";
+
+  // pré-repérage : dès la seconde zéro, l'image signale ses cellules les plus
+  // chargées (contraste local + chroma) en candidates qui pulsent ; un vrai
+  // point du modèle les remplace quand il tombe dessus.
+  const candMap={};
+  if(im.cells){
+    [...im.cells].map(cell=>({cell, s:Math.sqrt(cell.va||0)+(Math.max(cell.r,cell.g,cell.b)-Math.min(cell.r,cell.g,cell.b))*.4}))
+      .sort((a,b)=>b.s-a.s).slice(0,5).forEach(({cell})=>{
+        const el=svg("circle",{cx:cell.col*20+10,cy:cell.row*20+10,r:5.2,class:"cand"});
+        gLocks.appendChild(el); candMap[cell.col+","+cell.row]=el; });
+  }
+
+  // qui écrit, là, maintenant — une ligne d'état, pas un loader
+  const enCours=new Set();
+  function note(voice,on){ const v=VOICES[voice]; if(!v) return;
+    if(on) enCours.add(v.label); else enCours.delete(v.label);
+    writing.innerHTML = enCours.size ? `<b>écrivent</b> — ${[...enCours].join(" · ")}` : ""; }
 
   const seen={}, conv={}, chips={}, loupeSeen=new Set();
   const ci=L=>"ABCDE".indexOf(L), ctr=(c,r)=>[c*20+10,r*20+10];
@@ -521,6 +553,7 @@ function makeHUD(stage, im){
     gLocks.appendChild(svg("circle",{cx:x,cy:y,r:7,class:"ping",stroke:col}));
     gLocks.appendChild(svg("rect",{x:x0+1,y:y0+1,width:18,height:18,class:"flash",fill:col}));
     const k=c+","+r, set=(conv[k]=conv[k]||new Set()); set.add(voice);
+    if(candMap[k]){ candMap[k].remove(); delete candMap[k]; }   // la candidate cède au point réel
     if(set.size>=2 && !set._r){ set._r=true;
       gLocks.appendChild(svg("rect",{x:x-5.4,y:y-5.4,width:10.8,height:10.8,rx:1,class:"conv",transform:`rotate(45 ${x} ${y})`})); }
     loupe(voice,c,r,code);
@@ -545,7 +578,7 @@ function makeHUD(stage, im){
     while((m=one.exec(text))){ const sig="C"+m[1]+m[2]; if(s.has(sig))continue; s.add(sig); lock(voice,ci(m[1]),+m[2]-1,m[1]+m[2]); }
     COLW.forEach(w=>{ if(!s.has("W"+w)&&new RegExp("\\b"+w,"i").test(text)){ s.add("W"+w); chroma(voice,w); } });
   }
-  return { feed, dossier, scanner };
+  return { feed, note, dossier, direct, scanner };
 }
 
 async function run(){
@@ -566,10 +599,12 @@ async function run(){
   // Lance une voix dans sa carte, alimente le visuel en temps réel ; renvoie le
   // texte, ou null si le regard se perd.
   const lire = async (c, voice, system, content, temp=1) => {
+    instrument.note(voice,true);
     try{ const t=await ask({system, maxTokens:1400, temperature:temp, signal, content,
           onDelta:x=>{ c.__set(x); instrument.feed(voice,x); }});
       c.__set(t); c.__end(); instrument.feed(voice,t); return t; }
     catch(e){ if(e.name==="AbortError") throw e; c.__fail("Ce regard s'est perdu : "+e.message); return null; }
+    finally{ instrument.note(voice,false); }
   };
 
   try{
@@ -579,9 +614,11 @@ async function run(){
     let pNaif;   // promesse de la voix du naïf qui nourrira le tissage
 
     if(aveugle){
-      /* la passe aveugle et le comparatif — le naïf à nu attend son sol, RIEN d'autre n'attend */
-      const cNu=voixCard("nu","Regard nu","à l'aveugle, sans le nom — un sol de forces");
-      dossier.appendChild(cNu); cNu.__board(state.img.board.url);
+      /* L'ANALYSE D'ABORD : le regard nu (zones, forces) streame sous l'image,
+         lancé en PREMIER — c'est lui le spectacle. Les lectures des regards
+         sont des résultats : elles arrivent en dessous, à la fin. */
+      const cNu=voixCard("nu","Analyse en direct","zones et forces, lues à l'aveugle sur la silhouette");
+      instrument.direct.appendChild(cNu); cNu.__board(state.img.board.url);
       const comp=document.createElement("div"); comp.className="compare";
       comp.innerHTML=`<div class="tag2">le même naïf, deux fois — à gauche sans le sol, à droite monté des forces</div>`;
       const cA=voixCard("naif","Le naïf — à l'aveugle","reçoit l'œuvre, et ce qu'il reconnaît déjà");
@@ -590,7 +627,6 @@ async function run(){
       dossier.append(cCh,cCo);
 
       const sysA = SOCLE_PROJECTIF+"\n\n"+P_NAIF;
-      const pA = lire(cA, "naif_a", sysA, [img, cue]);
       const pB = (async()=>{
         const substrat = await lire(cNu, "nu", SOCLE_SENSIBLE,
           [imgBlock(state.img.board.b64, state.img.board.mime), {type:"text",text:P_REGARD_NU}], .7);
@@ -599,6 +635,7 @@ async function run(){
           : sysA;
         return lire(cB, "naif_b", sysB, [img, cue]);   // c'est lui qui entre dans le tissage
       })();
+      const pA = lire(cA, "naif_a", sysA, [img, cue]);
       pNaif = Promise.all([pB, pA]).then(([tB])=>tB);
     }else{
       const c=voixCard("naif","Le naïf","il ne sait rien, et reçoit tout");
@@ -621,12 +658,14 @@ async function run(){
       const c=voixCard("tissage","Le tissage","ce qui les sépare, ce qui malgré tout les touche");
       dossier.appendChild(c);
       const lecturesTxt = bons.map(L=>`### ${L.qui}\n${L.texte}`).join("\n\n");
+      instrument.note("tissage",true);
       try{
         const t=await ask({ system:SOCLE_PROJECTIF+"\n\n"+P_TISSAGE, maxTokens:1400, temperature:.9, signal,
           content:[img, {type:"text",text:"<lectures>\n"+lecturesTxt+"\n</lectures>"}],
           onDelta:x=>{ c.__set(x); instrument.feed("tissage",x); } });
         c.__set(t); c.__end(); instrument.feed("tissage",t);
       }catch(e){ if(e.name==="AbortError") throw e; c.__fail("Le tissage s'est perdu : "+e.message); }
+      finally{ instrument.note("tissage",false); }
     }
   }catch(e){
     if(e.name!=="AbortError")
