@@ -158,6 +158,22 @@ test('dixit : le visuel pointe (croix persistantes) et zoome (loupes), sans scan
   expect(nLock).toBeGreaterThanOrEqual(3);              // croix persistantes aux zones citées
   const nLoupe = await page.locator('.loupes .loupe').count();
   expect(nLoupe).toBeGreaterThanOrEqual(2);             // zooms sur les zones d'intérêt
+
+  // Les trois couches : mesh + isolignes (canvas animé), détection (boîtes + callouts).
+  await expect(page.locator('.frame canvas.cv')).toHaveCount(1);
+  await expect(page.locator('.ov .locks .dbox').first()).toBeVisible();
+  const nCall = await page.locator('.ov .calls .call').count();
+  expect(nCall).toBeGreaterThanOrEqual(3);              // traits de rappel + étiquettes
+  // le canvas peint vraiment, et continue de peindre (mouvement permanent)
+  const count = () => page.evaluate(() => {
+    const c = document.querySelector('.frame canvas.cv');
+    const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 8) n++;
+    return n;
+  });
+  await expect.poll(count, { timeout: 10000 }).toBeGreaterThan(200);
+  const a = await count(); await page.waitForTimeout(700); const b = await count();
+  expect(a).not.toBe(b);                                // ça bouge encore, ça ne fige pas
   await expect(page.locator('.hlegend .chip')).toHaveCount(3);
 
   // Les réflexions sont lisibles et présentes, une par regard — et AUCUN loader.
