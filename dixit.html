@@ -62,32 +62,79 @@
   .oeuvre img{width:100%; border-radius:9px; border:1px solid var(--line); display:block}
   .oeuvre figcaption{text-align:center; font-size:11px; color:var(--ink3); margin-top:8px; font-family:var(--mono)}
 
-  /* ── la table lumineuse : plans superposés + matrice de zones + marqueurs ── */
-  .table{max-width:860px; margin:0 auto 26px}
-  .planes{position:relative; border-radius:11px; overflow:hidden; border:1px solid var(--line);
-          background:#000; line-height:0; box-shadow:0 0 0 1px rgba(142,208,214,.06), 0 10px 40px rgba(0,0,0,.5)}
-  .planes .plane{display:block; width:100%; height:auto}
-  .planes .plane.pl{position:absolute; inset:0; height:100%; opacity:0; mix-blend-mode:screen; transition:opacity .15s}
-  .planes .ov{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible}
-  .ov .grid line{stroke:rgba(142,208,214,.16); stroke-width:.12}
-  .ov .grid .frame{stroke:rgba(142,208,214,.32); stroke-width:.25; fill:none}
-  .ov .glabel{fill:rgba(230,227,220,.42); font:2.4px var(--mono)}
-  .ov g.mk{transform-box:fill-box; transform-origin:center; animation:pop .45s cubic-bezier(.2,1.4,.4,1)}
-  .ov .cx{stroke-width:.5; fill:none; filter:drop-shadow(0 0 .8px currentColor)}
-  .ov .ring{fill:none; stroke-width:.4; opacity:.85}
-  .ov .rect{stroke-width:.35}
-  .ov .conv{fill:none; stroke:#fff; stroke-width:.5; animation:convp 1.7s ease-in-out infinite}
-  @keyframes pop{from{opacity:0; transform:scale(.35)} to{opacity:1; transform:scale(1)}}
-  @keyframes convp{0%,100%{opacity:.3} 50%{opacity:.95}}
-  .tctrls{display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-top:11px;
-          font-size:11px; color:var(--ink3); font-family:var(--mono); letter-spacing:.02em}
-  .tctrls label{display:flex; align-items:center; gap:7px}
-  .tctrls input[type=range]{width:84px; accent-color:var(--bleu)}
-  .tctrls input[type=checkbox]{accent-color:var(--bleu)}
-  .tlegend{display:flex; gap:14px; flex-wrap:wrap; margin-top:9px; font-size:10.5px; font-family:var(--mono); color:var(--ink2)}
-  .tlegend .chip{display:flex; align-items:center; gap:6px; opacity:0; animation:pop .3s forwards}
-  .tlegend .dot{width:9px; height:9px; border-radius:50%; box-shadow:0 0 7px currentColor}
-  .tcap{text-align:center; font-size:10.5px; color:var(--ink3); font-family:var(--mono); margin-top:7px}
+  /* ══ HUD SCANNER — analyse animée en direct sur l'image ══════════════════ */
+  .hud{--hud:#a6e9f2; --hl:rgba(166,233,242,.22); --hl2:rgba(166,233,242,.5); margin:0 0 20px; font-family:var(--mono)}
+  .scanner{position:relative; width:100%; height:min(80vh,900px); overflow:hidden; border-radius:7px;
+    background:radial-gradient(120% 95% at 50% 42%,#0a0f14 0%,#05070a 68%,#020304 100%);
+    border:1px solid var(--hl); display:flex; align-items:center; justify-content:center;
+    box-shadow:inset 0 0 150px rgba(0,0,0,.9)}
+  .frame{position:relative; max-width:100%}
+  .frame .plane.pc{display:block; max-width:100%; max-height:min(80vh,900px); width:auto; height:auto}
+  .frame .plane.pl{position:absolute; inset:0; width:100%; height:100%; opacity:0; mix-blend-mode:screen; transition:opacity .2s}
+  .frame .halftone{position:absolute; inset:0; pointer-events:none; opacity:.35; mix-blend-mode:overlay;
+    background-image:radial-gradient(rgba(255,255,255,.6) .5px,transparent .7px); background-size:5px 5px}
+  .frame .veil{position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(78% 78% at 50% 50%,transparent 52%,rgba(0,4,6,.6) 100%)}
+  .frame .scan{position:absolute; left:0; right:0; top:-16%; height:16%; pointer-events:none; opacity:0;
+    background:linear-gradient(to bottom,transparent,rgba(166,233,242,.12) 60%,rgba(166,233,242,.42));
+    border-bottom:1px solid rgba(166,233,242,.65); box-shadow:0 0 26px rgba(166,233,242,.3)}
+  .scanner.live .scan{opacity:1; animation:sweepY 3.6s linear infinite}
+  @keyframes sweepY{0%{top:-16%}100%{top:100%}}
+
+  .ov{position:absolute; inset:0; width:100%; height:100%; overflow:hidden; pointer-events:none}
+  .ov .grid line{stroke:var(--hl); stroke-width:.1}
+  .ov .grid .gframe{fill:none; stroke:var(--hl2); stroke-width:.18}
+  .ov .glabel{fill:rgba(166,233,242,.55); font:2.1px var(--mono)}
+  .ov .sweepline{stroke:rgba(166,233,242,.5); stroke-width:.25; transform-box:fill-box; transform-origin:50% 50%}
+  .scanner.live .ov .sweepline{animation:radar 4.4s linear infinite}
+  @keyframes radar{to{transform:rotate(360deg)}}
+
+  .ov .cursor{transition:transform .55s cubic-bezier(.25,1,.3,1)}
+  .ov .cursor .cx{stroke:#fff; stroke-width:.28; filter:drop-shadow(0 0 1px #fff)}
+  .ov .cursor .cring{fill:none; stroke:rgba(255,255,255,.65); stroke-width:.2; transform-box:fill-box; transform-origin:center; animation:spin 9s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .ov .lock{transform-box:fill-box; transform-origin:center; animation:lockin .5s cubic-bezier(.2,1.35,.4,1)}
+  .ov .lock .brk{stroke-width:.5; fill:none; filter:drop-shadow(0 0 .7px currentColor)}
+  .ov .lock .lring{fill:none; stroke-width:.28; opacity:.85}
+  .ov .lock .cx{stroke-width:.4}
+  .ov .lock text{font:1.7px var(--mono); letter-spacing:.02px}
+  @keyframes lockin{from{opacity:0; transform:scale(.55)}to{opacity:1; transform:scale(1)}}
+  .ov .conv{fill:none; stroke:#fff; stroke-width:.35; transform-box:fill-box; transform-origin:center; animation:spin 6s linear infinite}
+  .ov .chroma{fill:none; stroke-width:.35; stroke-dasharray:1.4 1.4; animation:chr 1.8s ease-out forwards}
+  @keyframes chr{from{opacity:.9}to{opacity:.22}}
+  .ov .band{animation:pop .5s ease-out}
+  @keyframes pop{from{opacity:0}to{opacity:1}}
+
+  .corner{position:absolute; width:32px; height:32px; border:1.5px solid var(--hl2); pointer-events:none; opacity:.8}
+  .corner.tl{top:9px; left:9px; border-right:0; border-bottom:0}
+  .corner.tr{top:9px; right:9px; border-left:0; border-bottom:0}
+  .corner.bl{bottom:9px; left:9px; border-right:0; border-top:0}
+  .corner.br{bottom:9px; right:9px; border-left:0; border-top:0}
+
+  .hpanel{position:absolute; color:var(--hud); font-size:9px; line-height:1.55; letter-spacing:.07em;
+    text-transform:uppercase; text-shadow:0 0 8px rgba(166,233,242,.4); pointer-events:none; z-index:3}
+  .hpanel .k{color:rgba(166,233,242,.5)} .hpanel b{color:#eafcff; font-weight:600}
+  .p-status{top:16px; left:18px} .p-zones{top:16px; right:18px; text-align:right; max-width:38%}
+  .p-count{bottom:16px; left:18px} .p-meta{bottom:16px; right:18px; text-align:right}
+  .p-title{position:absolute; top:15px; left:50%; transform:translateX(-50%); color:#eafcff; font-size:10.5px;
+    letter-spacing:.28em; text-shadow:0 0 12px rgba(166,233,242,.6); z-index:3}
+  .blink{animation:bl 1.05s steps(1) infinite} @keyframes bl{50%{opacity:.2}}
+  .p-zones .z{display:block; opacity:0; animation:pop .3s forwards}
+
+  .hctrls{display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-top:12px; font-size:11px; color:var(--ink3)}
+  .hctrls label{display:flex; gap:7px; align-items:center}
+  .hctrls input[type=range]{width:90px; accent-color:var(--hud)} .hctrls input[type=checkbox]{accent-color:var(--hud)}
+  .hlog{margin-top:12px; height:132px; overflow:hidden; border:1px solid var(--line); border-radius:6px;
+    background:#080b0f; padding:10px 14px; font-size:12.5px; line-height:1.62; display:flex; flex-direction:column; justify-content:flex-end}
+  .hlog .ln{opacity:0; animation:pop .35s forwards; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#cdd2dc}
+  .hlog .ln .tg{font-weight:700; margin-right:8px; text-transform:uppercase; letter-spacing:.04em}
+  .hlog .ln.ev{color:#8790a0; letter-spacing:.03em}
+  .hlegend{display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:10.5px; color:var(--ink2)}
+  .hlegend .chip{display:flex; gap:6px; align-items:center; opacity:0; animation:pop .3s forwards}
+  .hlegend .dot{width:9px; height:9px; border-radius:50%; box-shadow:0 0 8px currentColor}
+  .dossier{margin-top:22px}
+  .dhead{font-size:11px; text-transform:uppercase; letter-spacing:.14em; color:var(--ink3); font-family:var(--mono); text-align:center; margin:0 0 16px}
 
   .voix{background:var(--bg2); border:1px solid var(--line); border-radius:11px; padding:18px 20px; margin:0 auto 18px; max-width:760px}
   .voix.tissage{background:var(--bg3); border-color:var(--bg4)}
@@ -268,7 +315,7 @@ function chargeFichier(file){
         for(let y=y0;y<y1;y+=2)for(let x=x0;x<x1;x+=2){const i=(y*w+x)*4; R+=gd[i];G+=gd[i+1];B+=gd[i+2];n++;}
         n=n||1; cells.push({col,row,r:R/n,g:G/n,b:B/n});
       }
-      state.img={ b64:url.split(",")[1], mime:"image/jpeg", url, nom:file.name, cells,
+      state.img={ b64:url.split(",")[1], mime:"image/jpeg", url, nom:file.name, cells, w, h,
                   board:{ b64:bUrl.split(",")[1], mime:"image/png", url:bUrl } };
       $("#prev").innerHTML=`<img src="${url}" alt="">`;
       refresh();
@@ -327,73 +374,130 @@ function colorTest(w,h,s,l){
 const NS="http://www.w3.org/2000/svg";
 const svg=(t,a)=>{const e=document.createElementNS(NS,t); for(const k in a) e.setAttribute(k,a[k]); return e;};
 
-function makeInstrument(stage, im){
-  const wrap=document.createElement("div"); wrap.className="table";
+function makeHUD(stage, im){
+  const wrap=document.createElement("div"); wrap.className="hud";
+  const ar=(im.w&&im.h)?(im.w/im.h):1.4;
   wrap.innerHTML=`
-    <div class="planes">
-      <img class="plane pc" alt="">
-      <img class="plane pl" alt="">
-      <svg class="ov" viewBox="0 0 100 100" preserveAspectRatio="none"><g class="grid"></g><g class="markers"></g></svg>
+    <div class="scanner">
+      <div class="frame">
+        <img class="plane pc" alt=""><img class="plane pl" alt="">
+        <div class="halftone"></div><div class="veil"></div><div class="scan"></div>
+        <svg class="ov" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <g class="grid"></g>
+          <line class="sweepline" x1="50" y1="50" x2="50" y2="2"></line>
+          <g class="locks"></g>
+          <g class="cursor"></g>
+        </svg>
+        <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+        <div class="p-title">NEPHÉLÉ // SCAN PROJECTIF</div>
+        <div class="hpanel p-status">
+          <div><span class="blink">◉</span> <span class="k">signal</span> <b>LIVE</b></div>
+          <div><span class="k">regard</span> <b class="vc">—</b></div>
+          <div><span class="k">air noise</span> <b>PROJECTIF</b></div></div>
+        <div class="hpanel p-zones"><span class="k">zones verrouillées</span><div class="zlist"></div></div>
+        <div class="hpanel p-count">
+          <div><span class="k">verrous</span> <b class="nl">0</b></div>
+          <div><span class="k">recoupements</span> <b class="nc">0</b></div>
+          <div><span class="k">chroma</span> <b class="nk">0</b></div></div>
+        <div class="hpanel p-meta">
+          <div><b>${esc((im.nom||"œuvre").slice(0,22))}</b></div>
+          <div><span class="k">matrice</span> A–E × 1–5</div>
+          <div><span class="k">px</span> ${im.w||"?"}×${im.h||"?"}</div></div>
+      </div>
     </div>
-    <div class="tctrls">
+    <div class="hctrls">
       <label>couleur <input type="range" class="opC" min="0" max="100" value="100"></label>
       <label>niveaux <input type="range" class="opL" min="0" max="100" value="0"></label>
       <label><input type="checkbox" class="grille" checked> grille</label>
       <label><input type="checkbox" class="marq" checked> marqueurs</label>
     </div>
-    <div class="tlegend"></div>
-    <div class="tcap">${esc(im.nom||"l'œuvre")} — matrice A–E × 1–5, chaque regard vise en sa couleur</div>`;
+    <div class="hlog"></div>
+    <div class="hlegend"></div>
+    <div class="dossier"><div class="dhead">dossier — données et impressions récoltées</div></div>`;
   stage.appendChild(wrap);
-  const pc=wrap.querySelector(".pc"), pl=wrap.querySelector(".pl");
+  const $$=s=>wrap.querySelector(s);
+  const scanner=$$(".scanner"), pc=$$(".pc"), pl=$$(".pl");
   pc.src=im.url; pl.src=(im.board&&im.board.url)||im.url;
-  const gGrid=wrap.querySelector(".grid"), gMk=wrap.querySelector(".markers"), legend=wrap.querySelector(".tlegend");
+  const gGrid=$$(".grid"), gLocks=$$(".locks"), gCursor=$$(".cursor");
+  const legend=$$(".hlegend"), log=$$(".hlog"), zlist=$$(".zlist"), dossier=$$(".dossier");
 
+  // matrice
   for(let i=1;i<5;i++){ gGrid.appendChild(svg("line",{x1:i*20,y1:0,x2:i*20,y2:100})); gGrid.appendChild(svg("line",{x1:0,y1:i*20,x2:100,y2:i*20})); }
-  gGrid.appendChild(svg("rect",{x:0,y:0,width:100,height:100,class:"frame"}));
-  "ABCDE".split("").forEach((L,c)=>{const t=svg("text",{x:c*20+1.4,y:3.3,class:"glabel"}); t.textContent=L; gGrid.appendChild(t);});
-  for(let r=0;r<5;r++){const t=svg("text",{x:.5,y:r*20+4.1,class:"glabel"}); t.textContent=r+1; gGrid.appendChild(t);}
+  gGrid.appendChild(svg("rect",{x:.3,y:.3,width:99.4,height:99.4,class:"gframe"}));
+  "ABCDE".split("").forEach((L,c)=>{const t=svg("text",{x:c*20+1.3,y:3.1,class:"glabel"}); t.textContent=L; gGrid.appendChild(t);});
+  for(let r=0;r<5;r++){const t=svg("text",{x:.5,y:r*20+4,class:"glabel"}); t.textContent=r+1; gGrid.appendChild(t);}
+  // curseur actif (réticule qui balaye)
+  gCursor.appendChild(svg("line",{x1:44,y1:50,x2:47.5,y2:50,class:"cx"}));
+  gCursor.appendChild(svg("line",{x1:52.5,y1:50,x2:56,y2:50,class:"cx"}));
+  gCursor.appendChild(svg("line",{x1:50,y1:44,x2:50,y2:47.5,class:"cx"}));
+  gCursor.appendChild(svg("line",{x1:50,y1:52.5,x2:50,y2:56,class:"cx"}));
+  gCursor.appendChild(svg("circle",{cx:50,cy:50,r:1,class:"cx",fill:"#fff"}));
+  gCursor.appendChild(svg("circle",{cx:50,cy:50,r:5,class:"cring","stroke-dasharray":"3 2.2"}));
 
-  wrap.querySelector(".opC").oninput=e=>pc.style.opacity=e.target.value/100;
-  wrap.querySelector(".opL").oninput=e=>pl.style.opacity=e.target.value/100;
-  wrap.querySelector(".grille").onchange=e=>gGrid.style.display=e.target.checked?"":"none";
-  wrap.querySelector(".marq").onchange=e=>gMk.style.display=e.target.checked?"":"none";
+  // plans + toggles
+  $$(".opC").oninput=e=>pc.style.opacity=e.target.value/100;
+  $$(".opL").oninput=e=>pl.style.opacity=e.target.value/100;
+  $$(".grille").onchange=e=>gGrid.style.display=e.target.checked?"":"none";
+  $$(".marq").onchange=e=>{gLocks.style.display=e.target.checked?"":"none"; gCursor.style.display=e.target.checked?"":"none";};
 
-  const seen={}, conv={}, chips={};
-  const ci=L=>"ABCDE".indexOf(L);
-  const ctr=(c,r)=>[c*20+10,r*20+10];
-  function chip(voice){ if(chips[voice])return; const v=VOICES[voice]; const e=document.createElement("span");
-    e.className="chip"; e.style.color=v.color; e.innerHTML=`<span class="dot" style="background:${v.color}"></span>${v.label}`;
-    legend.appendChild(e); chips[voice]=e; }
-  function cross(voice,c,r){ const v=VOICES[voice], [x,y]=ctr(c,r), g=svg("g",{class:"mk"});
-    g.appendChild(svg("line",{x1:x-2.6,y1:y-2.6,x2:x+2.6,y2:y+2.6,class:"cx",stroke:v.color}));
-    g.appendChild(svg("line",{x1:x-2.6,y1:y+2.6,x2:x+2.6,y2:y-2.6,class:"cx",stroke:v.color}));
-    g.appendChild(svg("circle",{cx:x,cy:y,r:3.3,class:"ring",stroke:v.color}));
-    gMk.appendChild(g);
+  const seen={}, conv={}, chips={}, sent={};
+  let nL=0,nC=0,nK=0;
+  const ci=L=>"ABCDE".indexOf(L), ctr=(c,r)=>[c*20+10,r*20+10];
+  const setN=()=>{ $$(".nl").textContent=nL; $$(".nc").textContent=nC; $$(".nk").textContent=nK; };
+  function chip(voice){ const v=VOICES[voice]; $$(".vc").textContent=v.label.toUpperCase();
+    if(chips[voice])return; const e=document.createElement("span"); e.className="chip"; e.style.color=v.color;
+    e.innerHTML=`<span class="dot" style="background:${v.color}"></span>${v.label}`; legend.appendChild(e); chips[voice]=e; }
+  function logLine(html,cls){ const e=document.createElement("div"); e.className="ln"+(cls?" "+cls:""); e.innerHTML=html;
+    log.appendChild(e); while(log.children.length>40) log.removeChild(log.firstChild); }
+  function moveCursor(x,y){ gCursor.style.transform=`translate(${(x-50).toFixed(2)}px,${(y-50).toFixed(2)}px)`; }
+
+  function lock(voice,c,r,code){ const v=VOICES[voice], [x,y]=ctr(c,r), x0=c*20,y0=r*20, g=svg("g",{class:"lock"}), col=v.color;
+    const B=4.2, brk=(px,py,dx,dy)=>{ const p=svg("polyline",{class:"brk",stroke:col,
+      points:`${px+dx*B},${py} ${px},${py} ${px},${py+dy*B}`}); g.appendChild(p); };
+    brk(x0+1.6,y0+1.6,1,1); brk(x0+18.4,y0+1.6,-1,1); brk(x0+1.6,y0+18.4,1,-1); brk(x0+18.4,y0+18.4,-1,-1);
+    g.appendChild(svg("circle",{cx:x,cy:y,r:6.4,class:"lring",stroke:col}));
+    g.appendChild(svg("line",{x1:x-2.4,y1:y,x2:x+2.4,y2:y,class:"cx",stroke:col}));
+    g.appendChild(svg("line",{x1:x,y1:y-2.4,x2:x,y2:y+2.4,class:"cx",stroke:col}));
+    const t=svg("text",{x:x0+2.2,y:y0+4.4,fill:col}); t.textContent=code; g.appendChild(t);
+    gLocks.appendChild(g); moveCursor(x,y); nL++;
     const k=c+","+r, set=(conv[k]=conv[k]||new Set()); set.add(voice);
-    if(set.size>=2 && !set._r){ set._r=true; gMk.appendChild(svg("circle",{cx:x,cy:y,r:6,class:"conv"})); } }
-  function rangeRect(voice,c1,r1,c2,r2){ const v=VOICES[voice], g=svg("g",{class:"mk"});
-    g.appendChild(svg("rect",{x:Math.min(c1,c2)*20+.6,y:Math.min(r1,r2)*20+.6,width:(Math.abs(c1-c2)+1)*20-1.2,height:(Math.abs(r1-r2)+1)*20-1.2,
-      rx:1.4,class:"rect",fill:v.color,"fill-opacity":.09,stroke:v.color,"stroke-opacity":.55})); gMk.appendChild(g); }
-  function band(voice,c1,c2,r1,r2){ const v=VOICES[voice], g=svg("g",{class:"mk"});
-    g.appendChild(svg("rect",{x:c1*20,y:r1*20,width:(c2-c1+1)*20,height:(r2-r1+1)*20,fill:v.color,"fill-opacity":.06})); gMk.appendChild(g); }
-  function colorPulse(voice,w){ if(!im.cells)return; const v=VOICES[voice];
-    im.cells.forEach(cell=>{ const [h,s,l]=rgbToHsl(cell.r,cell.g,cell.b); if(colorTest(w,h,s,l)){ const g=svg("g",{class:"mk"});
-      g.appendChild(svg("rect",{x:cell.col*20+1,y:cell.row*20+1,width:18,height:18,rx:1.4,fill:"none",stroke:v.color,"stroke-opacity":.5,"stroke-dasharray":"2 2"})); gMk.appendChild(g); } }); }
+    if(set.size>=2 && !set._r){ set._r=true; nC++;
+      const d=svg("rect",{x:x-5.4,y:y-5.4,width:10.8,height:10.8,rx:1,class:"conv",transform:`rotate(45 ${x} ${y})`}); gLocks.appendChild(d);
+      logLine(`<span class="tg" style="color:#fff">◆ RECOUPEMENT</span>${code} — ${[...set].map(v=>VOICES[v].label).join(" ∩ ")}`,"ev"); }
+    setN();
+    const z=document.createElement("span"); z.className="z"; z.style.color=col; z.textContent=code+" · "+v.label.replace(/^(le |la )/,"");
+    zlist.appendChild(z); while(zlist.children.length>7) zlist.removeChild(zlist.firstChild);
+  }
+  function rangeRect(voice,c1,r1,c2,r2){ const v=VOICES[voice], g=svg("g",{class:"lock"});
+    g.appendChild(svg("rect",{x:Math.min(c1,c2)*20+1,y:Math.min(r1,r2)*20+1,width:(Math.abs(c1-c2)+1)*20-2,height:(Math.abs(r1-r2)+1)*20-2,
+      rx:1.2,fill:v.color,"fill-opacity":.07,stroke:v.color,"stroke-opacity":.5,"stroke-dasharray":"2 1.6"})); gLocks.appendChild(g); }
+  function band(voice,c1,c2,r1,r2){ const v=VOICES[voice], g=svg("g",{class:"band"});
+    g.appendChild(svg("rect",{x:c1*20,y:r1*20,width:(c2-c1+1)*20,height:(r2-r1+1)*20,fill:v.color,"fill-opacity":.05})); gLocks.appendChild(g); }
+  function chroma(voice,w){ if(!im.cells)return; const v=VOICES[voice]; let hit=0;
+    im.cells.forEach(cell=>{ const [h,s,l]=rgbToHsl(cell.r,cell.g,cell.b); if(colorTest(w,h,s,l)){ hit++;
+      gLocks.appendChild(svg("rect",{x:cell.col*20+1.4,y:cell.row*20+1.4,width:17.2,height:17.2,rx:1.2,class:"chroma",stroke:v.color})); } });
+    if(hit){ nK++; setN(); logLine(`<span class="tg" style="color:${v.color}">◈ CHROMA</span>${w} · ${hit} cellule(s)`,"ev"); } }
 
   const COLW=["rouge","orange","jaune","vert","bleu","violet","rose","blanc","noir","gris"];
   const SPACE={gauche:[0,1,0,4],droite:[3,4,0,4],haut:[0,4,0,1],bas:[0,4,3,4],centre:[1,3,1,3],milieu:[1,3,1,3]};
+  const phrases=t=>(t.match(/[^.;!?…\n]+[.;!?…]/g)||[]).map(x=>x.trim()).filter(x=>x.length>3);
 
   function feed(voice,text){
-    if(!text) return; chip(voice);
+    if(!text) return; chip(voice); const v=VOICES[voice];
     const s=(seen[voice]=seen[voice]||new Set());
+    // réflexions distillées : chaque phrase complète devient une transmission
+    const ph=phrases(text), was=sent[voice]||0;
+    for(let i=was;i<ph.length;i++) logLine(`<span class="tg" style="color:${v.color}">${v.label}</span>${esc(ph[i])}`);
+    sent[voice]=ph.length;
+    // pointage : zones, intervalles, chroma, espace
     let m; const rng=/([A-E])\s?([1-5])\s*[–—-]\s*([A-E])\s?([1-5])/g;
     while((m=rng.exec(text))){ const sig="R"+m[0].replace(/\s/g,""); if(s.has(sig))continue; s.add(sig); rangeRect(voice,ci(m[1]),+m[2]-1,ci(m[3]),+m[4]-1); }
     const one=/\b([A-E])\s?([1-5])\b/g;
-    while((m=one.exec(text))){ const sig="C"+m[1]+m[2]; if(s.has(sig))continue; s.add(sig); cross(voice,ci(m[1]),+m[2]-1); }
-    COLW.forEach(w=>{ if(!s.has("W"+w) && new RegExp("\\b"+w,"i").test(text)){ s.add("W"+w); colorPulse(voice,w); } });
-    Object.keys(SPACE).forEach(w=>{ if(!s.has("S"+w) && new RegExp("\\b"+w,"i").test(text)){ s.add("S"+w); const a=SPACE[w]; band(voice,a[0],a[1],a[2],a[3]); } });
+    while((m=one.exec(text))){ const sig="C"+m[1]+m[2]; if(s.has(sig))continue; s.add(sig); lock(voice,ci(m[1]),+m[2]-1,m[1]+m[2]); }
+    COLW.forEach(w=>{ if(!s.has("W"+w)&&new RegExp("\\b"+w,"i").test(text)){ s.add("W"+w); chroma(voice,w); } });
+    Object.keys(SPACE).forEach(w=>{ if(!s.has("S"+w)&&new RegExp("\\b"+w,"i").test(text)){ s.add("S"+w); const a=SPACE[w]; band(voice,a[0],a[1],a[2],a[3]); } });
   }
-  return { feed, wrap };
+  return { feed, dossier, scanner };
 }
 
 async function run(){
@@ -405,7 +509,9 @@ async function run(){
   $("#run").disabled=true; $("#halt").style.display="block";
 
   const stage=$("#stage"); stage.innerHTML="";
-  const instrument = makeInstrument(stage, state.img);
+  const instrument = makeHUD(stage, state.img);
+  const dossier = instrument.dossier;
+  instrument.scanner.classList.add("live");
 
   const img = imgBlock(state.img.b64, state.img.mime);
   const cue = {type:"text", text:"Voici l'œuvre. Regarde-la, et parle."};
@@ -426,7 +532,7 @@ async function run(){
     if(aveugle){
       /* 1. la passe aveugle : une silhouette lue en forces nues, sans nom. */
       const cNu=voixCard("nu","Regard nu","à l'aveugle, sans le nom — un sol de forces");
-      stage.appendChild(cNu); cNu.__board(state.img.board.url);
+      dossier.appendChild(cNu); cNu.__board(state.img.board.url);
       const substrat = await lire(cNu, "nu", SOCLE_SENSIBLE,
         [imgBlock(state.img.board.b64, state.img.board.mime), {type:"text",text:P_REGARD_NU}], .7);
 
@@ -435,7 +541,7 @@ async function run(){
       comp.innerHTML=`<div class="tag2">le même naïf, deux fois — à gauche sans le sol, à droite monté des forces</div>`;
       const cA=voixCard("naif","Le naïf — à l'aveugle","reçoit l'œuvre, et ce qu'il reconnaît déjà");
       const cB=voixCard("naif","Le naïf — à nu","reçoit d'abord les forces, puis l'œuvre");
-      comp.append(cA,cB); stage.appendChild(comp);
+      comp.append(cA,cB); dossier.appendChild(comp);
 
       const sysA = SOCLE_PROJECTIF+"\n\n"+P_NAIF;
       const sysB = substrat
@@ -445,14 +551,14 @@ async function run(){
       naifTexte = tB;        // c'est le naïf « à nu » qui entre dans le tissage
     }else{
       const c=voixCard("naif","Le naïf","il ne sait rien, et reçoit tout");
-      stage.appendChild(c);
+      dossier.appendChild(c);
       naifTexte = await lire(c, "naif", SOCLE_PROJECTIF+"\n\n"+P_NAIF, [img, cue]);
     }
 
     /* Le chercheur et le connaisseur, en parallèle et indépendants. */
     const cCh=voixCard("chercheur","Le chercheur","il pressent un sens caché, et creuse");
     const cCo=voixCard("connaisseur","Le connaisseur","il reconnaît, et cherche l'intention");
-    stage.append(cCh,cCo);
+    dossier.append(cCh,cCo);
     const [tCh,tCo]=await Promise.all([
       lire(cCh, "chercheur",   SOCLE_PROJECTIF+"\n\n"+P_CHERCHEUR,   [img, cue]),
       lire(cCo, "connaisseur", SOCLE_PROJECTIF+"\n\n"+P_CONNAISSEUR, [img, cue]),
@@ -464,7 +570,7 @@ async function run(){
                  tCo&&{qui:"Le connaisseur",texte:tCo} ].filter(Boolean);
     if($("#doTissage").checked && bons.length>=2){
       const c=voixCard("tissage","Le tissage","ce qui les sépare, ce qui malgré tout les touche");
-      stage.appendChild(c);
+      dossier.appendChild(c);
       const lecturesTxt = bons.map(L=>`### ${L.qui}\n${L.texte}`).join("\n\n");
       try{
         const t=await ask({ system:SOCLE_PROJECTIF+"\n\n"+P_TISSAGE, maxTokens:1400, temperature:.9, signal,
@@ -477,6 +583,7 @@ async function run(){
     if(e.name!=="AbortError")
       stage.appendChild(Object.assign(document.createElement("div"),{className:"banner", textContent:"Interrompu : "+e.message}));
   }finally{
+    instrument.scanner.classList.remove("live");
     state.running=false; $("#halt").style.display="none"; refresh();
   }
 }
