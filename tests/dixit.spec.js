@@ -158,8 +158,10 @@ test('dixit : le visuel pointe (croix persistantes) et zoome (loupes), sans scan
   expect(nLoupe).toBeGreaterThanOrEqual(2);             // zooms sur les zones d'intérêt
   await expect(page.locator('.hlegend .chip')).toHaveCount(3);
 
-  // Les réflexions sont lisibles et présentes, une par regard.
+  // Les réflexions sont lisibles et présentes, une par regard — et AUCUN loader.
   await expect(page.locator('.dossier .voix.chercheur .prose')).toContainText('se cache');
+  await expect(page.locator('.voix .spin')).toHaveCount(0);
+  await expect(page.locator('.prose.pending')).toHaveCount(0);
   await expect(page.locator('.voix.fail')).toHaveCount(0);
   await expect(page.locator('.banner')).toHaveCount(0);
   expect(calls.length).toBe(3);
