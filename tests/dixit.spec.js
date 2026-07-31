@@ -122,7 +122,7 @@ test('dixit : la passe aveugle nourrit le naïf, deux naïfs en comparatif', asy
   expect(calls.length).toBe(6);
 });
 
-test('dixit : le HUD scanner trace grille, plans, verrous et log', async ({ page }) => {
+test('dixit : le visuel pointe (croix persistantes) et zoome (loupes), sans scan', async ({ page }) => {
   const { calls } = await mockAnthropic(page, { responder: ({ system }) => {
     if (/TU ES LE NAÏF/.test(system)) return "Le rouge à gauche m'appelle. La masse tient en A3-E5, et un point en C3 me fixe.";
     if (/TU ES LE CHERCHEUR/.test(system)) return "Quelque chose se cache en bas, vers D4.";
@@ -137,27 +137,29 @@ test('dixit : le HUD scanner trace grille, plans, verrous et log', async ({ page
   await expect(page.locator('#run')).toBeEnabled({ timeout: 10000 });
   await page.click('#run');
 
-  // Le scanner, ses deux plans, ses cadres d'angle et ses panneaux.
+  // Le scanner et ses deux plans ; plus AUCUN scan ni trait rotatif.
   await expect(page.locator('.hud .scanner')).toHaveCount(1);
   await expect(page.locator('.scanner .frame img.pc')).toBeVisible({ timeout: 30000 });
   await expect(page.locator('.scanner .frame img.pl')).toHaveCount(1);
-  await expect(page.locator('.scanner .corner')).toHaveCount(4);
-  await expect(page.locator('.scanner .p-title')).toBeVisible();
   await expect(page.locator('.hctrls .opL')).toHaveCount(1);
+  await expect(page.locator('.ov .sweepline')).toHaveCount(0);
+  await expect(page.locator('.ov .cursor')).toHaveCount(0);
+  await expect(page.locator('.scanner .scan')).toHaveCount(0);
 
-  // La matrice A–E × 1–5 : 8 lignes internes + 10 étiquettes + le curseur.
+  // La matrice A–E × 1–5 : 8 lignes internes + 10 étiquettes.
   await expect(page.locator('.ov .grid line')).toHaveCount(8);
   await expect(page.locator('.ov .grid .glabel')).toHaveCount(10);
-  await expect(page.locator('.ov .cursor')).toHaveCount(1);
 
-  // On attend la fin (trois voix, dans le dossier) puis on compte les verrous.
+  // On attend la fin (trois voix, dans le dossier) puis on vérifie points + loupes.
   await expect(page.locator('.dossier .voix')).toHaveCount(3, { timeout: 30000 });
   const nLock = await page.locator('.ov .locks .lock').count();
-  expect(nLock).toBeGreaterThanOrEqual(3);              // zones + intervalles verrouillés
-  await expect(page.locator('.hlegend .chip')).toHaveCount(3);   // une puce par voix
-  const nLog = await page.locator('.hlog .ln').count();
-  expect(nLog).toBeGreaterThan(0);                      // les transmissions distillées
+  expect(nLock).toBeGreaterThanOrEqual(3);              // croix persistantes aux zones citées
+  const nLoupe = await page.locator('.loupes .loupe').count();
+  expect(nLoupe).toBeGreaterThanOrEqual(2);             // zooms sur les zones d'intérêt
+  await expect(page.locator('.hlegend .chip')).toHaveCount(3);
 
+  // Les réflexions sont lisibles et présentes, une par regard.
+  await expect(page.locator('.dossier .voix.chercheur .prose')).toContainText('se cache');
   await expect(page.locator('.voix.fail')).toHaveCount(0);
   await expect(page.locator('.banner')).toHaveCount(0);
   expect(calls.length).toBe(3);
