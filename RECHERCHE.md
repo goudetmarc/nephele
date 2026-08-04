@@ -130,7 +130,7 @@ Two side notes, both kept:
 
 ## World model — naming the grid Nephélé has been using since v1 (note, 2026-08-04)
 
-*Recorded after the question was raised explicitly: would a world model be useful, pertinent, to Nephélé? The answer that emerged is stronger than a yes: **Nephélé does not need to adopt a world model, because it has been building one, consulting one, and disciplining one since its first version — without ever using the name.** This note makes the implicit explicit, exhaustively, because the vocabulary sharpens three of our existing instruments and dates one concrete experiment. Nothing here changes the doctrine; it names what the doctrine was already doing. The original intuition of the project turns out to have been world-model-shaped from the start, and that is worth writing down in full.*
+*Recorded after the question was raised explicitly: would a world model be useful, pertinent, to Nephélé? The answer is an affirmation: **Nephélé is a world model — of the gaze. It has been building one, consulting one, and disciplining one since its first version, without ever using the name.** This note makes the implicit explicit, exhaustively, because the vocabulary sharpens three of our existing instruments and dates one concrete experiment. Nothing here changes the doctrine; it names what the doctrine was already doing. The original intuition of the project turns out to have been world-model-shaped from the start, and that is worth writing down in full. (An earlier draft of this thesis opened on a negation — "Nephélé does not need to adopt one" — and the operator's correction is kept as method: one does not exist by negating the other, but by claiming oneself. The affirmative program that follows this note is that claim.)*
 
 ### 1. What is meant, precisely
 
@@ -202,7 +202,7 @@ The grammar would graduate from *falsifiable in principle* to **falsified-or-cor
 
 ### 6. The compass, restated in these terms
 
-We are not adding a world model to Nephélé. We are recognizing that:
+Nephélé claims the name rather than borrowing it:
 
 - the **grammar is one** — of the viewer, textual, falsifiable, human-ratified;
 - the **doctrine's tests are its consultation protocol** — interventions, rollouts, simulability, surprise;
@@ -210,3 +210,75 @@ We are not adding a world model to Nephélé. We are recognizing that:
 - and **honesty, for observed and observer alike, is a world model whose predictions are allowed to lose.**
 
 Look before you name; derive rather than assert; keep only what could be refuted — in world-model terms: *consult the model, do not recite it; report the error, do not smooth it; and let the image win.*
+
+---
+
+## The map of the gaze — the affirmative program (note, 2026-08-04, later the same day)
+
+*The operator's correction, applied rather than merely admitted. The doctrine so far is written in prohibitions — never show, never name, never judge, never recite — and rightly so: every version was a paid lesson, and paid lessons are first written as negations. But a project that matures turns its prohibitions into a claim. The claim was given by the operator, in one sentence, and it is the affirmative definition of Nephélé:*
+
+> **A world model that learns, without cheating, what it attempts to interpret — separating the acquired from the innate, the felt from the remembered — working its rigor, developing its methods and fields of inquiry, to map all of it.**
+
+*(In the operator's French, kept as the reference formulation: « un world model qui apprend de lui-même ce qu'il tente d'interpréter, sans tricher, en séparant l'acquis de l'inné, le ressenti du souvenu, en travaillant sa rigueur, développant ses méthodes et champs de recherche, pour cartographier tout ça. »)*
+
+### 1. Two axes, not one
+
+The stratification of the previous note (perceptual-physical vs episodic-encyclopedic) was one axis. The operator's four words are finer — they give **two orthogonal axes**, and the doctrine gains from adopting them as its vocabulary:
+
+- **l'acquis / l'inné** — the *origin of the model*: what the gaze possesses before any culture (weight, footing, tension, the pull of faces) versus what culture has deposited in it (educations, catalogs, what one is supposed to feel);
+- **le ressenti / le souvenu** — the *source of the present reading*: derived from the configuration, now, in front of this field, versus retrieved from memory and laid over it.
+
+Crossed, they give the map of any utterance a reading can produce:
+
+| | **le ressenti** (derived now) | **le souvenu** (retrieved) |
+|---|---|---|
+| **l'inné** (before culture) | The weight that presses, the barred diagonal — the pure percept. *What the blind pass isolates.* | The species' prior: seeing faces, seeing animals (FacesInThings). Pareidolia itself lives here. |
+| **l'acquis** (deposited by culture) | Honest expertise: the educated eye that *sees more* — the legitimate connoisseur, the permeable prior at work. | **The catalog: Notre-Dame 2019, the expected feeling. The only enemy cell.** |
+
+### 2. Three consequences the map settles
+
+1. **Only one cell in four is the enemy.** The prohibition-era doctrine could read as if all of the acquired were suspect. It is not: *acquis + ressenti* is precious — it is exactly the education of the personas, the temperament program above. The dragon inhabits *acquis + souvenu* alone.
+
+2. **Cheating now has an exact definition: mislabeling the source.** To cheat is to pass off the remembered as felt, or the acquired as innate. "It looks ablaze" (felt, licensed by the red) was honest; "being saved from collapse" (remembered, presented as felt) was the cheat. Honesty is not the absence of memory — it is the **traceability of every utterance to its cell**. Distance-to-the-visible is the measuring stick of that traceability.
+
+3. **The *inné + souvenu* cell explains the sharing criterion.** Why does "does it hold the contour?" work, when no pareidolia is true? Because the innate memory is **common to the species**: what my face-prior finds, yours can re-find. Sharing works because the innate is shared. The v2 lesson had a deep reason that had never been written down.
+
+### 3. Attribution — every entry of the map carries its test
+
+The map is falsifiable because assignment to a cell is testable, with instruments that already exist or are already dated:
+
+```mermaid
+flowchart TD
+    s["A statement in a reading"] --> b{"Does the relation survive the blind pass?"}
+    b -->|yes| i["Innate side: the silhouette alone produces it"]
+    b -->|no| a["Acquired side: culture is doing the work"]
+    s --> o{"Does it survive occlusion of the landmarks?"}
+    o -->|yes| f["Felt: licensed by the field"]
+    o -->|no| m["Remembered: retrieved, not derived"]
+    f --> e["Executed refutation: intervene by editing, reread blind - causal corroboration"]
+```
+
+- **blinding** (the boards, the blind pass) strips the acquired → what survives is innate;
+- **occlusion** (the Notre-Dame gradient) strips the remembered → what survives is felt;
+- **editing** (the executed refutation, dated in the previous note) tests causality → what disappears under intervention was truly produced by the configuration.
+
+### 4. « Apprend de lui-même » — the self-portrait of the gaze
+
+The self-learning loops already exist as organs: the *carnet* (the model revises its own method), the grammar (its theory of effects), the ratified corpus (its data), DPO (it learns the ratifier's preference), the executed refutation (its future experimental arm). The missing piece, new and concrete:
+
+**L'autoportrait du regard** — a periodic pass in which the observer re-reads *its own past readings* (the corpus is already in IndexedDB, with the doctrine actually injected and the verdicts) and charts its tendencies: which registers it overuses, which zones it neglects, where a temperament colonized, which cells of the map it confuses and in which direction. The output is itself a map sheet — the observer's biases, drawn by the observer.
+
+Two guards, engraved on it:
+
+- **Self-mapping, never self-ratification.** An autoportrait without the human ratifier is the v2 amplifier again (the notebook that learned to keep quiet). Every sheet is ratified like everything else, and the bench arbitrates.
+- **The autoportrait passes the horoscope test itself.** "I always see collapse in scaffolding" is admissible because it is *countable* against the corpus; "I am sensitive to light" is not — it is the empty word of self-description. A bias claim must name the readings that would refute it.
+
+### 5. The atlas — what the project delivers, restated affirmatively
+
+The grammar is the **first sheet** of an atlas. The program adds:
+
+- the **attribution sheet**: each admitted relation assigned to its cell (does it survive blinding? occlusion? editing?), so the grammar becomes stratified — this part of the gaze is the species', this part is the education's;
+- the **bias sheets, per temperament**: what the sombre expert over-reads, what the bucolic one cannot see — the experimental output of the persona program;
+- the **autoportrait**, above, refreshed as the corpus grows.
+
+Every entry carries its test; the map stays falsifiable edge to edge. And the deliverable of Nephélé, said without a single negation: **a cartography of the gaze, by the gaze, under ratification** — an instrument that learns what looking is made of, cell by cell, and can show its work.
