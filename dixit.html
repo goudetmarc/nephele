@@ -276,6 +276,7 @@
     <h2>Regards</h2>
     <div class="sw"><input type="checkbox" id="doAveugle"><label for="doAveugle">Passe aveugle — nourrir le naïf<small>Une silhouette binarisée est lue en forces nues, sans nom, et sert de sol au naïf. On affiche alors les deux naïfs côte à côte : à l'aveugle vs à nu.</small></label></div>
     <div class="sw"><input type="checkbox" id="doTissage" checked><label for="doTissage">Tisser les trois<small>Un quatrième passage qui les tient ensemble sans les fondre.</small></label></div>
+    <div class="sw"><input type="checkbox" id="doTemp"><label for="doTemp">Tempéraments — expérience B<small>Deux éducations opposées (sombre / bucolique) lisent la même œuvre, avec l'obligation de friction. Verdict à la friction déclarée, jamais à la belle sortie.</small></label></div>
   </div>
 
   <div class="sect">
@@ -433,8 +434,8 @@ function chargeFichier(file){
   rd.readAsDataURL(file);
 }
 
-const GLYPH={nu:"◎",naif:"✦",chercheur:"⌕",connaisseur:"❖",tissage:"⧉"};
-const CARDVC={nu:"#8fd8de",naif:"#ffb066",chercheur:"#8fc3d8",connaisseur:"#ffd24a",tissage:"#9ed4a6"};
+const GLYPH={nu:"◎",naif:"✦",chercheur:"⌕",connaisseur:"❖",tissage:"⧉",sombre:"◆",bucolique:"❀"};
+const CARDVC={nu:"#8fd8de",naif:"#ffb066",chercheur:"#8fc3d8",connaisseur:"#ffd24a",tissage:"#9ed4a6",sombre:"#b3a7ea",bucolique:"#bcd985"};
 function voixCard(cls, qui, quoi){
   const el=document.createElement("section"); el.className="voix on "+cls;
   const g=GLYPH[cls]||"◇"; el.style.setProperty("--vc",CARDVC[cls]||"#ff8a8a");
@@ -458,6 +459,8 @@ const VOICES = {
   chercheur:   {label:"chercheur",    color:"#7ea8b8"},
   connaisseur: {label:"connaisseur",  color:"#c9a227"},
   tissage:     {label:"tissage",      color:"#6f9c73"},
+  sombre:      {label:"œil sombre",   color:"#9b8fd0"},
+  bucolique:   {label:"œil bucolique",color:"#a8c96a"},
 };
 
 function rgbToHsl(r,g,b){
@@ -804,11 +807,27 @@ async function run(){
       pNaif = lire(c, "naif", SOCLE_PROJECTIF+"\n\n"+P_NAIF, [img, cue]);
     }
 
+    /* Expérience B — deux éducations opposées lisent la même œuvre (RECHERCHE.md).
+       Elles n'entrent pas dans le tissage : leur verdict est la friction déclarée. */
+    let pTemp=Promise.resolve(null);
+    if($("#doTemp").checked){
+      const tb=document.createElement("div"); tb.className="compare";
+      tb.innerHTML=`<div class="tag2">expérience B — deux éducations opposées, même œuvre ; verdict à la friction déclarée</div>`;
+      const cS=voixCard("sombre","L'œil sombre","éduqué au chaos et à l'ombre — et que lui résiste-t-il ici ?");
+      const cB2=voixCard("bucolique","L'œil bucolique","éduqué à la clarté heureuse — et que lui résiste-t-il ici ?");
+      tb.append(cS,cB2); dossier.appendChild(tb);
+      pTemp=Promise.all([
+        lire(cS,  "sombre",    SOCLE_PROJECTIF+"\n\n"+P_TEMP_SOMBRE+"\n\n"+OBLIGATION_FRICTION,    [img, cue]),
+        lire(cB2, "bucolique", SOCLE_PROJECTIF+"\n\n"+P_TEMP_BUCOLIQUE+"\n\n"+OBLIGATION_FRICTION, [img, cue]),
+      ]);
+    }
+
     /* TOUS les regards streament en même temps : aucune carte n'attend en loader. */
     const [naifTexte,tCh,tCo]=await Promise.all([
       pNaif,
       lire(cCh, "chercheur",   SOCLE_PROJECTIF+"\n\n"+P_CHERCHEUR,   [img, cue]),
       lire(cCo, "connaisseur", SOCLE_PROJECTIF+"\n\n"+P_CONNAISSEUR, [img, cue]),
+      pTemp,
     ]);
 
     /* Le tissage — tient les trois ensemble sans les fondre. */
@@ -839,11 +858,11 @@ async function run(){
 function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
 function refresh(){
-  const aveugle = $("#doAveugle").checked;
-  const n = (aveugle?3:1) + 2 + ($("#doTissage").checked?1:0);
+  const aveugle = $("#doAveugle").checked, temp = $("#doTemp").checked;
+  const n = (aveugle?3:1) + 2 + ($("#doTissage").checked?1:0) + (temp?2:0);
   $("#run").disabled = state.running || !state.img || !cfg().key;
   $("#cost").textContent = state.img
-    ? `${n} appels${aveugle?" — passe aveugle, deux naïfs, chercheur, connaisseur":" — trois regards"}${$("#doTissage").checked?" et un tissage":""}.`
+    ? `${n} appels${aveugle?" — passe aveugle, deux naïfs, chercheur, connaisseur":" — trois regards"}${$("#doTissage").checked?", un tissage":""}${temp?", deux tempéraments":""}.`
     : "";
 }
 
@@ -859,6 +878,7 @@ $("#run").addEventListener("click",()=>{ if(!state.running) run(); });
 $("#halt").addEventListener("click",()=>{ if(state.abort) state.abort.abort(); });
 $("#doTissage").addEventListener("change",refresh);
 $("#doAveugle").addEventListener("change",refresh);
+$("#doTemp").addEventListener("change",refresh);
 
 $("#key").addEventListener("change",()=>{ if($("#remember").checked) store.set("nephele.key",$("#key").value.trim()); refresh(); });
 $("#key").addEventListener("input",refresh);

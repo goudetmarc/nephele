@@ -1,0 +1,10 @@
+# Primer non verbal — distillation silhouette -> embedding (SigLIP + LoRA).
+# Cible : Apple Silicon (MPS) en prototype, CUDA en run réel — cf ../device.py.
+# Pas de bitsandbytes (incompatible MPS, inutile à cette taille de modèle).
+torch>=2.4
+transformers>=4.49.0
+peft>=0.13.0
+pillow
+numpy
+scipy            # Spearman (eval_faces.py, métrique 3)
+# facesinthings  # dé-commente sur la machine d'éval : jeu FacesInThings (ECCV 2024)

@@ -185,6 +185,40 @@ test('dixit : le visuel pointe (croix persistantes) et zoome (loupes), sans scan
   expect(calls.length).toBe(3);
 });
 
+test('dixit : expérience B — deux tempéraments, même œuvre, friction déclarée', async ({ page }) => {
+  const { calls } = await mockAnthropic(page, { responder: ({ system }) => {
+    if (/L'ŒIL SOMBRE/.test(system))
+      return "Ce noir en bas me parle, il retient tout. Là où elle me résiste : cette clarté en B2, je ne sais pas la lire.";
+    if (/L'ŒIL BUCOLIQUE/.test(system))
+      return "Cette lumière en B2 respire. Là où elle me résiste : le socle noir, il me ferme la porte.";
+    if (/TU ES LE NAÏF/.test(system)) return "Le rouge me frappe en A3.";
+    if (/TU ES LE CHERCHEUR/.test(system)) return "Un vide en D4.";
+    if (/TU ES LE CONNAISSEUR/.test(system)) return "Le bleu en B2.";
+    return "…";
+  }});
+  await page.goto('/dixit.html');
+
+  await page.fill('#key', 'test-mock-key');
+  await page.uncheck('#doTissage');
+  await page.check('#doTemp');
+  await chargeImage(page);
+  await expect(page.locator('#run')).toBeEnabled({ timeout: 10000 });
+  await page.click('#run');
+
+  // Cinq voix : naïf, chercheur, connaisseur + les deux tempéraments.
+  await expect(page.locator('.dossier .voix')).toHaveCount(5, { timeout: 30000 });
+  await expect(page.locator('.voix.sombre .prose')).toContainText('me résiste');
+  await expect(page.locator('.voix.bucolique .prose')).toContainText('me résiste');
+  // L'obligation de friction est bien injectée dans les deux systèmes.
+  const sysS = calls.find(c => /L'ŒIL SOMBRE/.test(c.system)), sysB = calls.find(c => /L'ŒIL BUCOLIQUE/.test(c.system));
+  expect(sysS.system).toContain('OBLIGATION DE FRICTION');
+  expect(sysB.system).toContain('OBLIGATION DE FRICTION');
+
+  await expect(page.locator('.voix.fail')).toHaveCount(0);
+  await expect(page.locator('.banner')).toHaveCount(0);
+  expect(calls.length).toBe(5);   // 3 regards + 2 tempéraments (sans tissage)
+});
+
 test('dixit : sans clé, un bandeau le dit et rien n’est appelé', async ({ page }) => {
   const { calls } = await mockAnthropic(page, { responder: proseParPosture });
   await page.goto('/dixit.html');
