@@ -392,6 +392,7 @@ This path produces no text: it therefore cannot recite the catalog.
 | Non-verbal primer | CLIP 2021; SigLIP 2023; ZS-SBIR |
 | Projective regime, the three gazes (`dixit.html`) | Rorschach 1921; Iser 1974; Fish 1980 (reader-response) |
 | Blind pass feeding the naïve gaze | Arnheim 1954 (affect derived from configuration), turned into a mechanism |
+| World model as reading grid — strata, priors, surprise (see `RECHERCHE.md`) | Helmholtz; Friston 2010; Ha & Schmidhuber 2018; LeCun 2022 |
 
 ---
 
@@ -483,6 +484,9 @@ The working plan that turns this direction into next steps — the two axes (edu
 - Rafailov, R. et al. (2023). *Direct Preference Optimization.* NeurIPS.
 - Hu, E. et al. (2022). *LoRA: Low-Rank Adaptation of Large Language Models.* ICLR.
 - Dettmers, T. et al. (2023). *QLoRA.* NeurIPS.
+- Ha, D. & Schmidhuber, J. (2018). *World Models.* NeurIPS.
+- Hafner, D. et al. (2020). *Dream to Control: Learning Behaviors by Latent Imagination* (Dreamer). ICLR.
+- LeCun, Y. (2022). *A Path Towards Autonomous Machine Intelligence* (JEPA, position paper).
 - Radford, A. et al. (2021). *Learning Transferable Visual Models (CLIP).* ICML.
 - Zhai, X. et al. (2023). *Sigmoid Loss for Language-Image Pre-training (SigLIP).* ICCV.
 - Qwen Team (2024–2025). *Qwen2.5-VL.*
