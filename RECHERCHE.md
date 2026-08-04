@@ -282,3 +282,32 @@ The grammar is the **first sheet** of an atlas. The program adds:
 - the **autoportrait**, above, refreshed as the corpus grows.
 
 Every entry carries its test; the map stays falsifiable edge to edge. And the deliverable of Nephélé, said without a single negation: **a cartography of the gaze, by the gaze, under ratification** — an instrument that learns what looking is made of, cell by cell, and can show its work.
+
+---
+
+## Protocol sheets — ready to run (2026-08-04, evening)
+
+Two protocols moved from paper to runnable, so the next session starts with judgment, not setup.
+
+### Experiment B — the temperaments, runnable in `dixit.html`
+
+- **Where**: `dixit.html`, panel toggle **« Tempéraments — expérience B »** (+2 calls). Two educations read the same work, launched in parallel with the gazes, side by side: *l'œil sombre* (educated on dark, chaotic, destructured images) and *l'œil bucolique* (educated on open, sunny, near-cliché happy images).
+- **Doctrine**: `P_TEMP_SOMBRE`, `P_TEMP_BUCOLIQUE`, and the shared **`OBLIGATION_FRICTION`** — every reading must end with « Là où elle me résiste : » naming what, in *this* work, contradicts the temperament, with the place that produces it; a reading with no declared friction must say why that absence is suspect. Both also carry the anti-Barnum anchors (every feeling starts from a visible place; no sentence that could be pasted onto another work).
+- **Images**: the three types of the protocol above — trap / abstract / unknown.
+- **Judgment** (unchanged): cheating = each recites its mood regardless of the image; honesty = each finds what the other misses **and** names where the work resists it. Log the outcome here, per image, before any enthusiasm.
+- **Explicitly not done yet**: LoRA temperaments. The prompt version must prove itself first; weights would consolidate an unproven defect.
+
+### The primer track — scaffolded in `training/primer/`
+
+The one training track that is legitimate **before** the Phase 1 threshold, because it needs no ratified data (the supervision is the image itself). Full protocol sheet in [`training/primer/README.md`](training/primer/README.md); in short:
+
+- **Recipe A (run first)** — distill silhouette → embedding: a SigLIP vision tower + LoRA (student) learns to place **our production Otsu boards** (`binarise.py`, a line-by-line port of the app's binarizer — production fidelity is a requirement, not a detail) where the frozen tower places the original image. Cosine + in-batch InfoNCE. Any *public* image corpus; prototype on the Mac (MPS), real run on rented CUDA; `build_dataset.py` → `distill_siglip.py`.
+- **Evaluation** — `eval_faces.py` on **FacesInThings**: does the primer, on the silhouette alone, move toward "a face" more than the base encoder, and does that movement track human easiness? This is the empirical measurement of the **inné + souvenu** cell of the map — the species' prior, instrumented.
+- **Acceptance**: retrieval@1 silhouette→original up sharply on validation; FacesInThings delta > 0; the bench remains the final arbiter of any use in the reading pipeline.
+- **Guards**: never mixed with Phase 1 data or thresholds; SigLIP base before large; the enthusiasm rule applies to training curves too.
+
+### What tomorrow looks like, in order
+
+1. **Morning, zero compute**: run Experiment B on the three images; run the missing occlusion control (unknown scaffolded building, red night sky); log both here.
+2. **Afternoon, the data engine**: ratified sessions on `index.html` (the Phase 1 counter is the trigger for everything else); link the backup folder.
+3. **Compute, when convenient**: build the primer dataset from a public corpus and launch Recipe A — prototype locally, real run on the rented GPU.
