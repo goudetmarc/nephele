@@ -413,9 +413,12 @@ function courbe(res){
 const legende = `<div class="lg">${SERIES.map(s=>`<span><i style="background:${s.c}"></i>${s.l}</span>`).join("")}</div>`;
 
 function tableau(res){
-  let s=`<table><thead><tr><th>barreau</th><th>mots</th>${SERIES.map(x=>`<th>${x.l}</th>`).join("")}</tr></thead><tbody>`;
+  // Deux colonnes BRUTES à droite : le nombre d'occurrences de coordonnées
+  // précises (sa chute au fil des barreaux EST la preuve de la bascule vers
+  // les language priors) et le ratio figuré/grille non normalisé.
+  let s=`<table><thead><tr><th>barreau</th><th>mots</th>${SERIES.map(x=>`<th>${x.l}</th>`).join("")}<th>coord (brut)</th><th>fig/grille (brut)</th></tr></thead><tbody>`;
   res.forEach(r=>{ s+=`<tr><td>${r.label}</td><td>${r.m.mots}</td>${
-    SERIES.map(x=>`<td>${r.m[x.k].toFixed(2)}</td>`).join("")}</tr>`; });
+    SERIES.map(x=>`<td>${r.m[x.k].toFixed(2)}</td>`).join("")}<td>${r.m.brut.coord}</td><td>${r.m.brut.ratio}</td></tr>`; });
   return s+"</tbody></table>";
 }
 
