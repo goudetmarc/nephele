@@ -65,6 +65,16 @@ $$
 
 with $k_1 = 0.01$, $k_2 = 0.03$ and $L$ the pixel dynamic range. SSIM guarantees a reveal *preserves* the original structure of the field rather than overwriting it. Both metrics are implemented in `tests/similarity.js` and unit-tested.
 
+### Language priors, the blackhole regime, and the autoregressive collapse
+
+Three structural failure modes of current vision-language models frame what Nephélé is, and what it produces.
+
+**Alignment, not synthesis.** Recent work makes pareidolic forms *appear* by editing the pixels of clouds with diffusion models. Nephélé refuses pixel generation. What this project generates is a **perceptual-alignment model** — a synthetic formal critic. At term, the SFT + DPO pipeline produces a model able to diagnose the expressiveness and spatial mechanics of a composition (a painting, a facade, a UI screen) independently of the subject represented.
+
+**Language priors, and the "naïve but uninfluenced" model.** The dominant defect of vision-language models is hallucination: details generated that are absent from the image. Its principal cause is what the literature calls **language priors** (Rohrbach et al. 2018; POPE, Li et al. 2023): facing a formless, degraded or ambiguous image, the model stops leaning on visual grounding and starts *guessing* from the linguistic knowledge inherited from its text training — it recites what is linguistically plausible instead of looking. A "naïve but uninfluenced" observer is exactly an observer whose language priors have been neutralized. The Nephélé method — Otsu and Canny boards, never the photograph — acts as a **blackhole regime**: it destroys the scene-recognition layer at reading time and forces the network to ground itself exclusively on raw visual features (edges, masses, voids).
+
+**The "quantum" collapse, and its mechanical antidote.** Evaluations of VLMs on bistable images (the duck-rabbit) show a major divergence from human perception: where a human can flip between the two forms, models lock into a single interpretation — steered by their linguistic biases — and cannot *hold* two figures at once (Bistable Images, CMCL @ ACL 2024). Autoregressive generation compounds this: from the first word emitted ("a dog"), the model maximizes the probability of the continuation around that concept and blinds itself to the remaining visual evidence — the interpretation *collapses*, and the observer is thereafter influenced by its own output. The doctrinal move **hold two figures at once over the same zone** is the direct mechanical antidote to that collapse; *rotate* and *drop down in scale* attack the same lock from the side.
+
 ### Positioning (honest scope)
 
 Generative-reveal methods (DDS/MDDS, *Diamonds in the Sky*) **synthesize** the percept and validate the edit spatially (IoU) and photometrically (SSIM). Nephélé takes the **orthogonal, non-generative route**: it never alters the field; it reads the contour in language, teaches the eye *where to look*, aligns the reader to human judgment (DPO), and accumulates falsifiable configuration→effect relations. Its current outputs are linguistic, not pixel masks.
@@ -134,11 +144,11 @@ A specific prohibition: **if the model recognizes the artwork, it must keep quie
 
 The two regimes above are built to *suppress* projection: the photograph is hidden, recognition is cut, so that meaning does not come from the one who looks. This third regime, still an experiment, does the opposite. The work is shown whole and in color, and what it stirs *in the beholder* is no longer the contaminant to filter but the thing to collect.
 
-Its premise: a picture has no single meaning to deliver; meaning rises in whoever receives it, out of their culture, their memories, their mood. Three people see three works. The same image is therefore offered to three **postures**, and none is right against the others:
+Its premise: a picture has no single meaning to deliver; meaning rises in whoever receives it, out of their culture, their memories, their mood. Three people see three works. The same image is therefore offered to three **postures**, and none is right against the others. They are kept **mutually impermeable by strict lexical constraints** — each has a language the others are denied:
 
-- **the naïve one** — knows nothing, and takes the work full in the chest: sensation, memory, what the body does before it knows;
-- **the seeker** — does not know, but senses there is something beneath what is painted, and digs;
-- **the connoisseur** — recognizes the hand, the movement, and looks for the intention.
+- **the naïve one** — knows nothing, and takes the work in the body. Its vocabulary is strictly **somatic, kinetic, haptic**; cultural, historical and psychological nouns are formally forbidden. Not "a sad face" or "a threatening storm" — "a crushing compression at the center", "a rough slide to the right that nothing brakes", "a smothering by the dark mass";
+- **the seeker** — the structuralist: it does not feel, it **dissects the visual mechanics**, and must systematically hunt the contradiction — the conflict between matter and form ("this edge is razor-sharp and should advance, but its cold color pushes it back — unresolved spatial tension");
+- **the connoisseur** — the only posture licensed to use the jargon banned everywhere else (*vibrant, atmospheric, sfumato, chiaroscuro*), under one obligation: every formal configuration must be tied to a supposed **intentionality of the author** — matter read as a technical and historical decision.
 
 They run independently, so the naïve reading is not colored by the learned one. A final **weave** holds the three side by side without flattening them: where the same spot of the canvas becomes three different things, and where — by opposite roads — they touch the same point. No judgment here, no quota, no second look, no horoscope test: projection is Barnum-like by nature, and that is exactly the point.
 
@@ -185,12 +195,15 @@ The grammar lives in the browser, opens in a panel, and exports/re-imports as `.
 
 A separate page. It looks for nothing in the images: **it measures what the model's discourse becomes as there is less and less to recognize.**
 
-An image is degraded in steps — six rungs, from sharp to ÷32. At each rung, a probe. Each response is measured on four axes, **counted and not judged** (the bench calls no model to evaluate; it counts words against lexicons editable in `doctrine.js`):
+An image is degraded in steps — six rungs, from sharp to ÷32. At each rung, a probe. Each response is measured on five axes, **counted and not judged** (the bench calls no model to evaluate; it counts words against lexicons editable in `doctrine.js`):
 
 - **figuration** — density of concrete nouns. Naming objects where there are none left.
 - **jargon** — density of empty words. Speaking without designating.
 - **ancrage** (anchoring) — references to the grid and position terms, per sentence.
 - **esquive** (evasion) — density of *seems*, *could*, *it is difficult to*.
+- **dérive figuré/grille** — the **hallucination signature**: concrete nouns divided by precise coordinates (grid cells like `A3-B5`, named quadrants). Near 1 on the sharp rung — the model locates what it names. If the doctrine is weak, it explodes as the image degrades: many objects named, not one coordinate offered.
+
+Two of these instrument the **language-priors tipping point** directly. The **collapse of spatial anchoring** — the drastic fall of precise-coordinate counts across the rungs — is the objective proof that the model has stopped leaning on the image and switched to its textual probabilities; the bench flags the first rung where objects are still named but no coordinate survives. The **figured/grid ratio** turns that same switch into a single number per rung.
 
 The crossing of these curves is the model's abstraction threshold, and the bench names it.
 
