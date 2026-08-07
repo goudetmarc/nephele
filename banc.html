@@ -221,24 +221,37 @@ function mesure(texte){
   const creux=compte(lex("#lexCreux")), concret=compte(lex("#lexConcret"));
   const esq=compte(lex("#lexEsq")) + comptePhrases(LEX_ESQUIVE_PHRASES, texte);
   const pos=compte(lex("#lexPos"));
-  const grille=(texte.match(/\b[A-E][1-5]\b/g)||[]).length;
+  // Coordonnées PRÉCISES — la preuve d'ancrage visuel. Cases de grille (A3,
+  // « A3-B5 » compte ses deux bornes) et localisations cartésiennes nommées
+  // (« quadrant supérieur gauche »). Leur effondrement au fil des barreaux est
+  // la signature de la bascule vers les language priors : le modèle ne situe
+  // plus, il devine.
+  const grille=(texte.match(/\b[A-E]\s?[1-5]\b/gi)||[]).length;
+  const quads=(sansAcc(texte).match(/\b(quadrant|quart|moitie|coin|bande|tiers)s? (superieur|inferieur|gauche|droit|central|haut|bas|median)/g)||[]).length;
+  const coord=grille+quads;
   const phrases=(texte.match(/[.!?…]+/g)||[]).length||1;
+  // Ratio lexique figuré / grille : combien d'objets nommés PAR coordonnée
+  // fournie. ~1 quand le modèle situe ce qu'il nomme ; il explose quand le
+  // modèle nomme sans plus pouvoir situer — l'hallucination mesurée.
+  const ratio=concret/Math.max(1,coord);
   // densités pour 100 mots, ramenées dans [0,1] par un plafond raisonnable
   const d=(c,plafond)=>Math.max(0,Math.min(1,(c/n*100)/plafond));
   return {
     mots:n,
     figuration: d(concret,12),
     jargon:     d(creux,8),
-    ancrage:    Math.max(0,Math.min(1,(grille+pos)/phrases/1.2)),
+    ancrage:    Math.max(0,Math.min(1,(coord+pos)/phrases/1.2)),
     esquive:    d(esq,6),
-    brut:{creux,concret,esq,pos,grille,phrases}
+    derive:     Math.max(0,Math.min(1,ratio/8)),
+    brut:{creux,concret,esq,pos,grille,quads,coord,ratio:Math.round(ratio*100)/100,phrases}
   };
 }
 const SERIES=[
   {k:"figuration",l:"figuration",c:"var(--serie-1)",hex:"#3987e5"},
   {k:"jargon",    l:"jargon",    c:"var(--serie-2)",hex:"#d95926"},
   {k:"ancrage",   l:"ancrage",   c:"var(--serie-3)",hex:"#199e70"},
-  {k:"esquive",   l:"esquive",   c:"var(--serie-4)",hex:"#c98500"}
+  {k:"esquive",   l:"esquive",   c:"var(--serie-4)",hex:"#c98500"},
+  {k:"derive",    l:"dérive figuré/grille", c:"#b06fd6", hex:"#b06fd6"}
 ];
 
 /* ══════════ images ══════════ */
@@ -386,7 +399,7 @@ function courbe(res){
     s+=`<g class="hv" opacity="0">
         <line x1="${X(i)}" y1="${mT}" x2="${X(i)}" y2="${mT+ph}" stroke="var(--muet)" stroke-width="1" stroke-dasharray="3 3"/>
         <g class="tip" transform="translate(${Math.min(X(i)+10, mL+pw-150)},${mT+6})">
-          <rect width="150" height="88" rx="5" fill="#0d0e12" stroke="var(--axe)"/>
+          <rect width="150" height="${28+SERIES.length*15}" rx="5" fill="#0d0e12" stroke="var(--axe)"/>
           <text x="9" y="17" fill="#e6e3dc" font-size="11" font-weight="600">${r.label} · ${r.m.mots} mots</text>
           ${SERIES.map((se,k)=>`<text x="9" y="${34+k*15}" fill="${se.c}" font-size="10.5" font-family="var(--mono)">${se.l} ${r.m[se.k].toFixed(2)}</text>`).join("")}
         </g></g>`;
@@ -407,7 +420,17 @@ function tableau(res){
 }
 
 function seuil(res){
-  // premier barreau où la figuration passe sous l'ancrage, ou où le jargon la dépasse
+  // 1. la signature de l'hallucination par language priors : le modèle nomme
+  //    encore des objets mais ne fournit plus AUCUNE coordonnée précise
+  for(let i=1;i<res.length;i++){ const a=res[i].m.brut;
+    if(a.coord===0 && a.concret>=3 && res[0].m.brut.coord>0)
+      return {barreau:res[i].label, quoi:"effondrement de l'ancrage spatial — des objets nommés, plus une coordonnée : le modèle devine (language priors)"};
+  }
+  // 2. la dérive figuré/grille explose par rapport au barreau net
+  for(let i=1;i<res.length;i++)
+    if(res[i].m.brut.ratio >= Math.max(4, 3*Math.max(0.5,res[0].m.brut.ratio)))
+      return {barreau:res[i].label, quoi:"la dérive figuré/grille explose — il nomme sans situer, signature de l'hallucination"};
+  // 3. premier barreau où le jargon passe devant la figuration
   for(let i=1;i<res.length;i++){
     const a=res[i].m, b=res[i-1].m;
     if(b.figuration>=b.jargon && a.figuration<a.jargon) return {barreau:res[i].label, quoi:"le jargon passe devant la figuration"};

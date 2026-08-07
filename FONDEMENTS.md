@@ -393,6 +393,9 @@ This path produces no text: it therefore cannot recite the catalog.
 | Projective regime, the three gazes (`dixit.html`) | Rorschach 1921; Iser 1974; Fish 1980 (reader-response) |
 | Blind pass feeding the naïve gaze | Arnheim 1954 (affect derived from configuration), turned into a mechanism |
 | World model as reading grid — strata, priors, surprise (see `RECHERCHE.md`) | Helmholtz; Friston 2010; Ha & Schmidhuber 2018; LeCun 2022 |
+| The blackhole regime (boards destroy scene recognition → language priors neutralized) | Rohrbach 2018; POPE (Li 2023); VCD (Leng 2024) |
+| *Hold two figures* as antidote to the autoregressive collapse | Bistable Images ACL 2024; autoregressive decoding bias |
+| Bench: coordinate collapse + figured/grid ratio as hallucination signature | language priors, made countable (Rohrbach 2018) |
 
 ---
 
@@ -484,6 +487,9 @@ The working plan that turns this direction into next steps — the two axes (edu
 - Rafailov, R. et al. (2023). *Direct Preference Optimization.* NeurIPS.
 - Hu, E. et al. (2022). *LoRA: Low-Rank Adaptation of Large Language Models.* ICLR.
 - Dettmers, T. et al. (2023). *QLoRA.* NeurIPS.
+- Rohrbach, A. et al. (2018). *Object Hallucination in Image Captioning.* EMNLP (les language priors comme cause de l'hallucination).
+- Li, Y. et al. (2023). *Evaluating Object Hallucination in Large Vision-Language Models* (POPE). EMNLP.
+- Leng, S. et al. (2024). *Mitigating Object Hallucinations in Large Vision-Language Models through Visual Contrastive Decoding.* CVPR.
 - Ha, D. & Schmidhuber, J. (2018). *World Models.* NeurIPS.
 - Hafner, D. et al. (2020). *Dream to Control: Learning Behaviors by Latent Imagination* (Dreamer). ICLR.
 - LeCun, Y. (2022). *A Path Towards Autonomous Machine Intelligence* (JEPA, position paper).

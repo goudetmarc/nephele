@@ -54,6 +54,22 @@ test('mesure : l’esquive ne compte pas « est »/« pas », mais compte les lo
   expect(r.esquive).toBeGreaterThanOrEqual(4);
 });
 
+test('mesure : dérive figuré/grille et effondrement des coordonnées (language priors)', async ({ page }) => {
+  await page.goto('/banc.html');
+  const r = await page.evaluate(() => {
+    // Ancré : le modèle situe ce qu'il nomme (ratio ~1).
+    const ancre = mesure("Un rocher en A3, un arbre en B2 et une tour dans le quadrant supérieur gauche.");
+    // Halluciné : des objets nommés, plus une seule coordonnée (ratio = concret).
+    const hallu = mesure("On dirait un chien, un château, un dragon et un visage qui émergent.");
+    return { ancre: ancre.brut, hallu: hallu.brut, dAncre: ancre.derive, dHallu: hallu.derive };
+  });
+  expect(r.ancre.coord).toBeGreaterThanOrEqual(3);      // A3 + B2 + quadrant supérieur gauche
+  expect(r.ancre.ratio).toBeLessThanOrEqual(1.5);       // il situe ce qu'il nomme
+  expect(r.hallu.coord).toBe(0);                        // plus aucune coordonnée
+  expect(r.hallu.ratio).toBeGreaterThanOrEqual(3);      // nomme sans situer : la dérive explose
+  expect(r.dHallu).toBeGreaterThan(r.dAncre);           // la série normalisée suit
+});
+
 test('mesure : les lexiques couvrent les angles morts (chameau, coins composés, jargon)', async ({ page }) => {
   await page.goto('/banc.html');
   const r = await page.evaluate(() => ({
