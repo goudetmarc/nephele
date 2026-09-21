@@ -57,3 +57,13 @@ Full citations, formulas and lineages in `FONDEMENTS.md`. The four (verified) em
 - The interface and doctrine are in French, sober, without emphasis. (The docs — this file, `README.md`, `FONDEMENTS.md` — are in English.)
 - Personal data (corpus, grammar, notebook, exports) is in `.gitignore` — never version it.
 - Valid API models: `claude-opus-5`, `claude-sonnet-5`, `claude-haiku-4-5`. Recent models reject `temperature` (auto-handled in `ask()`).
+- **Branch hygiene.** One work branch per session, merged into `main` by a squashed PR, and **the head branch is deleted on merge** — GitHub does it automatically (*Settings → General → Automatically delete head branches*), which is what keeps old PRs from resurfacing on a long-lived branch. If a session is pinned to a branch whose PR is already merged, restart it from `main` (`git checkout -B <branch> origin/main`) rather than stacking on merged history. A cloud session's token can push refs but **not** delete them (403), so never claim a branch was deleted from here — the repo setting is what does it.
+
+## Protocols on the shelf — built, not yet run
+
+Two protocol folders are ready to run in `dixit.html`, each with a deterministic image preparer, a scoring script, and **a verdict rule written before the readings** (it prints on every run, so it cannot be adjusted after the numbers are in). Both are missing only the model pass, which must run on the local model that produced the August readings — another model would make any measured gap indistinguishable from a gap between models.
+
+- [`controles/occlusion-b/`](controles/occlusion-b/) — the control the Notre-Dame gradient lacked: a 2×2 factorial (scaffolding × red night) on a single anonymous façade.
+- [`experiences/experience-b/`](experiences/experience-b/) — the temperaments, with cheating made countable: `mean(S) > max(R)` (two gazes on one image must resemble each other more than one gaze across three images), plus anchored friction as a second lock.
+
+Generated images live in `out/` and are gitignored; both folders regenerate from a single command.
