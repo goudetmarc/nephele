@@ -370,3 +370,68 @@ not photographed: perfect as a control, imperfect ecologically. And one façade,
 one photograph, closes a question without founding a statistic.
 
 Protocol sheet, commands and provenance: [`controles/occlusion-b/`](controles/occlusion-b/).
+
+---
+
+## Experiment B — the temperaments, made countable (2026-09-21)
+
+The protocol has said since August what cheating and honesty mean: *cheating =
+each recites its mood regardless of the image; honesty = each finds what the
+other misses **and** names where the work resists it.* Both sentences are
+measurable, and until today neither was measured — which left the verdict
+resting on whether the prose was beautiful, i.e. on the v2 amplifier.
+
+**The central measure.** For each temperament `t` and image `i`:
+
+```
+R(t) = mean cosine between ONE temperament's readings of DIFFERENT images
+S(i) = cosine between the TWO temperaments on the SAME image
+```
+
+**The inequality that decides: `mean(S) > max(R)`.** Two opposed gazes in front
+of the same image must resemble each other **more** than one gaze does across
+three unrelated images. If the reverse holds, the temperament outweighs what is
+being looked at — the Barnum of temperament, the dragon back through the door of
+personality. It is a **ratio, not an absolute threshold**: French function words
+inflate every cosine, but they inflate both sides equally and cancel. They are
+stripped anyway to sharpen it, and the raw cosine prints alongside so nothing is
+hidden. Token and cosine are ported from `tests/similarity.js`; the lexicons come
+from `doctrine.js` and the coordinate regexes from `banc.html` — nothing
+reinvented.
+
+**The second lock: anchored friction.** Bag-of-words cosine catches *literal*
+recitation, not a mood re-recited in synonyms. So the « Là où elle me résiste : »
+block must be present, non-empty **and name a place**. A friction that names no
+location is a friction of politeness and counts as absent.
+
+**The three images, and why three.** A single image cannot tell a temperament
+that sees from one that recites; the effect only reads in the contrast. The trap
+is Van Gogh's *Wheat Field with Cypresses* — chosen because the motif is bucolic
+and the sky convulsive, so **neither temperament gets free ground**. The abstract
+is a marbled paper: a non-figurative field made to be looked at, with no
+interpretive catalog. The unknown is rust on sheet metal — not a work at all, the
+project's founding matter, zero culture.
+
+**Run today, without a model:** the three images are built and their boards
+verified with the production binarizer (ink 26.9 / 65.5 / 65.4 % — the trap is
+lighter because it is a canvas, not a matter, which costs nothing since
+comparison is always between temperaments on one image, never between images).
+The instrument is tested on two synthetic reading sets and **discriminates**:
+
+| | mean(S) | max(R) | verdict | anchored friction | coord |
+|---|---|---|---|---|---|
+| "cheating" set | 0.667 | 1.000 | temperament leads | no (6/6) | 0 |
+| "honest" set | 0.408 | 0.147 | the image leads | yes (6/6) | 3–5 |
+
+**Deliberately not run here** — same reason as the occlusion control: six
+readings on the Mac, on the local model. Protocol, commands and provenance in
+[`experiences/experience-b/`](experiences/experience-b/).
+
+**Stated limits.** Three images and six readings decide whether the prompt
+version deserves to go further, not a statistic. The cosine is coarse: it catches
+literal recitation, which is why anchored friction is the second lock. And on the
+trap, convergence is not proof — the two temperaments may meet because they share
+the catalog, not because they looked, so complementarity is judged first on the
+abstract and the unknown. Nothing is trained: the temperament LoRAs stay out of
+reach until the prompt version proves itself, or weights would consolidate an
+undemonstrated defect.

@@ -1,0 +1,14 @@
+Modèle de fichier de lecture. SIX fichiers, nommés <type>-<temperament>.txt :
+
+  piege-sombre.txt      piege-bucolique.txt
+  abstrait-sombre.txt   abstrait-bucolique.txt
+  inconnue-sombre.txt   inconnue-bucolique.txt
+
+Une seule prose par fichier : celle du tempérament, telle qu'elle sort, bloc
+« Là où elle me résiste : » compris. Ne rien réécrire, ne rien corriger — le
+dépouillement mesure la prose du modèle, pas la nôtre.
+
+Modèle : <le modèle local exact, tel que /v1/models le nomme>
+Date    : <aaaa-mm-jj>
+
+<la prose complète>
