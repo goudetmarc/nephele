@@ -21,3 +21,6 @@ __pycache__/
 *.pyc
 .venv/
 .venv-local/
+
+# contrôles : les conditions se régénèrent, on ne versionne pas les images
+controles/*/out/

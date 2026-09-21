@@ -1,0 +1,18 @@
+Modèle de fichier de lecture. Un fichier par condition : N0.txt, N1.txt,
+N2.txt, N3.txt. Les trois voix à la suite, séparées par leur intertitre.
+Ne rien réécrire, ne rien corriger : on colle la prose telle qu'elle sort.
+
+Modèle : <le modèle local exact, tel que /v1/models le nomme>
+Date    : <aaaa-mm-jj>
+
+--- REGARD NU ---
+
+<la prose>
+
+--- NAÏF À L'AVEUGLE ---
+
+<la prose>
+
+--- NAÏF À NU ---
+
+<la prose>

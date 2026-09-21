@@ -308,6 +308,65 @@ The one training track that is legitimate **before** the Phase 1 threshold, beca
 
 ### What tomorrow looks like, in order
 
-1. **Morning, zero compute**: run Experiment B on the three images; run the missing occlusion control (unknown scaffolded building, red night sky); log both here.
+1. **Morning, zero compute**: run Experiment B on the three images; run the missing occlusion control (unknown scaffolded building, red night sky) — **now built and half-run, see the next section**; log both here.
 2. **Afternoon, the data engine**: ratified sessions on `index.html` (the Phase 1 counter is the trigger for everything else); link the backup folder.
 3. **Compute, when convenient**: build the primer dataset from a public corpus and launch Recipe A — prototype locally, real run on the rented GPU.
+
+---
+
+## Occlusion control B — the other half of the proof (2026-09-21)
+
+The Notre-Dame gradient proved one direction only: **remove** the identity of a
+recognised building and watch which layer dies. It never tested the converse —
+**install the same configuration on a building that never had an identity**.
+Without that, "the fire is perceptual" rests on the absence of an alternative
+explanation rather than on a positive one. The control is now built, and the
+half of it that does not need a model has been run.
+
+**The design — factorial, within one façade.** A single Commons photograph of an
+anonymous hotel tower carries, in the same frame, a **scaffolded and netted
+half** and a **bare half**. Cropping both out of it neutralises building,
+material, original light and framing; only the two factors move.
+
+| | scaffolding | bare |
+|---|---|---|
+| **day (as shot)** | `N0` | `N3` |
+| **red night** | **`N1`** — the key cell | `N2` |
+
+The red-night grade is a **scripted, deterministic intervention** (`preparer.py`),
+not an ambience edit: it reproduces the three traits named in the August relevé
+— night, a dramatic red sky, and the fine structure caught in a warm glow ("the
+grid gnawing the stone"). No crop contains legible text.
+
+**Run today, without a model:** the four conditions are generated and their Otsu
+boards verified with the **production binarizer** (`training/primer/binarise.py`).
+Ink density is of the same order across all four (62.6 / 74.7 / 70.9 / 68.0 %),
+so no condition is disqualified before reading by an empty or saturated board.
+The scoring instrument (`depouiller.py`) is written and tested on synthetic
+readings; it reuses `LEX_CONCRET` from `doctrine.js` and the two coordinate
+regexes from `banc.html` — one source of truth — and adds the two word families
+the August table separated: **FEU**, and **SAUVETAGE** split into `.generique`
+(étayer, armature — faintly licensed by visible scaffolding) and `.monument`
+(cathédrale, patrimoine, pansement — the episodic layer that died with the towers).
+
+**Pre-registered verdict.** The rule is in `depouiller.py` and prints on every
+run, so it cannot be adjusted once the numbers are in: (1) `FEU(N1) > 0` and
+above `N0`/`N3` → the configuration licenses the fire and August holds, otherwise
+the fire in the crops was residual recognition and **August must be revised**;
+(2) `N1 ≫ N2` → the lattice carries it, `N1 ≈ N2` → the red sky alone does;
+(3) `SAUV_MON ≈ 0` everywhere, or the boundary drawn in August between the two
+layers must be redrawn; (4) the figurative/grid ratio must stay low and stable.
+
+**Deliberately not run here.** The model pass belongs on the Mac, on the **same
+local model** that produced the August readings. Running it on another model
+would make any measured gap indistinguishable from a gap between models — the
+source-mislabeling the doctrine calls cheating.
+
+**Stated limits.** The building looks nothing like Notre-Dame (modern concrete,
+repetitive balconies, palms): that is the price of anonymity, and it means a
+**null** result in `N1` stays ambiguous — no recognition, or too different a
+configuration? Only a **positive** `N1` cuts cleanly. The red night is fabricated,
+not photographed: perfect as a control, imperfect ecologically. And one façade,
+one photograph, closes a question without founding a statistic.
+
+Protocol sheet, commands and provenance: [`controles/occlusion-b/`](controles/occlusion-b/).
